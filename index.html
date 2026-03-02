@@ -81,24 +81,11 @@
         </form>
     </div>
 
-    <div id="mainContent" class="text-center hidden">
-        <div class="card p-10 rounded-3xl border-sky-500/30">
-            <div class="mb-4 flex justify-center"><i data-lucide="shield-check" class="w-16 h-16 text-sky-400"></i></div>
-            <h2 class="text-4xl font-black mb-2">BIENVENIDO, <span id="userName" class="neon-blue uppercase">AGENTE</span></h2>
-            <p class="text-slate-400 mb-8 tracking-widest text-xs uppercase font-bold">Acceso nivel Alpha verificado</p>
-            
-            <div class="grid grid-cols-1 gap-4">
-                <button class="btn-primary py-4 rounded-xl font-bold uppercase text-xs tracking-widest">Panel de Misiones</button>
-                <button onclick="logout()" class="text-slate-500 text-xs font-bold uppercase hover:text-red-400 transition-colors mt-4">Desconectar</button>
-            </div>
-        </div>
-    </div>
-
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
         import { 
             getAuth, onAuthStateChanged, signInWithPopup, GoogleAuthProvider, 
-            createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut 
+            createUserWithEmailAndPassword, signInWithEmailAndPassword 
         } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
 
         const firebaseConfig = {
@@ -114,13 +101,11 @@
         const auth = getAuth(app);
         const loader = document.getElementById('loadingOverlay');
         const authSection = document.getElementById('authSection');
-        const mainContent = document.getElementById('mainContent');
         
-        let currentMode = 'login'; // 'login' o 'register'
+        let currentMode = 'login';
 
         lucide.createIcons();
 
-        // Cambio de pestañas
         window.switchTab = (mode) => {
             currentMode = mode;
             document.getElementById('tab-login').classList.toggle('active', mode === 'login');
@@ -128,15 +113,14 @@
             document.getElementById('submitBtn').innerText = mode === 'login' ? 'Entrar al Sistema' : 'Crear Nueva Cuenta';
         };
 
-        // Observador de Estado
+        // --- EL CAMBIO ESTÁ AQUÍ: REDIRECCIÓN AUTOMÁTICA ---
         onAuthStateChanged(auth, (user) => {
-            document.body.style.display = "flex";
             if (user) {
-                authSection.classList.add('hidden');
-                mainContent.classList.remove('hidden');
-                document.getElementById('userName').innerText = user.displayName || user.email.split('@')[0];
+                // Si el usuario existe, lo mandamos a la otra pestaña inmediatamente
+                window.location.href = "Penta.html"; 
             } else {
-                mainContent.classList.add('hidden');
+                // Si no hay usuario, mostramos el login
+                document.body.style.display = "flex";
                 authSection.classList.remove('hidden');
             }
         });
@@ -145,12 +129,15 @@
         document.getElementById('googleBtn').onclick = async () => {
             const provider = new GoogleAuthProvider();
             loader.style.display = 'flex';
-            try { await signInWithPopup(auth, provider); } 
+            try { 
+                await signInWithPopup(auth, provider);
+                // No hace falta redirigir aquí, onAuthStateChanged lo hará solo
+            } 
             catch (e) { if (e.code !== 'auth/cancelled-popup-request') alert(e.message); } 
             finally { loader.style.display = 'none'; }
         };
 
-        // Formulario (Login o Registro)
+        // Formulario
         document.getElementById('authForm').onsubmit = async (e) => {
             e.preventDefault();
             const email = document.getElementById('email').value;
@@ -164,18 +151,11 @@
                     await createUserWithEmailAndPassword(auth, email, password);
                 }
             } catch (error) {
-                let msg = "Error de acceso";
-                if (error.code === 'auth/invalid-credential') msg = "Credenciales incorrectas.";
-                if (error.code === 'auth/email-already-in-use') msg = "Este correo ya está registrado.";
-                if (error.code === 'auth/weak-password') msg = "La contraseña es muy débil.";
-                alert(msg);
+                alert("Error: " + error.message);
             } finally {
                 loader.style.display = 'none';
             }
         };
-
-        window.logout = () => signOut(auth);
-
     </script>
 </body>
 </html>
