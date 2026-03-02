@@ -36,6 +36,9 @@
         }
         .pts-value { font-size: 0.85rem; font-weight: 800; color: #f1f5f9; }
         .cat-tag { font-size: 0.65rem; background: #1e293b; color: #38bdf8; padding: 2px 6px; border-radius: 4px; font-weight: 700; border: 1px solid #334155; }
+        
+        .vs-circle { background: #1e293b; width: 24px; height: 24px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 8px; font-weight: 900; border: 1px solid #334155; margin: 10px auto; color: #38bdf8; }
+        .status-pill { font-size: 0.65rem; font-weight: 900; padding: 2px 8px; border-radius: 99px; text-transform: uppercase; }
     </style>
 </head>
 <body class="p-2 md:p-8">
@@ -91,8 +94,13 @@
                 </div>
             </div>
 
-            <div id="statusView" class="hidden"><div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4" id="statusGrid"></div></div>
-            <div id="tournamentView" class="hidden"><div id="tournamentBrackets" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"></div></div>
+            <div id="statusView" class="hidden">
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4" id="statusGrid"></div>
+            </div>
+
+            <div id="tournamentView" class="hidden">
+                <div id="tournamentBrackets" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"></div>
+            </div>
             
             <div id="handicapView" class="hidden">
                 <div class="overflow-x-auto shadow-2xl rounded-2xl border border-slate-800 bg-slate-900/40">
@@ -106,30 +114,19 @@
             </div>
 
             <div id="publicEventsView" class="hidden">
-                <div class="mb-6 p-4 bg-purple-950/20 border border-purple-900/30 rounded-xl">
-                    <h3 class="text-purple-400 font-black uppercase text-xs mb-1">Calendario de Eventos</h3>
-                    <p id="publicEventsList" class="grid grid-cols-1 sm:grid-cols-2 gap-4"></p>
-                </div>
+                <div id="publicEventsList" class="grid grid-cols-1 sm:grid-cols-2 gap-4"></div>
             </div>
 
             <section id="adminPanel" class="hidden space-y-8 mt-12 border-t-2 border-dashed border-slate-800 pt-12">
                 <div class="card p-6 rounded-3xl shadow-2xl border border-blue-900/30">
-                    <h2 class="text-lg font-black text-blue-400 italic uppercase mb-6 flex items-center gap-2"><span class="w-2 h-6 bg-blue-600"></span> Registro Atleta</h2>
+                    <h2 id="adminFormTitle" class="text-lg font-black text-blue-400 italic uppercase mb-6 flex items-center gap-2"><span class="w-2 h-6 bg-blue-600"></span> Registro Atleta</h2>
                     <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
                         <input type="text" id="playerName" class="input-dark p-3 rounded-xl text-sm" placeholder="Nombre">
                         <select id="playerSex" class="input-dark p-3 rounded-xl text-sm bg-slate-950"><option value="M">Masculino</option><option value="F">Femenino</option></select>
-                        
                         <select id="playerCategory" class="input-dark p-3 rounded-xl text-sm bg-slate-950">
-                            <option value="U09">U09</option>
-                            <option value="U11">U11</option>
-                            <option value="U13">U13</option>
-                            <option value="U15">U15</option>
-                            <option value="U17">U17</option>
-                            <option value="U19">U19</option>
-                            <option value="Junior">Junior</option>
-                            <option value="Senior">Senior</option>
+                            <option value="U09">U09</option><option value="U11">U11</option><option value="U13">U13</option><option value="U15">U15</option>
+                            <option value="U17">U17</option><option value="U19">U19</option><option value="Junior">Junior</option><option value="Senior">Senior</option>
                         </select>
-
                         <input type="number" id="playerEsgrimaV" class="input-dark p-3 rounded-xl text-sm" placeholder="Vics">
                         <input type="number" id="playerEsgrimaTotal" class="input-dark p-3 rounded-xl text-sm" placeholder="Total Bouts">
                         <input type="text" id="playerObstaculos" class="input-dark p-3 rounded-xl text-sm" placeholder="Obs (seg)">
@@ -139,18 +136,7 @@
                     </div>
                     <div class="mt-6 flex gap-3">
                         <button onclick="savePlayer()" class="btn-primary text-white px-10 py-4 rounded-2xl font-black uppercase text-xs flex-1">Guardar Atleta</button>
-                    </div>
-                </div>
-
-                <div class="card p-6 rounded-3xl shadow-2xl border border-purple-900/30">
-                    <h2 class="text-lg font-black text-purple-400 italic uppercase mb-6 flex items-center gap-2"><span class="w-2 h-6 bg-purple-600"></span> Gestión de Eventos</h2>
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        <div class="space-y-4">
-                            <input type="text" id="eventName" class="input-dark w-full p-3 rounded-xl text-sm" placeholder="Nombre Evento">
-                            <input type="text" id="eventLocation" class="input-dark w-full p-3 rounded-xl text-sm" placeholder="Sede">
-                            <button onclick="saveEvent()" class="bg-purple-600 hover:bg-purple-700 text-white w-full py-4 rounded-2xl font-black uppercase text-xs">Publicar Evento</button>
-                        </div>
-                        <div class="bg-slate-950/50 rounded-2xl p-4 border border-slate-800 h-48 overflow-y-auto" id="adminEventsList"></div>
+                        <button id="btnCancelEdit" onclick="cancelEdit()" class="hidden bg-slate-800 text-white px-6 py-4 rounded-2xl font-black uppercase text-xs">Cancelar</button>
                     </div>
                 </div>
             </section>
@@ -158,7 +144,7 @@
     </div>
 
     <div id="loginModal" class="fixed inset-0 bg-slate-950/95 hidden flex items-center justify-center p-6 z-50 backdrop-blur-md">
-        <div class="bg-slate-900 p-8 rounded-[2rem] w-full max-sm border border-slate-800 text-center">
+        <div class="bg-slate-900 p-8 rounded-[2rem] w-full max-w-sm border border-slate-800 text-center">
             <h2 class="text-xl font-black mb-6 text-white uppercase italic tracking-tighter">Acceso Admin</h2>
             <input type="password" id="adminPass" class="input-dark w-full p-4 rounded-2xl mb-6 text-center text-2xl tracking-[0.5em]" placeholder="**">
             <button onclick="checkPassword()" class="btn-primary w-full py-4 rounded-2xl font-black text-white text-xs uppercase">Entrar</button>
@@ -182,13 +168,12 @@
         
         const appId = 'penta-tourney-v2';
         let firebaseApp, auth, db;
-        let players = [], events = [], isAdmin = false, currentSexFilter = 'TODOS';
+        let players = [], events = [], isAdmin = false, editingId = null, currentSexFilter = 'TODOS';
 
         async function start() {
             firebaseApp = initializeApp(firebaseConfig);
             auth = getAuth(firebaseApp);
             db = getFirestore(firebaseApp);
-            
             await signInAnonymously(auth);
 
             const btnSalir = document.getElementById('btnSalir');
@@ -226,48 +211,23 @@
         }
 
         function getFullStats(p) {
-            const bouts = parseInt(p.esgrimaTotal) || 35;
+            const bouts = parseInt(p.esgrimaTotal) || 0;
             const victories = parseInt(p.esgrimaV) || 0;
-            const esgrimaPts = Math.max(0, 250 + (victories - Math.ceil(bouts * 0.7)) * 5);
+            const defeats = Math.max(0, bouts - victories);
+            const esgrimaPts = bouts > 0 ? Math.max(0, 250 + (victories - Math.ceil(bouts * 0.7)) * 5) : 0;
+            
             const tObs = parseTime(p.obstaculos);
             let obsPts = tObs >= 15.00 ? Math.max(0, 400 - Math.floor((tObs - 15.00) / 0.33)) : (tObs > 0 ? 401 : 0);
+            
             const tNat = parseTime(p.natacion);
             let natPts = tNat > 0 ? Math.max(0, 375 - Math.ceil((tNat - 45.00) / 0.20)) : 0;
+            
             const tLas = parseTime(p.laser);
             let lasPts = tLas > 0 ? Math.max(0, 700 - Math.floor(tLas - 600.00)) : 0;
+            
             const handicapPts = esgrimaPts + obsPts + natPts;
-            return { ...p, esgrimaPts, obsPts, natPts, lasPts, handicapPts, totalFinal: Math.round(handicapPts + lasPts) };
+            return { ...p, victories, defeats, esgrimaPts, obsPts, natPts, lasPts, handicapPts, totalFinal: Math.round(handicapPts + lasPts) };
         }
-
-        window.setSexFilter = (sex) => {
-            currentSexFilter = sex;
-            ['TODOS', 'M', 'F'].forEach(s => {
-                document.getElementById('filterSex' + s).className = "px-4 py-1.5 rounded-lg text-[10px] font-black uppercase text-slate-400 hover:bg-slate-800";
-            });
-            document.getElementById('filterSex' + sex).className = "px-4 py-1.5 rounded-lg text-[10px] font-black uppercase bg-blue-600 text-white";
-            renderViews();
-        };
-
-        window.openLoginModal = () => { isAdmin ? logout() : document.getElementById('loginModal').classList.remove('hidden'); };
-        window.closeLoginModal = () => { document.getElementById('loginModal').classList.add('hidden'); };
-
-        window.checkPassword = () => {
-            if (document.getElementById('adminPass').value === "Newman.999") {
-                isAdmin = true;
-                document.getElementById('adminPanel').classList.remove('hidden');
-                document.getElementById('adminToggleBtn').innerText = "Cerrar Panel";
-                document.querySelectorAll('.admin-only').forEach(el => el.classList.remove('hidden'));
-                closeLoginModal();
-                renderViews();
-            }
-        };
-
-        window.logout = () => {
-            isAdmin = false;
-            document.getElementById('adminPanel').classList.add('hidden');
-            document.getElementById('adminToggleBtn').innerText = "Admin";
-            document.querySelectorAll('.admin-only').forEach(el => el.classList.add('hidden'));
-        };
 
         window.savePlayer = async () => {
             const data = {
@@ -281,33 +241,113 @@
                 laser: document.getElementById('playerLaser').value,
                 state: document.getElementById('playerState').value
             };
-            await setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'athletes', crypto.randomUUID()), data);
-            document.getElementById('playerName').value = "";
+            await setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'athletes', editingId || crypto.randomUUID()), data);
+            cancelEdit();
         };
 
-        window.saveEvent = async () => {
-            const name = document.getElementById('eventName').value;
-            const locat = document.getElementById('eventLocation').value;
-            if(!name) return;
-            await setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'events', crypto.randomUUID()), {
-                name, location: locat, date: new Date().toLocaleDateString()
-            });
-            document.getElementById('eventName').value = "";
-            document.getElementById('eventLocation').value = "";
+        window.editPlayer = (id) => {
+            const p = players.find(x => x.id === id);
+            if(!p) return;
+            editingId = id;
+            document.getElementById('playerName').value = p.name || '';
+            document.getElementById('playerSex').value = p.sex || 'M';
+            document.getElementById('playerCategory').value = p.category || 'Senior';
+            document.getElementById('playerEsgrimaV').value = p.esgrimaV || '';
+            document.getElementById('playerEsgrimaTotal').value = p.esgrimaTotal || '';
+            document.getElementById('playerObstaculos').value = p.obstaculos || '';
+            document.getElementById('playerNatacion').value = p.natacion || '';
+            document.getElementById('playerLaser').value = p.laser || '';
+            document.getElementById('playerState').value = p.state || '';
+            document.getElementById('adminFormTitle').innerText = "Editando Atleta";
+            document.getElementById('btnCancelEdit').classList.remove('hidden');
+            window.scrollTo({ top: document.getElementById('adminPanel').offsetTop, behavior: 'smooth' });
         };
 
-        window.deleteEvent = async (id) => { await deleteDoc(doc(db, 'artifacts', appId, 'public', 'data', 'events', id)); };
+        window.cancelEdit = () => {
+            editingId = null;
+            document.getElementById('adminFormTitle').innerText = "Registro Atleta";
+            document.getElementById('btnCancelEdit').classList.add('hidden');
+            ['playerName','playerEsgrimaV','playerEsgrimaTotal','playerObstaculos','playerNatacion','playerLaser','playerState'].forEach(id => document.getElementById(id).value = "");
+        };
 
-        function renderEvents() {
-            const adminList = document.getElementById('adminEventsList');
-            const publicList = document.getElementById('publicEventsList');
-            const html = events.map(e => `
-                <div class="card p-4 rounded-2xl flex justify-between items-center mb-2">
-                    <div><p class="text-[10px] font-black uppercase text-white">${e.name}</p><p class="text-[8px] text-purple-400 uppercase">${e.location} • ${e.date}</p></div>
-                    ${isAdmin ? `<button onclick="deleteEvent('${e.id}')" class="text-red-500 text-[9px] font-black">DEL</button>` : ''}
+        function renderViews() {
+            let data = players.map(p => getFullStats(p));
+            if (currentSexFilter !== 'TODOS') data = data.filter(p => p.sex === currentSexFilter);
+            data.sort((a, b) => b.totalFinal - a.totalFinal);
+
+            // 1. Ranking Table
+            document.getElementById('scoreboardBody').innerHTML = data.map((p, i) => `
+                <tr>
+                    <td class="p-5"><p class="text-xs font-black uppercase">${p.name}</p><span class="cat-tag">${p.category}</span></td>
+                    <td class="p-5 pts-value">${p.esgrimaPts}</td><td class="p-5 pts-value">${p.obsPts}</td>
+                    <td class="p-5 pts-value">${p.natPts}</td><td class="p-5 pts-value">${p.lasPts}</td>
+                    <td class="p-5 text-blue-400 font-black">${p.totalFinal}</td>
+                    <td class="p-5 text-right admin-only ${isAdmin ? '' : 'hidden'}">
+                        <button onclick="editPlayer('${p.id}')" class="text-blue-500 text-[9px] font-black mr-2">Edit</button>
+                        <button onclick="deleteAthlete('${p.id}')" class="text-red-500 text-[9px] font-black">Del</button>
+                    </td>
+                </tr>`).join('');
+
+            // 2. Status View (Solo Victorias/Derrotas de Esgrima)
+            document.getElementById('statusGrid').innerHTML = data.map(p => `
+                <div class="card p-5 rounded-2xl relative overflow-hidden">
+                    <div class="flex justify-between items-start mb-4">
+                        <div>
+                            <p class="text-[10px] font-black uppercase text-blue-400 mb-1">${p.category}</p>
+                            <h3 class="text-sm font-black uppercase italic">${p.name}</h3>
+                        </div>
+                        <span class="status-pill bg-green-500/10 text-green-500 border border-green-500/20">Esgrima</span>
+                    </div>
+                    <div class="grid grid-cols-2 gap-2">
+                        <div class="bg-slate-950/50 p-3 rounded-xl border border-slate-800 text-center">
+                            <p class="text-[8px] text-slate-500 uppercase font-black">Victorias</p>
+                            <p class="text-xl font-black text-green-400">${p.victories}</p>
+                        </div>
+                        <div class="bg-slate-950/50 p-3 rounded-xl border border-slate-800 text-center">
+                            <p class="text-[8px] text-slate-500 uppercase font-black">Derrotas</p>
+                            <p class="text-xl font-black text-red-400">${p.defeats}</p>
+                        </div>
+                    </div>
                 </div>`).join('');
-            adminList.innerHTML = html;
-            publicList.innerHTML = html || 'No hay eventos.';
+
+            // 3. Tournament 1vs1
+            const bracketHTML = [];
+            for (let i = 0; i < data.length; i += 2) {
+                const p1 = data[i];
+                const p2 = data[i + 1];
+                if (p1 && p2) {
+                    bracketHTML.push(`
+                        <div class="card p-5 rounded-2xl border-l-4 border-l-blue-600">
+                            <div class="flex justify-between items-center mb-4">
+                                <span class="text-[8px] font-black text-slate-500 uppercase tracking-widest">Match Oficial</span>
+                                <span class="status-pill bg-blue-500/20 text-blue-400">En Espera</span>
+                            </div>
+                            <div class="space-y-4">
+                                <div class="flex justify-between items-center">
+                                    <p class="text-[10px] font-black uppercase">${p1.name}</p>
+                                    <p class="text-xs font-mono font-bold text-slate-400">${p1.totalFinal}</p>
+                                </div>
+                                <div class="vs-circle">VS</div>
+                                <div class="flex justify-between items-center">
+                                    <p class="text-[10px] font-black uppercase text-slate-300">${p2.name}</p>
+                                    <p class="text-xs font-mono font-bold text-slate-400">${p2.totalFinal}</p>
+                                </div>
+                            </div>
+                        </div>`);
+                }
+            }
+            document.getElementById('tournamentBrackets').innerHTML = bracketHTML.join('') || '<p class="text-center text-slate-500 col-span-full">No hay suficientes atletas para llaves.</p>';
+
+            // 4. Handicap
+            const hData = [...data].sort((a,b) => b.handicapPts - a.handicapPts);
+            const best = hData[0]?.handicapPts || 0;
+            document.getElementById('handicapBody').innerHTML = hData.map((p, i) => `
+                <tr>
+                    <td class="p-5 text-center text-xs font-black text-slate-600">${i+1}</td>
+                    <td class="p-5 text-xs font-black uppercase">${p.name}</td>
+                    <td class="p-5 pts-value">${p.handicapPts}</td>
+                    <td class="p-5 text-green-500 font-mono text-[10px]">${i === 0 ? 'SALIDA' : `+${best - p.handicapPts}s`}</td>
+                </tr>`).join('');
         }
 
         window.switchView = (view) => {
@@ -320,29 +360,17 @@
             document.getElementById('btnView' + view.charAt(0).toUpperCase() + view.slice(1)).className = "bg-blue-600 text-white text-[9px] font-black uppercase px-4 py-2 rounded-lg";
         };
 
-        function renderViews() {
-            let data = players.map(p => getFullStats(p));
-            if (currentSexFilter !== 'TODOS') data = data.filter(p => p.sex === currentSexFilter);
-            data.sort((a, b) => b.totalFinal - a.totalFinal);
-
-            document.getElementById('scoreboardBody').innerHTML = data.map((p, i) => `
-                <tr>
-                    <td class="p-5"><p class="text-xs font-black uppercase">${p.name}</p><span class="cat-tag">${p.category}</span></td>
-                    <td class="p-5 pts-value">${p.esgrimaPts}</td><td class="p-5 pts-value">${p.obsPts}</td>
-                    <td class="p-5 pts-value">${p.natPts}</td><td class="p-5 pts-value">${p.lasPts}</td>
-                    <td class="p-5 text-blue-400 font-black">${p.totalFinal}</td>
-                    <td class="p-5 text-right admin-only ${isAdmin ? '' : 'hidden'}">
-                        <button onclick="deleteAthlete('${p.id}')" class="text-red-500 text-[9px] font-black">Del</button>
-                    </td>
-                </tr>`).join('');
-            
-            const hData = [...data].sort((a,b) => b.handicapPts - a.handicapPts);
-            const best = hData[0]?.handicapPts || 0;
-            document.getElementById('handicapBody').innerHTML = hData.map((p, i) => `
-                <tr><td class="p-5 text-xs font-black">${i+1}</td><td class="p-5 text-xs font-black uppercase">${p.name}</td><td class="p-5 pts-value">${p.handicapPts}</td><td class="p-5 text-green-500 font-mono text-[10px]">${i === 0 ? 'SALIDA' : `+${best - p.handicapPts}s`}</td></tr>`).join('');
-        }
-
+        window.openLoginModal = () => { isAdmin ? logout() : document.getElementById('loginModal').classList.remove('hidden'); };
+        window.closeLoginModal = () => { document.getElementById('loginModal').classList.add('hidden'); };
+        window.checkPassword = () => { if (document.getElementById('adminPass').value === "Newman.999") { isAdmin = true; document.getElementById('adminPanel').classList.remove('hidden'); document.getElementById('adminToggleBtn').innerText = "Cerrar Panel"; document.querySelectorAll('.admin-only').forEach(el => el.classList.remove('hidden')); closeLoginModal(); renderViews(); } };
+        window.logout = () => { isAdmin = false; document.getElementById('adminPanel').classList.add('hidden'); document.getElementById('adminToggleBtn').innerText = "Admin"; document.querySelectorAll('.admin-only').forEach(el => el.classList.add('hidden')); };
         window.deleteAthlete = async (id) => { if(confirm("¿Eliminar?")) await deleteDoc(doc(db, 'artifacts', appId, 'public', 'data', 'athletes', id)); };
+        window.setSexFilter = (sex) => { currentSexFilter = sex; ['TODOS', 'M', 'F'].forEach(s => { document.getElementById('filterSex' + s).className = "px-4 py-1.5 rounded-lg text-[10px] font-black uppercase text-slate-400 hover:bg-slate-800"; }); document.getElementById('filterSex' + sex).className = "px-4 py-1.5 rounded-lg text-[10px] font-black uppercase bg-blue-600 text-white"; renderViews(); };
+
+        function renderEvents() {
+            const list = document.getElementById('publicEventsList');
+            list.innerHTML = events.map(e => `<div class="card p-4 rounded-2xl"><div><p class="text-[10px] font-black uppercase text-white">${e.name}</p><p class="text-[8px] text-purple-400 uppercase">${e.location} • ${e.date}</p></div></div>`).join('') || 'No hay eventos.';
+        }
 
         start();
     </script>
