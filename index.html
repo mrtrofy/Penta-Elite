@@ -1,0 +1,629 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>PentatlónPro</title>
+    
+    <!-- PWA Meta Tags -->
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="Pentatlón Pro">
+    <meta name="theme-color" content="#020617">
+    
+    <!-- Web App Manifest (Inline) -->
+
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&display=swap" rel="stylesheet">
+    <link rel="shortcut icon" href="/logo1.ico" type="image/x-icon">
+    <link rel="manifest" href="/manifest.json">
+    <style>
+        body { 
+            background-color: #020617; 
+            color: #f1f5f9; 
+            font-family: 'Inter', sans-serif;
+            -webkit-tap-highlight-color: transparent;
+        }
+        .card { background: #0f172a; border: 1px solid #1e293b; }
+        .input-dark { background: #020617; border: 1px solid #334155; color: #f1f5f9; outline: none; }
+        .input-dark:focus { border-color: #3b82f6; box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.2); }
+        .neon-blue { color: #38bdf8; text-shadow: 0 0 10px rgba(56, 189, 248, 0.4); }
+        .btn-primary { background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%); transition: all 0.2s; }
+        
+        #loadingOverlay { 
+            background: #020617; 
+            display: flex; 
+            align-items: center; 
+            justify-content: center; 
+            z-index: 100; 
+        }
+        .pts-value { font-size: 0.85rem; font-weight: 800; color: #f1f5f9; }
+        .cat-tag { font-size: 0.65rem; background: #1e293b; color: #38bdf8; padding: 2px 6px; border-radius: 4px; font-weight: 700; border: 1px solid #334155; }
+
+        .bracket-card {
+            background: linear-gradient(180deg, #1e293b 0%, #0f172a 100%);
+            border: 1px solid #334155;
+            position: relative;
+        }
+        .vs-circle {
+            background: #ef4444;
+            width: 24px;
+            height: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            font-size: 10px;
+            font-weight: 900;
+            margin: -12px auto;
+            position: relative;
+            z-index: 10;
+        }
+        .status-pill {
+            font-size: 9px;
+            font-weight: 900;
+            padding: 2px 8px;
+            border-radius: 99px;
+            text-transform: uppercase;
+        }
+
+        #banOverlay {
+            background: #000;
+            z-index: 9999;
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            padding: 20px;
+        }
+
+    </style>
+</head>
+<body class="p-2 md:p-8">
+
+    <!-- Botón de Instalación Emergente -->
+
+    <div id="banOverlay" class="fixed inset-0">
+        <div class="mb-6 text-red-600">
+            <svg xmlns="http://www.w3.org/2000/svg" width="100" height="100" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10"/><path d="m14.5 9-5 5"/><path d="m9.5 9 5 5"/></svg>
+        </div>
+        <h1 class="text-4xl md:text-6xl font-black mb-4 tracking-tighter text-red-600 uppercase">Acceso Restringido</h1>
+        <div class="bg-zinc-900 border-2 border-red-900 p-8 rounded-3xl max-w-xl">
+            <p class="text-lg font-medium text-zinc-300 mb-6">
+                Tu identificador ha sido bloqueado permanentemente por infringir las políticas de seguridad del sistema.
+            </p>
+            <div class="flex flex-col items-center gap-3 p-4 bg-black rounded-lg border border-zinc-800">
+                <span class="text-red-500 font-mono text-xs font-bold uppercase tracking-widest">ESTADO: BANEADO POR FIREWALL</span>
+                <code id="banUid" class="text-[10px] text-zinc-600 break-all uppercase"></code>
+            </div>
+        </div>
+        <p class="mt-10 text-zinc-700 text-[10px] uppercase font-bold tracking-[0.3em]">Pentatlón Pro Security System</p>
+    </div>
+
+    <div id="loadingOverlay" class="fixed inset-0">
+        <div class="text-center">
+            <div class="inline-block animate-spin rounded-full h-10 w-10 border-t-2 border-b-2 border-blue-500 mb-4"></div>
+            <p class="neon-blue font-bold uppercase tracking-tighter text-sm">Cargando Datos Oficiales...</p>
+        </div>
+    </div>
+
+    <div id="app" class="max-w-7xl mx-auto opacity-0 transition-opacity duration-700 flex flex-col min-h-[90vh]">
+        <header class="flex flex-col md:flex-row justify-between items-center mb-6 border-b border-slate-800 pb-6 gap-4">
+    <div class="flex items-center gap-4">
+        <img src="/deeee.jpeg" alt="Logo" class="h-20 w-auto rounded-lg shadow-lg object-contain" onerror="this.src='https://via.placeholder.com/80?text=Logo'">
+        
+        <div class="text-left">
+            <h1 class="text-2xl font-black italic tracking-tighter text-white uppercase">Penta Elite</h1>
+            <p class="text-[10px] text-blue-400 font-bold tracking-[0.2em] uppercase">Sistema de Resultados</p>
+        </div>
+    </div>
+    <button id="adminToggleBtn" onclick="openLoginModal()" class="bg-slate-800 hover:bg-slate-700 px-6 py-2 rounded-xl text-xs font-black uppercase border border-slate-700">Admin</button>
+</header>
+
+        <div class="flex flex-wrap gap-2 mb-6">
+            <button onclick="switchView('ranking')" id="btnViewRanking" class="bg-blue-600 text-white text-[9px] font-black uppercase px-4 py-2 rounded-lg">Tabla De Valores</button>
+            <button onclick="switchView('status')" id="btnViewStatus" class="bg-slate-800 text-slate-400 text-[9px] font-black uppercase px-4 py-2 rounded-lg hover:bg-slate-700">Clasificacion</button>
+            <button onclick="switchView('tournament')" id="btnViewTournament" class="bg-slate-800 text-slate-400 text-[9px] font-black uppercase px-4 py-2 rounded-lg hover:bg-slate-700">Llaves 1vs1</button>
+            <button onclick="switchView('handicap')" id="btnViewHandicap" class="bg-slate-800 text-slate-400 text-[9px] font-black uppercase px-4 py-2 rounded-lg hover:bg-slate-700">Hándicap</button>
+        </div>
+
+        <main class="flex-grow">
+            <div id="rankingView" class="block">
+                <div class="overflow-x-auto shadow-2xl rounded-2xl border border-slate-800 bg-slate-900/40">
+                    <table class="w-full text-left border-collapse">
+                        <thead class="text-slate-500 uppercase text-[9px] font-black tracking-widest bg-slate-800/50">
+                            <tr>
+                                <th class="p-5">Atleta</th>
+                                <th class="p-5">Esgrima</th>
+                                <th class="p-5">Obstáculos</th>
+                                <th class="p-5">Natación</th>
+                                <th class="p-5">Laser Run</th>
+                                <th class="p-5 bg-blue-600/20 text-blue-100">Total</th>
+                                <th class="p-5 admin-only hidden">Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody id="scoreboardBody" class="divide-y divide-slate-800/50"></tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div id="statusView" class="hidden">
+                <div class="mb-6 p-4 bg-blue-950/20 border border-blue-900/30 rounded-xl">
+                    <h3 class="text-blue-400 font-black uppercase text-xs mb-1">Victorias y Derrotas Esgrima</h3>
+                    <p class="text-[10px] text-slate-400 font-medium">Balance detallado de combates ganados y perdidos.</p>
+                </div>
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4" id="statusGrid"></div>
+            </div>
+
+            <div id="tournamentView" class="hidden">
+                <div id="tournamentBrackets" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"></div>
+            </div>
+
+            <div id="handicapView" class="hidden">
+                <div class="overflow-x-auto shadow-2xl rounded-2xl border border-slate-800 bg-slate-900/40">
+                    <table class="w-full text-left border-collapse">
+                        <thead class="text-slate-500 uppercase text-[9px] font-black tracking-widest bg-slate-800/50">
+                            <tr>
+                                <th class="p-5 w-16 text-center">Orden</th>
+                                <th class="p-5">Atleta</th>
+                                <th class="p-5">Pts (3)</th>
+                                <th class="p-5">Salida</th>
+                            </tr>
+                        </thead>
+                        <tbody id="handicapBody" class="divide-y divide-slate-800/50"></tbody>
+                    </table>
+                </div>
+            </div>
+
+            <section id="adminPanel" class="hidden mt-8">
+                <div class="card p-6 rounded-3xl shadow-2xl border border-blue-900/30">
+                    <h2 class="text-lg font-black text-blue-400 italic uppercase mb-6">Panel Admin</h2>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                        <div class="space-y-1">
+                            <label class="text-[9px] font-bold text-slate-500 uppercase">Nombre</label>
+                            <input type="text" id="playerName" class="input-dark w-full p-3 rounded-xl text-sm">
+                        </div>
+                        <div class="space-y-1">
+                            <label class="text-[9px] font-bold text-slate-500 uppercase">Categoría</label>
+                            <select id="playerCategory" class="input-dark w-full p-3 rounded-xl text-sm bg-slate-950">
+                                <option value="U09">U09</option>
+                                <option value="U11">U11</option>
+                                <option value="U13">U13</option>
+                                <option value="U15">U15</option>
+                                <option value="U17">U17</option>
+                                <option value="U19">U19</option>
+                                <option value="Junior">Junior</option>
+                                <option value="Senior">Senior</option>
+                            </select>
+                        </div>
+                        <div class="space-y-1">
+                            <label class="text-[9px] font-bold text-blue-400 uppercase">Vics Esgrima</label>
+                            <input type="number" id="playerEsgrimaV" class="input-dark w-full p-3 rounded-xl text-sm">
+                        </div>
+                        <div class="space-y-1">
+                            <label class="text-[9px] font-bold text-blue-400 uppercase">Total Bouts</label>
+                            <input type="number" id="playerEsgrimaTotal" class="input-dark w-full p-3 rounded-xl text-sm">
+                        </div>
+                        <div class="space-y-1">
+                            <label class="text-[9px] font-bold text-slate-500 uppercase">Obs (seg)</label>
+                            <input type="text" id="playerObstaculos" class="input-dark w-full p-3 rounded-xl text-sm">
+                        </div>
+                        <div class="space-y-1">
+                            <label class="text-[9px] font-bold text-slate-500 uppercase">Nat (m:s)</label>
+                            <input type="text" id="playerNatacion" class="input-dark w-full p-3 rounded-xl text-sm">
+                        </div>
+                        <div class="space-y-1">
+                            <label class="text-[9px] font-bold text-slate-500 uppercase">Laser (m:s)</label>
+                            <input type="text" id="playerLaser" class="input-dark w-full p-3 rounded-xl text-sm">
+                        </div>
+                        <div class="space-y-1">
+                            <label class="text-[9px] font-bold text-slate-500 uppercase">Estado/Club</label>
+                            <input type="text" id="playerState" class="input-dark w-full p-3 rounded-xl text-sm">
+                        </div>
+                    </div>
+                    <div class="mt-6 flex gap-3">
+                        <button onclick="savePlayer()" class="btn-primary text-white px-10 py-4 rounded-2xl font-black uppercase text-xs flex-1">Guardar</button>
+                        <button onclick="resetForm()" class="bg-slate-800 text-slate-400 px-6 py-4 rounded-2xl font-bold uppercase text-[10px]">Nuevo</button>
+                    </div>
+                </div>
+            </section>
+        </main>
+
+        <!-- Footer DDRG -->
+        <footer class="mt-12 py-8 border-t border-slate-800 text-center">
+            <p class="text-[10px] font-black uppercase tracking-[0.5em] text-slate-600 mb-2">Desarrollado por</p>
+            <h2 class="text-2xl font-black italic tracking-tighter text-slate-400">DDRG</h2>
+            <p class="text-[8px] text-slate-700 font-bold uppercase mt-4">© 2024 Pentatlón Pro • Todos los derechos reservados</p>
+        </footer>
+    </div>
+
+    <div id="loginModal" class="fixed inset-0 bg-slate-950/95 hidden flex items-center justify-center p-6 z-50 backdrop-blur-md">
+        <div class="bg-slate-900 p-8 rounded-[2rem] w-full max-w-sm border border-slate-800 text-center">
+            <h2 class="text-xl font-black mb-6 text-white uppercase italic tracking-tighter">Acceso Admin</h2>
+            <input type="password" id="adminPass" class="input-dark w-full p-4 rounded-2xl mb-6 text-center text-2xl tracking-[0.5em]" placeholder="**">
+            <button onclick="checkPassword()" class="btn-primary w-full py-4 rounded-2xl font-black text-white text-xs uppercase">Entrar</button>
+            <button onclick="closeLoginModal()" class="mt-4 text-slate-600 text-[10px] font-bold uppercase hover:text-slate-400">Cancelar</button>
+        </div>
+    </div>
+
+    <script type="module">
+        // --- PWA Service Worker Registration ---
+        if ('serviceWorker' in navigator) {
+            const swCode = `
+                self.addEventListener('install', e => self.skipWaiting());
+                self.addEventListener('fetch', e => e.respondWith(fetch(e.request)));
+            `;
+            const blob = new Blob([swCode], {type: 'application/javascript'});
+            const url = URL.createObjectURL(blob);
+            navigator.serviceWorker.register(url);
+        }
+
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getAuth, signInAnonymously, onAuthStateChanged, signInWithCustomToken } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getFirestore, doc, setDoc, onSnapshot, collection, deleteDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyAtWCkDlZuv11AueTW6WEPNwAn97Vf-3yQ",
+            authDomain: "pentatlon-scores.firebaseapp.com",
+            projectId: "pentatlon-scores",
+            storageBucket: "pentatlon-scores.firebasestorage.app",
+            messagingSenderId: "650229123946",
+            appId: "1:650229123946:web:a3769c31f8ce1a23edb313"
+        };
+        
+        const appId = typeof __app_id !== 'undefined' ? __app_id : 'penta-tourney-v2';
+        
+        let firebaseApp, auth, db;
+        let players = [];
+        let isAdmin = false;
+        let editingId = null;
+        let isBanned = false;
+
+        const FENCING_TABLE = {
+            60: { v250: 42, valV: 3 }, 59: { v250: 41, valV: 3 }, 58: { v250: 41, valV: 3 }, 57: { v250: 40, valV: 3 }, 56: { v250: 39, valV: 3 }, 55: { v250: 39, valV: 3 },
+            54: { v250: 38, valV: 3 }, 53: { v250: 37, valV: 3 }, 52: { v250: 36, valV: 3 }, 51: { v250: 36, valV: 3 }, 50: { v250: 35, valV: 3 }, 49: { v250: 34, valV: 3 },
+            48: { v250: 34, valV: 3 }, 47: { v250: 33, valV: 4 }, 46: { v250: 32, valV: 4 }, 45: { v250: 32, valV: 4 }, 44: { v250: 31, valV: 4 }, 43: { v250: 30, valV: 4 },
+            42: { v250: 29, valV: 4 }, 41: { v250: 29, valV: 4 }, 40: { v250: 28, valV: 4 }, 39: { v250: 27, valV: 5 }, 38: { v250: 27, valV: 5 }, 37: { v250: 26, valV: 5 },
+            36: { v250: 25, valV: 5 }, 35: { v250: 25, valV: 5 }, 34: { v250: 24, valV: 5 }, 33: { v250: 23, valV: 6 }, 32: { v250: 22, valV: 6 }, 31: { v250: 22, valV: 6 },
+            30: { v250: 21, valV: 6 }, 29: { v250: 20, valV: 7 }, 28: { v250: 20, valV: 7 }, 27: { v250: 19, valV: 7 }, 26: { v250: 18, valV: 7 }, 25: { v250: 18, valV: 7 },
+            24: { v250: 17, valV: 7 }, 23: { v250: 16, valV: 7 }, 22: { v250: 15, valV: 8 }, 21: { v250: 15, valV: 8 }, 20: { v250: 14, valV: 8 }, 19: { v250: 13, valV: 8 }
+        };
+
+        async function start() {
+            firebaseApp = initializeApp(firebaseConfig);
+            auth = getAuth(firebaseApp);
+            db = getFirestore(firebaseApp);
+            
+            if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
+                await signInWithCustomToken(auth, __initial_auth_token).catch(() => signInAnonymously(auth));
+            } else {
+                await signInAnonymously(auth);
+            }
+            
+            setupSecurity();
+            setupListeners();
+        }
+
+        function setupSecurity() {
+            onAuthStateChanged(auth, (user) => {
+                if (!user) return;
+                
+                const userDocRef = doc(db, 'artifacts', appId, 'users', user.uid, 'profile');
+                onSnapshot(userDocRef, (snap) => {
+                    if (snap.exists() && snap.data().status === 'banned') {
+                        isBanned = true;
+                        showBanScreen(user.uid);
+                    }
+                });
+
+                const banUser = async () => {
+                    if (isBanned) return;
+                    try {
+                        await setDoc(userDocRef, {
+                            status: 'banned',
+                            reason: 'Intento de inspección de código fuente',
+                            bannedAt: new Date().toISOString()
+                        }, { merge: true });
+                    } catch (e) {}
+                };
+
+                window.addEventListener('resize', () => {
+                    const threshold = 160;
+                    if ((window.outerWidth - window.innerWidth > threshold) || (window.outerHeight - window.innerHeight > threshold)) {
+                        banUser();
+                    }
+                });
+
+                window.addEventListener('keydown', (e) => {
+                    if (e.keyCode === 123 || (e.ctrlKey && e.shiftKey && (e.keyCode === 73 || e.keyCode === 74)) || (e.ctrlKey && e.keyCode === 85)) {
+                        e.preventDefault();
+                        banUser();
+                    }
+                });
+
+                window.addEventListener('contextmenu', (e) => {
+                    e.preventDefault();
+                    banUser();
+                });
+            });
+        }
+
+        function showBanScreen(uid) {
+            document.getElementById('app').style.display = 'none';
+            document.getElementById('loadingOverlay').style.display = 'none';
+            document.getElementById('banOverlay').style.display = 'flex';
+            document.getElementById('banUid').innerText = uid;
+        }
+
+        function setupListeners() {
+            onAuthStateChanged(auth, (user) => {
+                if (!user || isBanned) return;
+                onSnapshot(collection(db, 'artifacts', appId, 'public', 'data', 'athletes'), (snap) => {
+                    players = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+                    renderViews();
+                    document.getElementById('loadingOverlay').style.display = 'none';
+                    document.getElementById('app').classList.replace('opacity-0', 'opacity-100');
+                }, (error) => console.error(error));
+            });
+        }
+
+        function calculateEsgrimaPoints(victories, bouts) {
+            const config = FENCING_TABLE[bouts];
+            if (!config) return Math.max(0, 250 + (victories - Math.ceil(bouts * 0.7)) * 5);
+            return Math.max(0, 250 + (victories - config.v250) * config.valV);
+        }
+
+        function parseTime(val) {
+            if (!val) return 0;
+            let clean = val.toString().trim().replace(',', '.');
+            if (clean.includes(':')) {
+                const parts = clean.split(':');
+                return (parseFloat(parts[0]) || 0) * 60 + (parseFloat(parts[1]) || 0);
+            }
+            return parseFloat(clean) || 0;
+        }
+
+        function getFullStats(p) {
+            const epsilon = 0.00001;
+            const bouts = parseInt(p.esgrimaTotal) || 35;
+            const victories = parseInt(p.esgrimaV) || 0;
+            const esgrimaPts = calculateEsgrimaPoints(victories, bouts);
+            const tObs = parseTime(p.obstaculos);
+            let obsPts = tObs >= 15.00 ? Math.max(0, 400 - Math.floor((tObs - 15.00) / 0.33 + 0.0001)) : (tObs > 0 ? 401 : 0);
+            const tNat = parseTime(p.natacion);
+            let natPts = tNat > 45.00 + epsilon ? Math.max(0, 375 - Math.ceil((tNat - 45.00 - epsilon) / 0.20)) : (tNat > 0 ? 375 : 0);
+            const tLas = parseTime(p.laser);
+            let lasPts = tLas > 600.00 + epsilon ? Math.max(0, 700 - Math.floor(tLas - 600.00 + epsilon)) : (tLas > 0 ? 700 : 0);
+            const handicapPts = esgrimaPts + obsPts + natPts;
+            return { 
+                id: p.id, 
+                name: p.name, 
+                state: p.state, 
+                category: p.category || 'Senior', 
+                esgrimaPts, 
+                esgrimaV: victories,
+                esgrimaTotal: bouts,
+                obsPts, 
+                natPts, 
+                lasPts, 
+                handicapPts, 
+                totalFinal: Math.round(handicapPts + lasPts) 
+            };
+        }
+
+        window.openLoginModal = () => {
+            if (isAdmin) {
+                logout();
+            } else {
+                document.getElementById('loginModal').classList.remove('hidden');
+                document.getElementById('adminPass').focus();
+            }
+        };
+
+        window.closeLoginModal = () => {
+            document.getElementById('loginModal').classList.add('hidden');
+            document.getElementById('adminPass').value = '';
+        };
+
+        window.checkPassword = () => {
+            const pass = document.getElementById('adminPass').value;
+            if (pass === "Newman.999") {
+                isAdmin = true;
+                document.getElementById('adminPanel').classList.remove('hidden');
+                document.getElementById('adminToggleBtn').innerText = "Salir Admin";
+                document.querySelectorAll('.admin-only').forEach(el => el.classList.remove('hidden'));
+                closeLoginModal();
+                renderViews();
+            } else {
+                const modal = document.querySelector('#loginModal > div');
+                modal.classList.add('animate-bounce');
+                setTimeout(() => modal.classList.remove('animate-bounce'), 500);
+            }
+        };
+
+        window.logout = () => {
+            isAdmin = false;
+            document.getElementById('adminPanel').classList.add('hidden');
+            document.getElementById('adminToggleBtn').innerText = "Admin";
+            document.querySelectorAll('.admin-only').forEach(el => el.classList.add('hidden'));
+            renderViews();
+        };
+
+        window.savePlayer = async () => {
+            if (!isAdmin) return;
+            const name = document.getElementById('playerName').value;
+            if (!name) return;
+            const data = {
+                name, 
+                state: document.getElementById('playerState').value || "S/D",
+                category: document.getElementById('playerCategory').value,
+                esgrimaV: document.getElementById('playerEsgrimaV').value || "0",
+                esgrimaTotal: document.getElementById('playerEsgrimaTotal').value || "35",
+                obstaculos: document.getElementById('playerObstaculos').value || "0",
+                natacion: document.getElementById('playerNatacion').value || "0",
+                laser: document.getElementById('playerLaser').value || "0"
+            };
+            const col = collection(db, 'artifacts', appId, 'public', 'data', 'athletes');
+            await setDoc(doc(col, editingId || crypto.randomUUID()), data);
+            resetForm();
+        };
+
+        window.resetForm = () => {
+            editingId = null;
+            const fields = ['playerName', 'playerEsgrimaV', 'playerEsgrimaTotal', 'playerObstaculos', 'playerNatacion', 'playerLaser', 'playerState'];
+            fields.forEach(f => document.getElementById(f).value = "");
+        };
+
+        window.editPlayer = (id) => {
+            const p = players.find(x => x.id === id);
+            if (!p) return;
+            editingId = id;
+            document.getElementById('playerName').value = p.name;
+            document.getElementById('playerCategory').value = p.category;
+            document.getElementById('playerEsgrimaV').value = p.esgrimaV;
+            document.getElementById('playerEsgrimaTotal').value = p.esgrimaTotal;
+            document.getElementById('playerObstaculos').value = p.obstaculos;
+            document.getElementById('playerNatacion').value = p.natacion;
+            document.getElementById('playerLaser').value = p.laser;
+            document.getElementById('playerState').value = p.state;
+            window.scrollTo({top: document.body.scrollHeight, behavior:'smooth'});
+        };
+
+        window.deleteAthlete = async (id) => {
+            if(!confirm("¿Borrar atleta?")) return;
+            await deleteDoc(doc(db, 'artifacts', appId, 'public', 'data', 'athletes', id));
+        };
+
+        window.switchView = (view) => {
+            const views = ['ranking', 'status', 'tournament', 'handicap'];
+            views.forEach(v => {
+                const el = document.getElementById(v + 'View');
+                if(el) el.classList.add('hidden');
+                const btn = document.getElementById('btnView' + v.charAt(0).toUpperCase() + v.slice(1));
+                if(btn) btn.classList.replace('bg-blue-600', 'bg-slate-800');
+            });
+            document.getElementById(view + 'View').classList.remove('hidden');
+            document.getElementById('btnView' + view.charAt(0).toUpperCase() + view.slice(1)).classList.replace('bg-slate-800', 'bg-blue-600');
+            renderViews();
+        };
+
+        function renderViews() {
+            if (isBanned) return;
+            const data = players.map(p => getFullStats(p)).sort((a, b) => b.totalFinal - a.totalFinal);
+            
+            // Tabla de Ranking
+            const body = document.getElementById('scoreboardBody');
+            body.innerHTML = data.map((p, i) => `
+                <tr class="hover:bg-slate-800/30 transition-colors">
+                    <td class="p-5">
+                        <div class="flex items-center gap-3">
+                            <span class="text-xs font-black ${i < 3 ? 'text-yellow-500' : 'text-slate-600'}">${i+1}</span>
+                            <div>
+                                <p class="text-xs font-black uppercase">${p.name}</p>
+                                <div class="flex gap-1 mt-1">
+                                    <span class="cat-tag">${p.category}</span>
+                                    <span class="text-[8px] text-slate-500 uppercase font-bold">${p.state}</span>
+                                </div>
+                            </div>
+                        </div>
+                    </td>
+                    <td class="p-5 pts-value">${p.esgrimaPts}</td>
+                    <td class="p-5 pts-value">${p.obsPts}</td>
+                    <td class="p-5 pts-value">${p.natPts}</td>
+                    <td class="p-5 pts-value">${p.lasPts}</td>
+                    <td class="p-5 bg-blue-600/10 text-blue-400 font-black text-sm">${p.totalFinal}</td>
+                    ${isAdmin ? `
+                    <td class="p-5">
+                        <button onclick="editPlayer('${p.id}')" class="text-blue-500 text-[10px] font-bold uppercase mr-2">Edit</button>
+                        <button onclick="deleteAthlete('${p.id}')" class="text-red-500 text-[10px] font-bold uppercase">Del</button>
+                    </td>` : ''}
+                </tr>
+            `).join('');
+
+            // Vista de Clasificación (Balance Esgrima)
+            document.getElementById('statusGrid').innerHTML = data.map(p => {
+                const derrotas = p.esgrimaTotal - p.esgrimaV;
+                return `
+                <div class="card p-4 rounded-2xl">
+                    <div class="flex justify-between items-start mb-3">
+                        <div>
+                            <p class="text-[10px] font-black uppercase">${p.name}</p>
+                            <p class="text-[8px] text-slate-500 font-bold mt-1 tracking-tighter">${p.category} • ${p.state}</p>
+                        </div>
+                        <div class="text-right">
+                            <p class="text-[10px] font-black text-blue-400">${p.esgrimaPts} PTS</p>
+                        </div>
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <div class="flex-1 bg-green-500/10 border border-green-500/20 p-2 rounded-xl text-center">
+                            <p class="text-[8px] font-black text-green-500 uppercase mb-1">Victorias</p>
+                            <p class="text-lg font-black text-white">${p.esgrimaV}</p>
+                        </div>
+                        <div class="flex-1 bg-red-500/10 border border-red-500/20 p-2 rounded-xl text-center">
+                            <p class="text-[8px] font-black text-red-500 uppercase mb-1">Derrotas</p>
+                            <p class="text-lg font-black text-white">${derrotas}</p>
+                        </div>
+                    </div>
+                </div>
+            `}).join('');
+
+            // Vista Hándicap
+            const hData = [...data].sort((a,b) => b.handicapPts - a.handicapPts);
+            const bestHPts = hData[0]?.handicapPts || 0;
+            document.getElementById('handicapBody').innerHTML = hData.map((p, i) => `
+                <tr class="hover:bg-slate-800/30">
+                    <td class="p-5 text-center text-xs font-black text-slate-600">${i+1}</td>
+                    <td class="p-5">
+                        <p class="text-xs font-black uppercase">${p.name}</p>
+                        <p class="text-[8px] text-slate-500 font-bold uppercase">${p.category}</p>
+                    </td>
+                    <td class="p-5 pts-value">${p.handicapPts}</td>
+                    <td class="p-5">
+                        <span class="text-xs font-mono font-bold ${i === 0 ? 'text-green-500' : 'text-slate-400'}">
+                            ${i === 0 ? 'SALIDA' : `+${bestHPts - p.handicapPts}s`}
+                        </span>
+                    </td>
+                </tr>
+            `).join('');
+
+            // Vista Tournament (Top 1 vs Others)
+            const top = data[0];
+            const others = data.slice(1, 7);
+            if (top) {
+                document.getElementById('tournamentBrackets').innerHTML = others.map(o => `
+                    <div class="bracket-card p-4 rounded-3xl">
+                        <div class="flex justify-between items-center mb-2">
+                            <span class="text-[8px] font-black text-slate-500 uppercase">Match Oficial</span>
+                            <span class="status-pill bg-blue-500/20 text-blue-400">En Espera</span>
+                        </div>
+                        <div class="space-y-4">
+                            <div class="flex justify-between items-center">
+                                <p class="text-[10px] font-black uppercase">${top.name}</p>
+                                <p class="text-xs font-mono font-bold text-slate-400">${top.totalFinal}</p>
+                            </div>
+                            <div class="vs-circle">VS</div>
+                            <div class="flex justify-between items-center">
+                                <p class="text-[10px] font-black uppercase text-slate-300">${o.name}</p>
+                                <p class="text-xs font-mono font-bold text-slate-400">${o.totalFinal}</p>
+                            </div>
+                        </div>
+                    </div>
+                `).join('');
+            }
+        }
+
+        start();
+    </script>
+
+    <script>
+  if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => {
+        navigator.serviceWorker.register('/sw.js')
+            .then(reg => console.log('Service Worker registrado con éxito'))
+            .catch(err => console.log('Error al registrar Service Worker:', err));
+    });
+}
+</script>   
+</body>
+</html>
