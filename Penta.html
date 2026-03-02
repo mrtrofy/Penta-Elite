@@ -186,12 +186,12 @@
             
             await signInAnonymously(auth);
 
-            // CORRECCIÓN: Evento de cierre de sesión asignado por código
+            // CORRECCIÓN: Ahora redirige a index.html al cerrar sesión
             const btnSalir = document.getElementById('btnSalir');
             if (btnSalir) {
                 btnSalir.onclick = async () => {
                     await signOut(auth);
-                    window.location.reload(); // Recarga para limpiar estado
+                    window.location.href = 'index.html'; 
                 };
             }
 
