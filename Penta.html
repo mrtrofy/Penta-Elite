@@ -83,6 +83,10 @@
     
 </head>
 <body class="p-2 md:p-8">
+    
+    <button id="btnSalir" class="px-6 py-2 bg-red-600/20 border border-red-500/50 text-red-500 hover:bg-red-600 hover:text-white rounded-lg font-bold text-xs uppercase tracking-widest transition-all">
+    Cerrar Sesión
+</button>
 
     <!-- Botón de Instalación Emergente -->
 
@@ -626,6 +630,25 @@
             .catch(err => console.log('Error al registrar Service Worker:', err));
     });
 }
-</script>   
+
+// 1. SEGURIDAD: Si no hay sesión, fuera de aquí
+    onAuthStateChanged(auth, (user) => {
+        if (!user) {
+            window.location.href = "index.html";
+        }
+    });
+
+    // 2. FUNCIÓN DE SALIDA
+    document.getElementById('btnSalir').onclick = async () => {
+        try {
+            await signOut(auth);
+            // El observador de arriba detectará que ya no hay usuario y redirigirá
+        } catch (error) {
+            console.error("Error al salir:", error);
+        }
+    };
+</script>  
+
+
 </body>
 </html>
