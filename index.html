@@ -96,7 +96,7 @@
             <div class="inline-block mb-3">
                 <span class="cat-tag uppercase tracking-tighter">Acceso Alpha</span>
             </div>
-            <h1 class="text-3xl font-black mb-2">Cyber<span class="neon-blue">Penta Elite</span></h1>
+            <h1 class="text-3xl font-black mb-2"><span class="neon-blue">Penta Elite</span></h1>
         </div>
 
         <div class="mb-6">
@@ -125,21 +125,20 @@
         </form>
 
         <p class="text-center mt-8 text-sm text-slate-500 font-medium">
-            ¿Ya tienes acceso? <a href="index.html" class="text-white font-black hover:text-blue-400 transition-colors ml-1 underline decoration-blue-500/30">Entrar</a>
+            ¿Ya tienes acceso? <a href="Penta.html" class="text-white font-black hover:text-blue-400 transition-colors ml-1 underline decoration-blue-500/30">Entrar</a>
         </p>
     </div>
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-import { 
-    getAuth, 
-    signInWithPopup, 
-    GoogleAuthProvider, 
-    createUserWithEmailAndPassword,
-    sendEmailVerification 
-} from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+        import { 
+            getAuth, 
+            signInWithPopup, 
+            GoogleAuthProvider, 
+            createUserWithEmailAndPassword,
+            sendEmailVerification 
+        } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
 
-        // CONFIGURACIÓN DE FIREBASE
         const firebaseConfig = {
             apiKey: "AIzaSyAtWCkDlZuv11AueTW6WEPNwAn97Vf-3yQ",
             authDomain: "pentatlon-scores.firebaseapp.com",
@@ -149,60 +148,70 @@ import {
             appId: "1:650229123946:web:a3769c31f8ce1a23edb313"
         };
 
-        // Inicialización
         const app = initializeApp(firebaseConfig);
         const auth = getAuth(app);
         const loader = document.getElementById('loadingOverlay');
         const loadingStatus = document.getElementById('loadingStatus');
 
-        // Inicializar iconos de Lucide
+        // Inicializar iconos
         lucide.createIcons();
 
-        // Función para manejar el inicio de sesión con Google
+        // Función de Google mejorada
         const handleGoogleLogin = async () => {
             const provider = new GoogleAuthProvider();
+            // Esto asegura que Google no use una sesión "fantasma" anterior
+            provider.setCustomParameters({ prompt: 'select_account' });
+            
             loadingStatus.innerText = "Abriendo portal de Google...";
             loader.style.display = 'flex';
+
             try {
                 const result = await signInWithPopup(auth, provider);
-                console.log("Usuario registrado:", result.user);
+                console.log("Éxito:", result.user);
                 window.location.href = "index.html"; 
             } catch (error) {
-                console.error("Error Google Auth:", error);
-                alert("Error de autenticación con Google: " + error.message);
+                console.error("Error Google:", error);
+                // No mostrar alerta si el usuario simplemente cerró la ventanita
+                if (error.code !== 'auth/cancelled-popup-request') {
+                    alert("Error: " + error.message);
+                }
             } finally {
                 loader.style.display = 'none';
             }
         };
 
-        // Asignación de eventos tras carga del DOM
-        document.addEventListener('DOMContentLoaded', () => {
-            document.getElementById('googleBtn').addEventListener('click', handleGoogleLogin);
-        });
-
         // Registro Manual
-        document.getElementById('registerForm').addEventListener('submit', async (e) => {
+        const handleManualRegister = async (e) => {
             e.preventDefault();
             const email = document.getElementById('email').value;
             const password = document.getElementById('password').value;
             
             loadingStatus.innerText = "Creando identidad digital...";
             loader.style.display = 'flex';
+
             try {
                 const userCredential = await createUserWithEmailAndPassword(auth, email, password);
                 await sendEmailVerification(userCredential.user);
-                alert("¡Casi listo! Se envió un enlace de verificación a tu correo.");
+                alert("¡Verificación enviada! Revisa tu correo electrónico para activar tu cuenta.");
                 window.location.href = "index.html";
             } catch (error) {
                 console.error("Error Registro:", error);
-                alert("Error en registro: " + error.message);
+                alert("Error: " + error.message);
             } finally {
                 loader.style.display = 'none';
             }
-        });
+        };
 
-        // Asegurar que el botón funcione incluso si el DOM ya cargó antes que el módulo
-        document.getElementById('googleBtn').onclick = handleGoogleLogin;
+        // ASIGNACIÓN ÚNICA DE EVENTOS (Evita el error de "cancelled-popup-request")
+        const googleBtn = document.getElementById('googleBtn');
+        if (googleBtn) {
+            googleBtn.onclick = handleGoogleLogin;
+        }
+
+        const regForm = document.getElementById('registerForm');
+        if (regForm) {
+            regForm.onsubmit = handleManualRegister;
+        }
 
     </script>
 </body>
