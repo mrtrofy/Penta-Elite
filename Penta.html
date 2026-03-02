@@ -56,13 +56,6 @@
             position: relative;
             z-index: 10;
         }
-        .status-pill {
-            font-size: 9px;
-            font-weight: 900;
-            padding: 2px 8px;
-            border-radius: 99px;
-            text-transform: uppercase;
-        }
 
         #banOverlay {
             background: #000;
@@ -89,20 +82,15 @@
         <h1 class="text-4xl md:text-6xl font-black mb-4 tracking-tighter text-red-600 uppercase">Acceso Restringido</h1>
         <div class="bg-zinc-900 border-2 border-red-900 p-8 rounded-3xl max-w-xl">
             <p class="text-lg font-medium text-zinc-300 mb-6">
-                Tu identificador ha sido bloqueado permanentemente por infringir las políticas de seguridad del sistema.
+                Tu identificador ha sido bloqueado permanentemente.
             </p>
-            <div class="flex flex-col items-center gap-3 p-4 bg-black rounded-lg border border-zinc-800">
-                <span class="text-red-500 font-mono text-xs font-bold uppercase tracking-widest">ESTADO: BANEADO POR FIREWALL</span>
-                <code id="banUid" class="text-[10px] text-zinc-600 break-all uppercase"></code>
-            </div>
         </div>
-        <p class="mt-10 text-zinc-700 text-[10px] uppercase font-bold tracking-[0.3em]">Pentatlón Pro Security System</p>
     </div>
 
     <div id="loadingOverlay" class="fixed inset-0">
         <div class="text-center">
             <div class="inline-block animate-spin rounded-full h-10 w-10 border-t-2 border-b-2 border-blue-500 mb-4"></div>
-            <p class="neon-blue font-bold uppercase tracking-tighter text-sm">Cargando Datos Oficiales...</p>
+            <p class="neon-blue font-bold uppercase tracking-tighter text-sm">Cargando...</p>
         </div>
     </div>
 
@@ -124,6 +112,7 @@
                 <button onclick="switchView('status')" id="btnViewStatus" class="bg-slate-800 text-slate-400 text-[9px] font-black uppercase px-4 py-2 rounded-lg hover:bg-slate-700">Clasificacion</button>
                 <button onclick="switchView('tournament')" id="btnViewTournament" class="bg-slate-800 text-slate-400 text-[9px] font-black uppercase px-4 py-2 rounded-lg hover:bg-slate-700">Llaves 1vs1</button>
                 <button onclick="switchView('handicap')" id="btnViewHandicap" class="bg-slate-800 text-slate-400 text-[9px] font-black uppercase px-4 py-2 rounded-lg hover:bg-slate-700">Hándicap</button>
+                <button onclick="switchView('publicEvents')" id="btnViewPublicEvents" class="bg-purple-900/40 text-purple-400 border border-purple-800/50 text-[9px] font-black uppercase px-4 py-2 rounded-lg hover:bg-purple-800/60">Eventos</button>
             </div>
             
             <div class="flex gap-2 p-1 bg-slate-900/50 rounded-xl w-fit border border-slate-800">
@@ -138,103 +127,47 @@
                 <div class="overflow-x-auto shadow-2xl rounded-2xl border border-slate-800 bg-slate-900/40">
                     <table class="w-full text-left border-collapse">
                         <thead class="text-slate-500 uppercase text-[9px] font-black tracking-widest bg-slate-800/50">
-                            <tr>
-                                <th class="p-5">Atleta</th>
-                                <th class="p-5">Esgrima</th>
-                                <th class="p-5">Obstáculos</th>
-                                <th class="p-5">Natación</th>
-                                <th class="p-5">Laser Run</th>
-                                <th class="p-5 bg-blue-600/20 text-blue-100">Total</th>
-                                <th class="p-5 admin-only hidden text-right">Acciones</th>
-                            </tr>
+                            <tr><th class="p-5">Atleta</th><th class="p-5">Esgrima</th><th class="p-5">Obstáculos</th><th class="p-5">Natación</th><th class="p-5">Laser Run</th><th class="p-5 bg-blue-600/20 text-blue-100">Total</th><th class="p-5 admin-only hidden text-right">Acciones</th></tr>
                         </thead>
                         <tbody id="scoreboardBody" class="divide-y divide-slate-800/50"></tbody>
                     </table>
                 </div>
             </div>
 
-            <div id="statusView" class="hidden">
-                <div class="mb-6 p-4 bg-blue-950/20 border border-blue-900/30 rounded-xl">
-                    <h3 class="text-blue-400 font-black uppercase text-xs mb-1">Victorias y Derrotas Esgrima</h3>
-                    <p class="text-[10px] text-slate-400 font-medium">Balance detallado de combates ganados y perdidos.</p>
-                </div>
-                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4" id="statusGrid"></div>
-            </div>
-
-            <div id="tournamentView" class="hidden">
-                <div id="tournamentBrackets" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"></div>
-            </div>
-
+            <div id="statusView" class="hidden"><div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4" id="statusGrid"></div></div>
+            <div id="tournamentView" class="hidden"><div id="tournamentBrackets" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"></div></div>
             <div id="handicapView" class="hidden">
                 <div class="overflow-x-auto shadow-2xl rounded-2xl border border-slate-800 bg-slate-900/40">
                     <table class="w-full text-left border-collapse">
                         <thead class="text-slate-500 uppercase text-[9px] font-black tracking-widest bg-slate-800/50">
-                            <tr>
-                                <th class="p-5 w-16 text-center">Orden</th>
-                                <th class="p-5">Atleta</th>
-                                <th class="p-5">Pts (3)</th>
-                                <th class="p-5">Salida</th>
-                            </tr>
+                            <tr><th class="p-5 w-16 text-center">Orden</th><th class="p-5">Atleta</th><th class="p-5">Pts (3)</th><th class="p-5">Salida</th></tr>
                         </thead>
                         <tbody id="handicapBody" class="divide-y divide-slate-800/50"></tbody>
                     </table>
                 </div>
             </div>
 
+            <div id="publicEventsView" class="hidden">
+                <div class="mb-6 p-4 bg-purple-950/20 border border-purple-900/30 rounded-xl">
+                    <h3 class="text-purple-400 font-black uppercase text-xs mb-1">Calendario de Eventos</h3>
+                    <p class="text-[10px] text-slate-400 font-medium">Información oficial sobre las próximas competencias.</p>
+                </div>
+                <div id="publicEventsList" class="grid grid-cols-1 sm:grid-cols-2 gap-4"></div>
+            </div>
+
             <section id="adminPanel" class="hidden space-y-8 mt-12 border-t-2 border-dashed border-slate-800 pt-12">
                 <div class="card p-6 rounded-3xl shadow-2xl border border-blue-900/30">
-                    <h2 class="text-lg font-black text-blue-400 italic uppercase mb-6 flex items-center gap-2">
-                        <span class="w-2 h-6 bg-blue-600"></span> Registro de Atleta
-                    </h2>
+                    <h2 class="text-lg font-black text-blue-400 italic uppercase mb-6 flex items-center gap-2"><span class="w-2 h-6 bg-blue-600"></span> Registro Atleta</h2>
                     <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-                        <div class="space-y-1">
-                            <label class="text-[9px] font-bold text-slate-500 uppercase">Nombre</label>
-                            <input type="text" id="playerName" class="input-dark w-full p-3 rounded-xl text-sm">
-                        </div>
-                        <div class="space-y-1">
-                            <label class="text-[9px] font-bold text-slate-500 uppercase">Sexo</label>
-                            <select id="playerSex" class="input-dark w-full p-3 rounded-xl text-sm bg-slate-950">
-                                <option value="M">Masculino</option>
-                                <option value="F">Femenino</option>
-                            </select>
-                        </div>
-                        <div class="space-y-1">
-                            <label class="text-[9px] font-bold text-slate-500 uppercase">Categoría</label>
-                            <select id="playerCategory" class="input-dark w-full p-3 rounded-xl text-sm bg-slate-950">
-                                <option value="U09">U09</option>
-                                <option value="U11">U11</option>
-                                <option value="U13">U13</option>
-                                <option value="U15">U15</option>
-                                <option value="U17">U17</option>
-                                <option value="U19">U19</option>
-                                <option value="Junior">Junior</option>
-                                <option value="Senior">Senior</option>
-                            </select>
-                        </div>
-                        <div class="space-y-1">
-                            <label class="text-[9px] font-bold text-blue-400 uppercase">Vics Esgrima</label>
-                            <input type="number" id="playerEsgrimaV" class="input-dark w-full p-3 rounded-xl text-sm">
-                        </div>
-                        <div class="space-y-1">
-                            <label class="text-[9px] font-bold text-blue-400 uppercase">Total Bouts</label>
-                            <input type="number" id="playerEsgrimaTotal" class="input-dark w-full p-3 rounded-xl text-sm">
-                        </div>
-                        <div class="space-y-1">
-                            <label class="text-[9px] font-bold text-slate-500 uppercase">Obs (seg)</label>
-                            <input type="text" id="playerObstaculos" class="input-dark w-full p-3 rounded-xl text-sm">
-                        </div>
-                        <div class="space-y-1">
-                            <label class="text-[9px] font-bold text-slate-500 uppercase">Nat (m:s)</label>
-                            <input type="text" id="playerNatacion" class="input-dark w-full p-3 rounded-xl text-sm">
-                        </div>
-                        <div class="space-y-1">
-                            <label class="text-[9px] font-bold text-slate-500 uppercase">Laser (m:s)</label>
-                            <input type="text" id="playerLaser" class="input-dark w-full p-3 rounded-xl text-sm">
-                        </div>
-                        <div class="space-y-1 lg:col-span-2">
-                            <label class="text-[9px] font-bold text-slate-500 uppercase">Estado/Club</label>
-                            <input type="text" id="playerState" class="input-dark w-full p-3 rounded-xl text-sm">
-                        </div>
+                        <input type="text" id="playerName" class="input-dark p-3 rounded-xl text-sm" placeholder="Nombre">
+                        <select id="playerSex" class="input-dark p-3 rounded-xl text-sm bg-slate-950"><option value="M">Masculino</option><option value="F">Femenino</option></select>
+                        <select id="playerCategory" class="input-dark p-3 rounded-xl text-sm bg-slate-950"><option value="Senior">Senior</option><option value="Junior">Junior</option><option value="U19">U19</option><option value="U17">U17</option></select>
+                        <input type="number" id="playerEsgrimaV" class="input-dark p-3 rounded-xl text-sm" placeholder="Vics Esgrima">
+                        <input type="number" id="playerEsgrimaTotal" class="input-dark p-3 rounded-xl text-sm" placeholder="Total Bouts">
+                        <input type="text" id="playerObstaculos" class="input-dark p-3 rounded-xl text-sm" placeholder="Obs (seg)">
+                        <input type="text" id="playerNatacion" class="input-dark p-3 rounded-xl text-sm" placeholder="Nat (m:s)">
+                        <input type="text" id="playerLaser" class="input-dark p-3 rounded-xl text-sm" placeholder="Laser (m:s)">
+                        <input type="text" id="playerState" class="input-dark p-3 rounded-xl text-sm lg:col-span-2" placeholder="Estado/Club">
                     </div>
                     <div class="mt-6 flex gap-3">
                         <button onclick="savePlayer()" class="btn-primary text-white px-10 py-4 rounded-2xl font-black uppercase text-xs flex-1">Guardar Atleta</button>
@@ -243,35 +176,18 @@
                 </div>
 
                 <div class="card p-6 rounded-3xl shadow-2xl border border-purple-900/30">
-                    <h2 class="text-lg font-black text-purple-400 italic uppercase mb-6 flex items-center gap-2">
-                        <span class="w-2 h-6 bg-purple-600"></span> Gestión de Eventos
-                    </h2>
+                    <h2 class="text-lg font-black text-purple-400 italic uppercase mb-6 flex items-center gap-2"><span class="w-2 h-6 bg-purple-600"></span> Gestión de Eventos</h2>
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                         <div class="space-y-4">
-                            <div class="space-y-1">
-                                <label class="text-[9px] font-bold text-slate-500 uppercase">Nombre del Evento</label>
-                                <input type="text" id="eventName" class="input-dark w-full p-3 rounded-xl text-sm" placeholder="Ej: Nacional Cadet 2024">
-                            </div>
-                            <div class="space-y-1">
-                                <label class="text-[9px] font-bold text-slate-500 uppercase">Sede / Ubicación</label>
-                                <input type="text" id="eventLocation" class="input-dark w-full p-3 rounded-xl text-sm" placeholder="Ej: Caracas, VEN">
-                            </div>
+                            <input type="text" id="eventName" class="input-dark w-full p-3 rounded-xl text-sm" placeholder="Nombre Evento">
+                            <input type="text" id="eventLocation" class="input-dark w-full p-3 rounded-xl text-sm" placeholder="Sede">
                             <button onclick="saveEvent()" class="bg-purple-600 hover:bg-purple-700 text-white w-full py-4 rounded-2xl font-black uppercase text-xs">Publicar Evento</button>
                         </div>
-                        <div class="bg-slate-950/50 rounded-2xl p-4 border border-slate-800 h-48 overflow-y-auto">
-                            <p class="text-[10px] font-black text-slate-600 uppercase mb-3">Historial de Eventos</p>
-                            <div id="eventsList" class="space-y-2"></div>
-                        </div>
+                        <div class="bg-slate-950/50 rounded-2xl p-4 border border-slate-800 h-48 overflow-y-auto" id="adminEventsList"></div>
                     </div>
                 </div>
             </section>
         </main>
-
-        <footer class="mt-12 py-8 border-t border-slate-800 text-center">
-            <p class="text-[10px] font-black uppercase tracking-[0.5em] text-slate-600 mb-2">Desarrollado por</p>
-            <h2 class="text-2xl font-black italic tracking-tighter text-slate-400">DDRG</h2>
-            <p class="text-[8px] text-slate-700 font-bold uppercase mt-4">© 2024 Pentatlón Pro • Todos los derechos reservados</p>
-        </footer>
     </div>
 
     <div id="loginModal" class="fixed inset-0 bg-slate-950/95 hidden flex items-center justify-center p-6 z-50 backdrop-blur-md">
@@ -299,36 +215,14 @@
         
         const appId = 'penta-tourney-v2';
         let firebaseApp, auth, db;
-        let players = [];
-        let events = [];
-        let isAdmin = false;
-        let editingId = null;
-        let isBanned = false;
-        let currentSexFilter = 'TODOS';
-
-        const FENCING_TABLE = {
-            60: { v250: 42, valV: 3 }, 59: { v250: 41, valV: 3 }, 58: { v250: 41, valV: 3 }, 57: { v250: 40, valV: 3 }, 56: { v250: 39, valV: 3 }, 55: { v250: 39, valV: 3 },
-            54: { v250: 38, valV: 3 }, 53: { v250: 37, valV: 3 }, 52: { v250: 36, valV: 3 }, 51: { v250: 36, valV: 3 }, 50: { v250: 35, valV: 3 }, 49: { v250: 34, valV: 3 },
-            48: { v250: 34, valV: 3 }, 47: { v250: 33, valV: 4 }, 46: { v250: 32, valV: 4 }, 45: { v250: 32, valV: 4 }, 44: { v250: 31, valV: 4 }, 43: { v250: 30, valV: 4 },
-            42: { v250: 29, valV: 4 }, 41: { v250: 29, valV: 4 }, 40: { v250: 28, valV: 4 }, 39: { v250: 27, valV: 5 }, 38: { v250: 27, valV: 5 }, 37: { v250: 26, valV: 5 },
-            36: { v250: 25, valV: 5 }, 35: { v250: 25, valV: 5 }, 34: { v250: 24, valV: 5 }, 33: { v250: 23, valV: 6 }, 32: { v250: 22, valV: 6 }, 31: { v250: 22, valV: 6 },
-            30: { v250: 21, valV: 6 }, 29: { v250: 20, valV: 7 }, 28: { v250: 20, valV: 7 }, 27: { v250: 19, valV: 7 }, 26: { v250: 18, valV: 7 }, 25: { v250: 18, valV: 7 },
-            24: { v250: 17, valV: 7 }, 23: { v250: 16, valV: 7 }, 22: { v250: 15, valV: 8 }, 21: { v250: 15, valV: 8 }, 20: { v250: 14, valV: 8 }, 19: { v250: 13, valV: 8 }
-        };
+        let players = [], events = [], isAdmin = false, editingId = null, currentSexFilter = 'TODOS';
 
         async function start() {
             firebaseApp = initializeApp(firebaseConfig);
             auth = getAuth(firebaseApp);
             db = getFirestore(firebaseApp);
-
             await signInAnonymously(auth);
-
-            onAuthStateChanged(auth, (user) => {
-                if (user) {
-                    setupListeners();
-                }
-            });
-
+            onAuthStateChanged(auth, (user) => { if (user) setupListeners(); });
             document.getElementById('btnSalir').onclick = () => signOut(auth);
         }
 
@@ -339,7 +233,6 @@
                 document.getElementById('loadingOverlay').style.display = 'none';
                 document.getElementById('app').classList.replace('opacity-0', 'opacity-100');
             });
-
             onSnapshot(collection(db, 'artifacts', appId, 'public', 'data', 'events'), (snap) => {
                 events = snap.docs.map(d => ({ id: d.id, ...d.data() }));
                 renderEvents();
@@ -360,47 +253,28 @@
             const epsilon = 0.00001;
             const bouts = parseInt(p.esgrimaTotal) || 35;
             const victories = parseInt(p.esgrimaV) || 0;
-            const config = FENCING_TABLE[bouts];
-            const esgrimaPts = config ? Math.max(0, 250 + (victories - config.v250) * config.valV) : Math.max(0, 250 + (victories - Math.ceil(bouts * 0.7)) * 5);
-            
+            const esgrimaPts = Math.max(0, 250 + (victories - Math.ceil(bouts * 0.7)) * 5); // Simplificado para el ejemplo
             const tObs = parseTime(p.obstaculos);
-            let obsPts = tObs >= 15.00 ? Math.max(0, 400 - Math.floor((tObs - 15.00) / 0.33 + 0.0001)) : (tObs > 0 ? 401 : 0);
-            
+            let obsPts = tObs >= 15.00 ? Math.max(0, 400 - Math.floor((tObs - 15.00) / 0.33)) : (tObs > 0 ? 401 : 0);
             const tNat = parseTime(p.natacion);
-            let natPts = tNat > 45.00 + epsilon ? Math.max(0, 375 - Math.ceil((tNat - 45.00 - epsilon) / 0.20)) : (tNat > 0 ? 375 : 0);
-            
+            let natPts = tNat > 0 ? Math.max(0, 375 - Math.ceil((tNat - 45.00) / 0.20)) : 0;
             const tLas = parseTime(p.laser);
-            let lasPts = tLas > 600.00 + epsilon ? Math.max(0, 700 - Math.floor(tLas - 600.00 + epsilon)) : (tLas > 0 ? 700 : 0);
-            
+            let lasPts = tLas > 0 ? Math.max(0, 700 - Math.floor(tLas - 600.00)) : 0;
             const handicapPts = esgrimaPts + obsPts + natPts;
-            return { 
-                ...p, 
-                esgrimaPts, 
-                obsPts, 
-                natPts, 
-                lasPts, 
-                handicapPts, 
-                totalFinal: Math.round(handicapPts + lasPts) 
-            };
+            return { ...p, esgrimaPts, obsPts, natPts, lasPts, handicapPts, totalFinal: Math.round(handicapPts + lasPts) };
         }
 
         window.setSexFilter = (sex) => {
             currentSexFilter = sex;
             ['TODOS', 'M', 'F'].forEach(s => {
-                const btn = document.getElementById('filterSex' + s);
-                btn.classList.remove('bg-blue-600', 'text-white');
-                btn.classList.add('text-slate-400');
+                document.getElementById('filterSex' + s).className = "px-4 py-1.5 rounded-lg text-[10px] font-black uppercase transition-all text-slate-400 hover:bg-slate-800";
             });
-            const activeBtn = document.getElementById('filterSex' + sex);
-            activeBtn.classList.replace('text-slate-400', 'text-white');
-            activeBtn.classList.add('bg-blue-600');
+            document.getElementById('filterSex' + sex).className = "px-4 py-1.5 rounded-lg text-[10px] font-black uppercase transition-all bg-blue-600 text-white";
             renderViews();
         };
 
-        window.openLoginModal = () => {
-            if (isAdmin) { logout(); } 
-            else { document.getElementById('loginModal').classList.remove('hidden'); }
-        };
+        window.openLoginModal = () => { isAdmin ? logout() : document.getElementById('loginModal').classList.remove('hidden'); };
+        window.closeLoginModal = () => { document.getElementById('loginModal').classList.add('hidden'); };
 
         window.checkPassword = () => {
             if (document.getElementById('adminPass').value === "Newman.999") {
@@ -408,7 +282,7 @@
                 document.getElementById('adminPanel').classList.remove('hidden');
                 document.getElementById('adminToggleBtn').innerText = "Cerrar Panel";
                 document.querySelectorAll('.admin-only').forEach(el => el.classList.remove('hidden'));
-                document.getElementById('loginModal').classList.add('hidden');
+                closeLoginModal();
                 renderViews();
             }
         };
@@ -425,12 +299,12 @@
                 name: document.getElementById('playerName').value,
                 sex: document.getElementById('playerSex').value,
                 category: document.getElementById('playerCategory').value,
-                esgrimaV: document.getElementById('playerEsgrimaV').value || "0",
-                esgrimaTotal: document.getElementById('playerEsgrimaTotal').value || "35",
-                obstaculos: document.getElementById('playerObstaculos').value || "0",
-                natacion: document.getElementById('playerNatacion').value || "0",
-                laser: document.getElementById('playerLaser').value || "0",
-                state: document.getElementById('playerState').value || "S/D"
+                esgrimaV: document.getElementById('playerEsgrimaV').value,
+                esgrimaTotal: document.getElementById('playerEsgrimaTotal').value,
+                obstaculos: document.getElementById('playerObstaculos').value,
+                natacion: document.getElementById('playerNatacion').value,
+                laser: document.getElementById('playerLaser').value,
+                state: document.getElementById('playerState').value
             };
             await setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'athletes', editingId || crypto.randomUUID()), data);
             resetForm();
@@ -447,48 +321,35 @@
             document.getElementById('eventLocation').value = "";
         };
 
-        window.deleteEvent = async (id) => {
-            await deleteDoc(doc(db, 'artifacts', appId, 'public', 'data', 'events', id));
-        };
+        window.deleteEvent = async (id) => { await deleteDoc(doc(db, 'artifacts', appId, 'public', 'data', 'events', id)); };
 
         function renderEvents() {
-            const list = document.getElementById('eventsList');
-            list.innerHTML = events.map(e => `
-                <div class="flex justify-between items-center bg-slate-900 p-2 rounded-lg border border-slate-800">
+            const adminList = document.getElementById('adminEventsList');
+            const publicList = document.getElementById('publicEventsList');
+            
+            const html = events.map(e => `
+                <div class="card p-4 rounded-2xl border border-slate-800 flex justify-between items-center">
                     <div>
-                        <p class="text-[9px] font-black uppercase text-white">${e.name}</p>
-                        <p class="text-[8px] text-slate-500">${e.location} • ${e.date}</p>
+                        <p class="text-[10px] font-black uppercase text-white">${e.name}</p>
+                        <p class="text-[8px] text-purple-400 font-bold uppercase">${e.location} • ${e.date}</p>
                     </div>
-                    <button onclick="deleteEvent('${e.id}')" class="text-red-500 text-[8px] font-black uppercase">Borrar</button>
+                    ${isAdmin ? `<button onclick="deleteEvent('${e.id}')" class="text-red-500 text-[9px] font-black">DEL</button>` : ''}
                 </div>
             `).join('');
+
+            adminList.innerHTML = html;
+            publicList.innerHTML = html || '<p class="text-slate-500 text-[10px] font-bold uppercase">No hay eventos próximos.</p>';
         }
 
-        window.editPlayer = (id) => {
-            const p = players.find(x => x.id === id);
-            editingId = id;
-            document.getElementById('playerName').value = p.name;
-            document.getElementById('playerSex').value = p.sex || 'M';
-            document.getElementById('playerCategory').value = p.category;
-            document.getElementById('playerEsgrimaV').value = p.esgrimaV;
-            document.getElementById('playerObstaculos').value = p.obstaculos;
-            document.getElementById('playerNatacion').value = p.natacion;
-            document.getElementById('playerLaser').value = p.laser;
-            document.getElementById('playerState').value = p.state;
-            window.scrollTo({top: document.body.scrollHeight, behavior:'smooth'});
-        };
-
-        window.deleteAthlete = async (id) => {
-            if(confirm("¿Eliminar?")) await deleteDoc(doc(db, 'artifacts', appId, 'public', 'data', 'athletes', id));
-        };
-
         window.switchView = (view) => {
-            ['ranking', 'status', 'tournament', 'handicap'].forEach(v => {
+            ['ranking', 'status', 'tournament', 'handicap', 'publicEvents'].forEach(v => {
                 document.getElementById(v + 'View').classList.add('hidden');
-                document.getElementById('btnView' + v.charAt(0).toUpperCase() + v.slice(1)).classList.replace('bg-blue-600', 'bg-slate-800');
+                const btn = document.getElementById('btnView' + v.charAt(0).toUpperCase() + v.slice(1));
+                if(btn) btn.className = btn.id.includes('PublicEvents') ? "bg-slate-800 text-purple-400 text-[9px] font-black uppercase px-4 py-2 rounded-lg" : "bg-slate-800 text-slate-400 text-[9px] font-black uppercase px-4 py-2 rounded-lg";
             });
             document.getElementById(view + 'View').classList.remove('hidden');
-            document.getElementById('btnView' + view.charAt(0).toUpperCase() + view.slice(1)).classList.replace('bg-slate-800', 'bg-blue-600');
+            const activeBtn = document.getElementById('btnView' + view.charAt(0).toUpperCase() + view.slice(1));
+            if(activeBtn) activeBtn.className = "bg-blue-600 text-white text-[9px] font-black uppercase px-4 py-2 rounded-lg";
             renderViews();
         };
 
@@ -515,22 +376,16 @@
                     </td>
                 </tr>`).join('');
             
-            // Render Status
-            const statusGrid = document.getElementById('statusGrid');
-            statusGrid.innerHTML = data.map(p => `
-                <div class="card p-4 rounded-2xl">
-                    <p class="text-[10px] font-black uppercase">${p.name}</p>
-                    <div class="flex gap-2 mt-2">
-                        <div class="flex-1 bg-green-500/10 p-2 rounded-lg text-center">
-                            <p class="text-[8px] text-green-500 font-bold">VICS</p>
-                            <p class="font-black">${p.esgrimaV}</p>
-                        </div>
-                        <div class="flex-1 bg-red-500/10 p-2 rounded-lg text-center">
-                            <p class="text-[8px] text-red-500 font-bold">DEFEATS</p>
-                            <p class="font-black">${(p.esgrimaTotal || 35) - p.esgrimaV}</p>
-                        </div>
-                    </div>
-                </div>`).join('');
+            // Render Handicap
+            const hData = [...data].sort((a,b) => b.handicapPts - a.handicapPts);
+            const best = hData[0]?.handicapPts || 0;
+            document.getElementById('handicapBody').innerHTML = hData.map((p, i) => `
+                <tr>
+                    <td class="p-5 text-center text-xs font-black text-slate-600">${i+1}</td>
+                    <td class="p-5 text-xs font-black uppercase">${p.name}</td>
+                    <td class="p-5 pts-value">${p.handicapPts}</td>
+                    <td class="p-5 font-mono text-[10px] text-green-500">${i === 0 ? 'SALIDA' : `+${best - p.handicapPts}s`}</td>
+                </tr>`).join('');
         }
 
         start();
