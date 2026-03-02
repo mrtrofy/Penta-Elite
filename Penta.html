@@ -42,31 +42,6 @@
             border: 1px solid #334155;
             position: relative;
         }
-        .vs-circle {
-            background: #ef4444;
-            width: 24px;
-            height: 24px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            border-radius: 50%;
-            font-size: 10px;
-            font-weight: 900;
-            margin: -12px auto;
-            position: relative;
-            z-index: 10;
-        }
-
-        #banOverlay {
-            background: #000;
-            z-index: 9999;
-            display: none;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            text-align: center;
-            padding: 20px;
-        }
     </style>
 </head>
 <body class="p-2 md:p-8">
@@ -74,18 +49,6 @@
     <button id="btnSalir" class="px-6 py-2 bg-red-600/20 border border-red-500/50 text-red-500 hover:bg-red-600 hover:text-white rounded-lg font-bold text-xs uppercase tracking-widest transition-all">
         Cerrar Sesión
     </button>
-
-    <div id="banOverlay" class="fixed inset-0">
-        <div class="mb-6 text-red-600">
-            <svg xmlns="http://www.w3.org/2000/svg" width="100" height="100" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10"/><path d="m14.5 9-5 5"/><path d="m9.5 9 5 5"/></svg>
-        </div>
-        <h1 class="text-4xl md:text-6xl font-black mb-4 tracking-tighter text-red-600 uppercase">Acceso Restringido</h1>
-        <div class="bg-zinc-900 border-2 border-red-900 p-8 rounded-3xl max-w-xl">
-            <p class="text-lg font-medium text-zinc-300 mb-6">
-                Tu identificador ha sido bloqueado permanentemente.
-            </p>
-        </div>
-    </div>
 
     <div id="loadingOverlay" class="fixed inset-0">
         <div class="text-center">
@@ -136,6 +99,7 @@
 
             <div id="statusView" class="hidden"><div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4" id="statusGrid"></div></div>
             <div id="tournamentView" class="hidden"><div id="tournamentBrackets" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"></div></div>
+            
             <div id="handicapView" class="hidden">
                 <div class="overflow-x-auto shadow-2xl rounded-2xl border border-slate-800 bg-slate-900/40">
                     <table class="w-full text-left border-collapse">
@@ -150,9 +114,8 @@
             <div id="publicEventsView" class="hidden">
                 <div class="mb-6 p-4 bg-purple-950/20 border border-purple-900/30 rounded-xl">
                     <h3 class="text-purple-400 font-black uppercase text-xs mb-1">Calendario de Eventos</h3>
-                    <p class="text-[10px] text-slate-400 font-medium">Información oficial sobre las próximas competencias.</p>
+                    <p id="publicEventsList" class="grid grid-cols-1 sm:grid-cols-2 gap-4"></p>
                 </div>
-                <div id="publicEventsList" class="grid grid-cols-1 sm:grid-cols-2 gap-4"></div>
             </div>
 
             <section id="adminPanel" class="hidden space-y-8 mt-12 border-t-2 border-dashed border-slate-800 pt-12">
@@ -162,7 +125,7 @@
                         <input type="text" id="playerName" class="input-dark p-3 rounded-xl text-sm" placeholder="Nombre">
                         <select id="playerSex" class="input-dark p-3 rounded-xl text-sm bg-slate-950"><option value="M">Masculino</option><option value="F">Femenino</option></select>
                         <select id="playerCategory" class="input-dark p-3 rounded-xl text-sm bg-slate-950"><option value="Senior">Senior</option><option value="Junior">Junior</option><option value="U19">U19</option><option value="U17">U17</option></select>
-                        <input type="number" id="playerEsgrimaV" class="input-dark p-3 rounded-xl text-sm" placeholder="Vics Esgrima">
+                        <input type="number" id="playerEsgrimaV" class="input-dark p-3 rounded-xl text-sm" placeholder="Vics">
                         <input type="number" id="playerEsgrimaTotal" class="input-dark p-3 rounded-xl text-sm" placeholder="Total Bouts">
                         <input type="text" id="playerObstaculos" class="input-dark p-3 rounded-xl text-sm" placeholder="Obs (seg)">
                         <input type="text" id="playerNatacion" class="input-dark p-3 rounded-xl text-sm" placeholder="Nat (m:s)">
@@ -171,7 +134,6 @@
                     </div>
                     <div class="mt-6 flex gap-3">
                         <button onclick="savePlayer()" class="btn-primary text-white px-10 py-4 rounded-2xl font-black uppercase text-xs flex-1">Guardar Atleta</button>
-                        <button onclick="resetForm()" class="bg-slate-800 text-slate-400 px-6 py-4 rounded-2xl font-bold uppercase text-[10px]">Nuevo</button>
                     </div>
                 </div>
 
@@ -221,9 +183,19 @@
             firebaseApp = initializeApp(firebaseConfig);
             auth = getAuth(firebaseApp);
             db = getFirestore(firebaseApp);
+            
             await signInAnonymously(auth);
+
+            // CORRECCIÓN: Evento de cierre de sesión asignado por código
+            const btnSalir = document.getElementById('btnSalir');
+            if (btnSalir) {
+                btnSalir.onclick = async () => {
+                    await signOut(auth);
+                    window.location.reload(); // Recarga para limpiar estado
+                };
+            }
+
             onAuthStateChanged(auth, (user) => { if (user) setupListeners(); });
-            document.getElementById('btnSalir').onclick = () => signOut(auth);
         }
 
         function setupListeners() {
@@ -250,10 +222,9 @@
         }
 
         function getFullStats(p) {
-            const epsilon = 0.00001;
             const bouts = parseInt(p.esgrimaTotal) || 35;
             const victories = parseInt(p.esgrimaV) || 0;
-            const esgrimaPts = Math.max(0, 250 + (victories - Math.ceil(bouts * 0.7)) * 5); // Simplificado para el ejemplo
+            const esgrimaPts = Math.max(0, 250 + (victories - Math.ceil(bouts * 0.7)) * 5);
             const tObs = parseTime(p.obstaculos);
             let obsPts = tObs >= 15.00 ? Math.max(0, 400 - Math.floor((tObs - 15.00) / 0.33)) : (tObs > 0 ? 401 : 0);
             const tNat = parseTime(p.natacion);
@@ -267,9 +238,9 @@
         window.setSexFilter = (sex) => {
             currentSexFilter = sex;
             ['TODOS', 'M', 'F'].forEach(s => {
-                document.getElementById('filterSex' + s).className = "px-4 py-1.5 rounded-lg text-[10px] font-black uppercase transition-all text-slate-400 hover:bg-slate-800";
+                document.getElementById('filterSex' + s).className = "px-4 py-1.5 rounded-lg text-[10px] font-black uppercase text-slate-400 hover:bg-slate-800";
             });
-            document.getElementById('filterSex' + sex).className = "px-4 py-1.5 rounded-lg text-[10px] font-black uppercase transition-all bg-blue-600 text-white";
+            document.getElementById('filterSex' + sex).className = "px-4 py-1.5 rounded-lg text-[10px] font-black uppercase bg-blue-600 text-white";
             renderViews();
         };
 
@@ -307,7 +278,6 @@
                 state: document.getElementById('playerState').value
             };
             await setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'athletes', editingId || crypto.randomUUID()), data);
-            resetForm();
         };
 
         window.saveEvent = async () => {
@@ -326,31 +296,23 @@
         function renderEvents() {
             const adminList = document.getElementById('adminEventsList');
             const publicList = document.getElementById('publicEventsList');
-            
             const html = events.map(e => `
-                <div class="card p-4 rounded-2xl border border-slate-800 flex justify-between items-center">
-                    <div>
-                        <p class="text-[10px] font-black uppercase text-white">${e.name}</p>
-                        <p class="text-[8px] text-purple-400 font-bold uppercase">${e.location} • ${e.date}</p>
-                    </div>
+                <div class="card p-4 rounded-2xl flex justify-between items-center mb-2">
+                    <div><p class="text-[10px] font-black uppercase text-white">${e.name}</p><p class="text-[8px] text-purple-400 uppercase">${e.location} • ${e.date}</p></div>
                     ${isAdmin ? `<button onclick="deleteEvent('${e.id}')" class="text-red-500 text-[9px] font-black">DEL</button>` : ''}
-                </div>
-            `).join('');
-
+                </div>`).join('');
             adminList.innerHTML = html;
-            publicList.innerHTML = html || '<p class="text-slate-500 text-[10px] font-bold uppercase">No hay eventos próximos.</p>';
+            publicList.innerHTML = html || 'No hay eventos.';
         }
 
         window.switchView = (view) => {
             ['ranking', 'status', 'tournament', 'handicap', 'publicEvents'].forEach(v => {
                 document.getElementById(v + 'View').classList.add('hidden');
                 const btn = document.getElementById('btnView' + v.charAt(0).toUpperCase() + v.slice(1));
-                if(btn) btn.className = btn.id.includes('PublicEvents') ? "bg-slate-800 text-purple-400 text-[9px] font-black uppercase px-4 py-2 rounded-lg" : "bg-slate-800 text-slate-400 text-[9px] font-black uppercase px-4 py-2 rounded-lg";
+                if(btn) btn.className = "bg-slate-800 text-slate-400 text-[9px] font-black uppercase px-4 py-2 rounded-lg";
             });
             document.getElementById(view + 'View').classList.remove('hidden');
-            const activeBtn = document.getElementById('btnView' + view.charAt(0).toUpperCase() + view.slice(1));
-            if(activeBtn) activeBtn.className = "bg-blue-600 text-white text-[9px] font-black uppercase px-4 py-2 rounded-lg";
-            renderViews();
+            document.getElementById('btnView' + view.charAt(0).toUpperCase() + view.slice(1)).className = "bg-blue-600 text-white text-[9px] font-black uppercase px-4 py-2 rounded-lg";
         };
 
         function renderViews() {
@@ -358,35 +320,24 @@
             if (currentSexFilter !== 'TODOS') data = data.filter(p => p.sex === currentSexFilter);
             data.sort((a, b) => b.totalFinal - a.totalFinal);
 
-            const body = document.getElementById('scoreboardBody');
-            body.innerHTML = data.map((p, i) => `
-                <tr class="hover:bg-slate-800/30">
-                    <td class="p-5">
-                        <p class="text-xs font-black uppercase">${p.name}</p>
-                        <span class="cat-tag">${p.category}</span>
-                    </td>
-                    <td class="p-5 pts-value">${p.esgrimaPts}</td>
-                    <td class="p-5 pts-value">${p.obsPts}</td>
-                    <td class="p-5 pts-value">${p.natPts}</td>
-                    <td class="p-5 pts-value">${p.lasPts}</td>
+            document.getElementById('scoreboardBody').innerHTML = data.map((p, i) => `
+                <tr>
+                    <td class="p-5"><p class="text-xs font-black uppercase">${p.name}</p><span class="cat-tag">${p.category}</span></td>
+                    <td class="p-5 pts-value">${p.esgrimaPts}</td><td class="p-5 pts-value">${p.obsPts}</td>
+                    <td class="p-5 pts-value">${p.natPts}</td><td class="p-5 pts-value">${p.lasPts}</td>
                     <td class="p-5 text-blue-400 font-black">${p.totalFinal}</td>
                     <td class="p-5 text-right admin-only ${isAdmin ? '' : 'hidden'}">
-                        <button onclick="editPlayer('${p.id}')" class="text-blue-500 text-[9px] font-black uppercase mr-2">Edit</button>
-                        <button onclick="deleteAthlete('${p.id}')" class="text-red-500 text-[9px] font-black uppercase">Del</button>
+                        <button onclick="deleteAthlete('${p.id}')" class="text-red-500 text-[9px] font-black">Del</button>
                     </td>
                 </tr>`).join('');
             
-            // Render Handicap
             const hData = [...data].sort((a,b) => b.handicapPts - a.handicapPts);
             const best = hData[0]?.handicapPts || 0;
             document.getElementById('handicapBody').innerHTML = hData.map((p, i) => `
-                <tr>
-                    <td class="p-5 text-center text-xs font-black text-slate-600">${i+1}</td>
-                    <td class="p-5 text-xs font-black uppercase">${p.name}</td>
-                    <td class="p-5 pts-value">${p.handicapPts}</td>
-                    <td class="p-5 font-mono text-[10px] text-green-500">${i === 0 ? 'SALIDA' : `+${best - p.handicapPts}s`}</td>
-                </tr>`).join('');
+                <tr><td class="p-5 text-xs font-black">${i+1}</td><td class="p-5 text-xs font-black uppercase">${p.name}</td><td class="p-5 pts-value">${p.handicapPts}</td><td class="p-5 text-green-500 font-mono text-[10px]">${i === 0 ? 'SALIDA' : `+${best - p.handicapPts}s`}</td></tr>`).join('');
         }
+
+        window.deleteAthlete = async (id) => { if(confirm("¿Eliminar?")) await deleteDoc(doc(db, 'artifacts', appId, 'public', 'data', 'athletes', id)); };
 
         start();
     </script>
