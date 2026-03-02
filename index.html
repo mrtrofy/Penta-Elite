@@ -14,57 +14,33 @@
             color: #f1f5f9; 
             font-family: 'Inter', sans-serif;
             -webkit-tap-highlight-color: transparent;
-            display: none; /* Se mantiene oculto hasta que Firebase responda */
+            display: none; 
         }
         .card { background: #0f172a; border: 1px solid #1e293b; }
-        .input-dark { background: #020617; border: 1px solid #334155; color: #f1f5f9; outline: none; }
+        .input-dark { background: #020617; border: 1px solid #334155; color: #f1f5f9; outline: none; transition: all 0.2s; }
         .input-dark:focus { border-color: #3b82f6; box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.2); }
         .neon-blue { color: #38bdf8; text-shadow: 0 0 10px rgba(56, 189, 248, 0.4); }
         .btn-primary { background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%); transition: all 0.2s; }
         .btn-primary:hover { opacity: 0.9; transform: translateY(-1px); }
         
-        .social-btn {
-            background: #1e293b;
-            border: 1px solid #334155;
-            transition: all 0.2s;
-            cursor: pointer;
-        }
+        .social-btn { background: #1e293b; border: 1px solid #334155; transition: all 0.2s; cursor: pointer; }
         .social-btn:hover { background: #334155; border-color: #38bdf8; }
 
+        .tab-btn { padding: 10px; font-size: 0.75rem; font-weight: 800; text-transform: uppercase; border-bottom: 2px solid transparent; color: #64748b; transition: all 0.3s; }
+        .tab-btn.active { color: #38bdf8; border-bottom-color: #38bdf8; }
+
         #loadingOverlay { 
-            background: #020617; 
-            display: none; 
-            position: fixed;
+            background: #020617; display: none; position: fixed;
             top: 0; left: 0; right: 0; bottom: 0;
-            align-items: center; justify-content: center; 
-            z-index: 100; 
+            align-items: center; justify-content: center; z-index: 100; 
         }
 
-        .cat-tag { 
-            font-size: 0.65rem; 
-            background: #1e293b; 
-            color: #38bdf8; 
-            padding: 2px 6px; 
-            border-radius: 4px; 
-            font-weight: 700; 
-            border: 1px solid #334155; 
-        }
-
-        .divider {
-            display: flex; align-items: center; text-align: center;
-            color: #64748b; font-size: 0.75rem; margin: 1.5rem 0;
-        }
+        .divider { display: flex; align-items: center; text-align: center; color: #64748b; font-size: 0.75rem; margin: 1.5rem 0; }
         .divider::before, .divider::after { content: ''; flex: 1; border-bottom: 1px solid #1e293b; }
         .divider:not(:empty)::before { margin-right: .75em; }
         .divider:not(:empty)::after { margin-left: .75em; }
 
-        .spinner {
-            width: 40px; height: 40px;
-            border: 4px solid rgba(56, 189, 248, 0.1);
-            border-left-color: #38bdf8;
-            border-radius: 50%;
-            animation: spin 1s linear infinite;
-        }
+        .spinner { width: 40px; height: 40px; border: 4px solid rgba(56, 189, 248, 0.1); border-left-color: #38bdf8; border-radius: 50%; animation: spin 1s linear infinite; }
         @keyframes spin { to { transform: rotate(360deg); } }
     </style>
 </head>
@@ -73,16 +49,14 @@
     <div id="loadingOverlay">
         <div class="flex flex-col items-center gap-4">
             <div class="spinner"></div>
-            <p id="loadingStatus" class="text-sm font-bold neon-blue tracking-widest uppercase text-center px-4">Sincronizando...</p>
+            <p id="loadingStatus" class="text-sm font-bold neon-blue tracking-widest uppercase">Sincronizando...</p>
         </div>
     </div>
 
     <div id="authSection" class="card w-full max-w-md rounded-2xl p-8 shadow-2xl hidden">
-        <div class="text-center mb-8">
-            <div class="inline-block mb-3">
-                <span class="cat-tag uppercase tracking-tighter">Protocolo de Acceso</span>
-            </div>
+        <div class="text-center mb-6">
             <h1 class="text-3xl font-black mb-2"><span class="neon-blue">Penta Elite</span></h1>
+            <p class="text-xs text-slate-500 uppercase tracking-widest font-bold">Protocolo de Seguridad</p>
         </div>
 
         <button id="googleBtn" type="button" class="social-btn w-full flex items-center justify-center gap-3 py-4 rounded-xl text-sm font-bold mb-6">
@@ -90,25 +64,32 @@
             Acceder con Google
         </button>
 
-        <div class="divider uppercase font-black">o credenciales</div>
+        <div class="divider uppercase font-black">Identificación Manual</div>
 
-        <form id="registerForm" class="space-y-4">
-            <input type="email" id="email" required class="input-dark w-full px-4 py-3 rounded-xl text-sm" placeholder="Correo Electrónico">
+        <div class="flex w-full mb-6 border-b border-slate-800">
+            <button onclick="switchTab('login')" id="tab-login" class="tab-btn flex-1 active">Iniciar Sesión</button>
+            <button onclick="switchTab('register')" id="tab-register" class="tab-btn flex-1">Registrarse</button>
+        </div>
+
+        <form id="authForm" class="space-y-4">
+            <input type="email" id="email" required class="input-dark w-full px-4 py-3 rounded-xl text-sm" placeholder="Email del Agente">
             <input type="password" id="password" required class="input-dark w-full px-4 py-3 rounded-xl text-sm" placeholder="Contraseña">
-            <button type="submit" class="btn-primary w-full py-4 rounded-xl font-black text-sm uppercase tracking-widest mt-4">
-                Iniciar Sesión / Registro
+            
+            <button type="submit" id="submitBtn" class="btn-primary w-full py-4 rounded-xl font-black text-sm uppercase tracking-widest mt-4">
+                Entrar al Sistema
             </button>
         </form>
     </div>
 
     <div id="mainContent" class="text-center hidden">
         <div class="card p-10 rounded-3xl border-sky-500/30">
+            <div class="mb-4 flex justify-center"><i data-lucide="shield-check" class="w-16 h-16 text-sky-400"></i></div>
             <h2 class="text-4xl font-black mb-2">BIENVENIDO, <span id="userName" class="neon-blue uppercase">AGENTE</span></h2>
-            <p class="text-slate-400 mb-8 tracking-widest text-xs uppercase">Acceso nivel Alpha verificado</p>
+            <p class="text-slate-400 mb-8 tracking-widest text-xs uppercase font-bold">Acceso nivel Alpha verificado</p>
             
             <div class="grid grid-cols-1 gap-4">
-                <button class="btn-primary py-4 rounded-xl font-bold uppercase text-xs tracking-widest">Entrar al Panel de Control</button>
-                <button onclick="logout()" class="text-slate-500 text-xs font-bold uppercase hover:text-red-400 transition-colors mt-4">Desconectar Sesión</button>
+                <button class="btn-primary py-4 rounded-xl font-bold uppercase text-xs tracking-widest">Panel de Misiones</button>
+                <button onclick="logout()" class="text-slate-500 text-xs font-bold uppercase hover:text-red-400 transition-colors mt-4">Desconectar</button>
             </div>
         </div>
     </div>
@@ -134,12 +115,22 @@
         const loader = document.getElementById('loadingOverlay');
         const authSection = document.getElementById('authSection');
         const mainContent = document.getElementById('mainContent');
+        
+        let currentMode = 'login'; // 'login' o 'register'
 
         lucide.createIcons();
 
-        // CONTROLADOR DE ESTADO: Muestra u oculta secciones según la sesión
+        // Cambio de pestañas
+        window.switchTab = (mode) => {
+            currentMode = mode;
+            document.getElementById('tab-login').classList.toggle('active', mode === 'login');
+            document.getElementById('tab-register').classList.toggle('active', mode === 'register');
+            document.getElementById('submitBtn').innerText = mode === 'login' ? 'Entrar al Sistema' : 'Crear Nueva Cuenta';
+        };
+
+        // Observador de Estado
         onAuthStateChanged(auth, (user) => {
-            document.body.style.display = "flex"; // Revelamos la página solo tras verificar
+            document.body.style.display = "flex";
             if (user) {
                 authSection.classList.add('hidden');
                 mainContent.classList.remove('hidden');
@@ -151,44 +142,39 @@
         });
 
         // Google Login
-        window.handleGoogleLogin = async () => {
+        document.getElementById('googleBtn').onclick = async () => {
             const provider = new GoogleAuthProvider();
-            provider.setCustomParameters({ prompt: 'select_account' });
             loader.style.display = 'flex';
-            try {
-                await signInWithPopup(auth, provider);
-            } catch (error) {
-                if (error.code !== 'auth/cancelled-popup-request') alert(error.message);
-            } finally {
-                loader.style.display = 'none';
-            }
+            try { await signInWithPopup(auth, provider); } 
+            catch (e) { if (e.code !== 'auth/cancelled-popup-request') alert(e.message); } 
+            finally { loader.style.display = 'none'; }
         };
 
-        // Manual: Login o Registro Automático
-        document.getElementById('registerForm').onsubmit = async (e) => {
+        // Formulario (Login o Registro)
+        document.getElementById('authForm').onsubmit = async (e) => {
             e.preventDefault();
             const email = document.getElementById('email').value;
             const password = document.getElementById('password').value;
             loader.style.display = 'flex';
             
             try {
-                await signInWithEmailAndPassword(auth, email, password);
-            } catch (error) {
-                if (error.code === 'auth/user-not-found' || error.code === 'auth/invalid-credential') {
-                    // Si el usuario no existe, intentamos registrarlo
-                    try {
-                        await createUserWithEmailAndPassword(auth, email, password);
-                    } catch (err) { alert("Error al crear cuenta: " + err.message); }
+                if (currentMode === 'login') {
+                    await signInWithEmailAndPassword(auth, email, password);
                 } else {
-                    alert("Acceso Denegado: " + error.message);
+                    await createUserWithEmailAndPassword(auth, email, password);
                 }
+            } catch (error) {
+                let msg = "Error de acceso";
+                if (error.code === 'auth/invalid-credential') msg = "Credenciales incorrectas.";
+                if (error.code === 'auth/email-already-in-use') msg = "Este correo ya está registrado.";
+                if (error.code === 'auth/weak-password') msg = "La contraseña es muy débil.";
+                alert(msg);
             } finally {
                 loader.style.display = 'none';
             }
         };
 
         window.logout = () => signOut(auth);
-        document.getElementById('googleBtn').onclick = handleGoogleLogin;
 
     </script>
 </body>
