@@ -25,6 +25,7 @@
             background: #1e293b;
             border: 1px solid #334155;
             transition: all 0.2s;
+            cursor: pointer;
         }
         .social-btn:hover {
             background: #334155;
@@ -85,7 +86,7 @@
     <div id="loadingOverlay">
         <div class="flex flex-col items-center gap-4">
             <div class="spinner"></div>
-            <p id="loadingStatus" class="text-sm font-bold neon-blue tracking-widest uppercase">Verificando...</p>
+            <p id="loadingStatus" class="text-sm font-bold neon-blue tracking-widest uppercase text-center px-4">Iniciando protocolo...</p>
         </div>
     </div>
 
@@ -95,36 +96,36 @@
                 <span class="cat-tag uppercase tracking-tighter">Acceso Alpha</span>
             </div>
             <h1 class="text-3xl font-black mb-2">Cyber<span class="neon-blue">Gate</span></h1>
-            <p class="text-slate-400 text-sm">Inicia tu viaje en la red</p>
+            <p class="text-slate-400 text-sm">Crea tu identidad en la red</p>
         </div>
 
         <div class="mb-6">
-            <button id="googleBtn" class="social-btn w-full flex items-center justify-center gap-3 py-4 rounded-xl text-sm font-bold">
+            <button id="googleBtn" type="button" class="social-btn w-full flex items-center justify-center gap-3 py-4 rounded-xl text-sm font-bold">
                 <i data-lucide="chrome" class="w-5 h-5 text-red-400"></i>
-                Continuar con Google
+                Registro con Google
             </button>
         </div>
 
-        <div class="divider uppercase font-black">o registro manual</div>
+        <div class="divider uppercase font-black">o datos manuales</div>
 
         <form id="registerForm" class="space-y-4">
             <div>
-                <label class="block text-xs font-bold text-slate-500 uppercase mb-2 ml-1">Email</label>
+                <label class="block text-xs font-bold text-slate-500 uppercase mb-2 ml-1 tracking-wider">Correo Electrónico</label>
                 <input type="email" id="email" required class="input-dark w-full px-4 py-3 rounded-xl text-sm" placeholder="usuario@red.com">
             </div>
 
             <div>
-                <label class="block text-xs font-bold text-slate-500 uppercase mb-2 ml-1">Contraseña</label>
+                <label class="block text-xs font-bold text-slate-500 uppercase mb-2 ml-1 tracking-wider">Contraseña</label>
                 <input type="password" id="password" required class="input-dark w-full px-4 py-3 rounded-xl text-sm" placeholder="••••••••">
             </div>
 
             <button type="submit" class="btn-primary w-full py-4 rounded-xl font-black text-sm uppercase tracking-widest shadow-lg shadow-blue-900/20 mt-4">
-                Crear Cuenta
+                Inicializar Cuenta
             </button>
         </form>
 
-        <p class="text-center mt-8 text-sm text-slate-500">
-            ¿Ya eres miembro? <a href="index.html" class="text-white font-bold hover:text-blue-400 transition-colors">Entrar</a>
+        <p class="text-center mt-8 text-sm text-slate-500 font-medium">
+            ¿Ya tienes acceso? <a href="index.html" class="text-white font-black hover:text-blue-400 transition-colors ml-1 underline decoration-blue-500/30">Entrar</a>
         </p>
     </div>
 
@@ -148,50 +149,61 @@
             appId: "1:650229123946:web:a3769c31f8ce1a23edb313"
         };
 
+        // Inicialización
         const app = initializeApp(firebaseConfig);
         const auth = getAuth(app);
         const loader = document.getElementById('loadingOverlay');
         const loadingStatus = document.getElementById('loadingStatus');
 
-        // Inicializar iconos
+        // Inicializar iconos de Lucide
         lucide.createIcons();
 
-        // Google Auth Logic
-        document.getElementById('googleBtn').addEventListener('click', async () => {
+        // Función para manejar el inicio de sesión con Google
+        const handleGoogleLogin = async () => {
             const provider = new GoogleAuthProvider();
-            loadingStatus.innerText = "Sincronizando Google...";
+            loadingStatus.innerText = "Abriendo portal de Google...";
             loader.style.display = 'flex';
             try {
-                await signInWithPopup(auth, provider);
+                const result = await signInWithPopup(auth, provider);
+                console.log("Usuario registrado:", result.user);
                 window.location.href = "index.html"; 
             } catch (error) {
-                console.error(error);
-                alert("Error de autenticación: " + error.message);
+                console.error("Error Google Auth:", error);
+                alert("Error de autenticación con Google: " + error.message);
             } finally {
                 loader.style.display = 'none';
             }
+        };
+
+        // Asignación de eventos tras carga del DOM
+        document.addEventListener('DOMContentLoaded', () => {
+            document.getElementById('googleBtn').addEventListener('click', handleGoogleLogin);
         });
 
-        // Email Register Logic
+        // Registro Manual
         document.getElementById('registerForm').addEventListener('submit', async (e) => {
             e.preventDefault();
             const email = document.getElementById('email').value;
             const password = document.getElementById('password').value;
             
-            loadingStatus.innerText = "Creando identidad...";
+            loadingStatus.innerText = "Creando identidad digital...";
             loader.style.display = 'flex';
             try {
                 const userCredential = await createUserWithEmailAndPassword(auth, email, password);
                 await sendEmailVerification(userCredential.user);
-                alert("Enlace de verificación enviado. Revisa tu bandeja de entrada.");
+                alert("¡Casi listo! Se envió un enlace de verificación a tu correo.");
                 window.location.href = "index.html";
             } catch (error) {
-                console.error(error);
+                console.error("Error Registro:", error);
                 alert("Error en registro: " + error.message);
             } finally {
                 loader.style.display = 'none';
             }
         });
+
+        // Asegurar que el botón funcione incluso si el DOM ya cargó antes que el módulo
+        document.getElementById('googleBtn').onclick = handleGoogleLogin;
+
     </script>
 </body>
 </html>
