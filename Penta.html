@@ -5,11 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>PentatlónPro</title>
     
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <meta name="apple-mobile-web-app-title" content="Pentatlón Pro">
-    <meta name="theme-color" content="#020617">
-    
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&display=swap" rel="stylesheet">
     <style>
@@ -23,38 +18,31 @@
         .pts-value { font-size: 0.85rem; font-weight: 800; color: #f1f5f9; }
         .cat-tag { font-size: 0.65rem; background: #1e293b; color: #38bdf8; padding: 2px 6px; border-radius: 4px; font-weight: 700; border: 1px solid #334155; }
         .vs-circle { background: #1e293b; width: 24px; height: 24px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 8px; font-weight: 900; border: 1px solid #334155; margin: 10px auto; color: #38bdf8; }
-        .bracket-container { display: flex; gap: 20px; padding: 20px; overflow-x: auto; }
-        .bracket-round { display: flex; flex-direction: column; justify-content: space-around; min-width: 200px; }
     </style>
 </head>
 <body class="p-2 md:p-8">
     
     <div class="flex justify-between items-center mb-4">
-        <button onclick="location.reload()" class="px-6 py-2 bg-red-600/20 border border-red-500/50 text-red-500 hover:bg-red-600 hover:text-white rounded-lg font-bold text-xs uppercase tracking-widest transition-all">
+        <button onclick="window.location.href='index.html'" class="px-6 py-2 bg-red-600/20 border border-red-500/50 text-red-500 hover:bg-red-600 hover:text-white rounded-lg font-bold text-xs uppercase tracking-widest transition-all">
             Cerrar Sesión
         </button>
         <div id="adminBadge" class="hidden bg-blue-600/20 border border-blue-500/50 text-blue-500 px-3 py-1 rounded-full text-[10px] font-black uppercase">Modo Admin</div>
     </div>
 
-    <div id="loadingOverlay">
-        <div class="text-center">
-            <div class="inline-block animate-spin rounded-full h-10 w-10 border-t-2 border-b-2 border-blue-500 mb-4"></div>
-            <p class="neon-blue font-bold uppercase tracking-tighter text-sm">Cargando...</p>
-        </div>
-    </div>
+    <div id="loadingOverlay"><div class="text-center"><div class="inline-block animate-spin rounded-full h-10 w-10 border-t-2 border-b-2 border-blue-500 mb-4"></div><p class="neon-blue font-bold uppercase text-sm">Cargando...</p></div></div>
 
-    <div id="app" class="max-w-7xl mx-auto opacity-0 transition-opacity duration-700 flex flex-col min-h-[90vh]">
+    <div id="app" class="max-w-7xl mx-auto opacity-0 transition-opacity duration-700">
         <header class="flex flex-col md:flex-row justify-between items-center mb-6 border-b border-slate-800 pb-6 gap-4">
             <div class="flex items-center gap-4">
                 <img src="/deeee.jpeg" alt="Logo" class="h-20 w-auto rounded-lg shadow-lg object-contain">
-                <div class="text-left">
-                    <h1 class="text-2xl font-black italic tracking-tighter text-white uppercase">Penta Elite</h1>
-                    <p class="text-[10px] text-blue-400 font-bold tracking-[0.2em] uppercase">Sistema de Resultados</p>
+                <div>
+                    <h1 class="text-2xl font-black italic text-white uppercase">Penta Elite</h1>
+                    <p class="text-[10px] text-blue-400 font-bold uppercase">Sistema de Resultados</p>
                 </div>
             </div>
             <div class="flex gap-2">
                 <button onclick="switchView('publicEvents')" class="bg-purple-900/40 text-purple-400 border border-purple-800/50 px-6 py-2 rounded-xl text-xs font-black uppercase">Eventos</button>
-                <button id="adminToggleBtn" onclick="openLoginModal()" class="bg-slate-800 hover:bg-slate-700 px-6 py-2 rounded-xl text-xs font-black uppercase border border-slate-700">Admin</button>
+                <button id="adminToggleBtn" onclick="toggleAdminMode()" class="bg-slate-800 hover:bg-slate-700 px-6 py-2 rounded-xl text-xs font-black uppercase border border-slate-700">Admin</button>
             </div>
         </header>
 
@@ -73,79 +61,51 @@
                             <option value="Calificación">CALIFICACIÓN</option><option value="Semifinal">SEMIFINAL</option><option value="Final">FINAL</option>
                         </select>
                     </div>
-                    <div class="flex items-end">
-                        <button onclick="applyMainFilters()" class="btn-primary w-full p-3 rounded-xl text-xs font-black uppercase">Resultados</button>
-                    </div>
+                    <div class="flex items-end"><button onclick="applyMainFilters()" class="btn-primary w-full p-3 rounded-xl text-xs font-black uppercase">Resultados</button></div>
                 </div>
                 
                 <div id="subViewButtons" class="hidden flex flex-wrap gap-2 pt-4 border-t border-slate-800">
                     <button onclick="switchView('ranking')" id="btnViewRanking" class="bg-blue-600 text-white text-[9px] font-black uppercase px-4 py-2 rounded-lg">Tabla General</button>
-                    <button onclick="switchView('status')" id="btnViewStatus" class="bg-slate-800 text-slate-400 text-[9px] font-black uppercase px-4 py-2 rounded-lg">Clasificación Esgrima</button>
-                    <button onclick="switchView('tournament')" id="btnViewTournament" class="bg-slate-800 text-slate-400 text-[9px] font-black uppercase px-4 py-2 rounded-lg">Eliminación Directa</button>
+                    <button onclick="switchView('status')" id="btnViewStatus" class="bg-slate-800 text-slate-400 text-[9px] font-black uppercase px-4 py-2 rounded-lg">Esgrima</button>
+                    <button onclick="switchView('tournament')" id="btnViewTournament" class="bg-slate-800 text-slate-400 text-[9px] font-black uppercase px-4 py-2 rounded-lg">Eliminación</button>
                     <button onclick="switchView('handicap')" id="btnViewHandicap" class="bg-slate-800 text-slate-400 text-[9px] font-black uppercase px-4 py-2 rounded-lg">Hándicap</button>
                 </div>
             </div>
             <div id="publicEventsList" class="grid grid-cols-1 sm:grid-cols-2 gap-4"></div>
         </div>
 
-        <main class="flex-grow">
+        <main>
             <div id="rankingView" class="hidden">
-                <div class="overflow-x-auto shadow-2xl rounded-2xl border border-slate-800 bg-slate-900/40">
-                    <table class="w-full text-left border-collapse">
-                        <thead class="text-slate-500 uppercase text-[9px] font-black tracking-widest bg-slate-800/50">
-                            <tr>
-                                <th class="p-5">Atleta</th>
-                                <th class="p-5">Obstáculos</th>
-                                <th class="p-5">Natación</th>
-                                <th class="p-5">Laser Run</th>
-                                <th class="p-5">Total</th>
-                                <th class="p-5 text-right admin-only hidden">Acciones</th>
-                            </tr>
+                <div class="overflow-x-auto card rounded-2xl">
+                    <table class="w-full text-left">
+                        <thead class="bg-slate-800 text-[9px] uppercase font-black text-slate-400">
+                            <tr><th class="p-5">Atleta</th><th class="p-5">Obs</th><th class="p-5">Nat</th><th class="p-5">Laser</th><th class="p-5">Total</th><th class="p-5 admin-only hidden text-right">Acciones</th></tr>
                         </thead>
-                        <tbody id="scoreboardBody" class="divide-y divide-slate-800/50"></tbody>
+                        <tbody id="scoreboardBody" class="divide-y divide-slate-800"></tbody>
                     </table>
                 </div>
             </div>
-
-            <div id="statusView" class="hidden">
-                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4" id="statusGrid"></div>
-            </div>
-
-            <div id="tournamentView" class="hidden">
-                <div id="tournamentBrackets" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"></div>
-                <div class="mt-12 bg-slate-900/20 p-6 rounded-3xl border border-slate-800">
-                    <h3 class="text-center text-xs font-black uppercase text-blue-400 mb-8 italic">Tabla Eliminatoria Ramificada</h3>
-                    <div id="ramifiedBracket" class="bracket-container"></div>
-                </div>
-            </div>
-            
-            <div id="handicapView" class="hidden">
-                <div class="overflow-x-auto shadow-2xl rounded-2xl border border-slate-800 bg-slate-900/40">
-                    <table class="w-full text-left border-collapse">
-                        <thead class="text-slate-500 uppercase text-[9px] font-black tracking-widest bg-slate-800/50">
-                            <tr><th class="p-5 w-16 text-center">Orden</th><th class="p-5">Atleta</th><th class="p-5">Pts (3)</th><th class="p-5">Salida</th></tr>
-                        </thead>
-                        <tbody id="handicapBody" class="divide-y divide-slate-800/50"></tbody>
-                    </table>
-                </div>
-            </div>
+            <div id="statusView" class="hidden"><div id="statusGrid" class="grid grid-cols-1 md:grid-cols-3 gap-4"></div></div>
+            <div id="tournamentView" class="hidden"><div id="tournamentBrackets" class="grid grid-cols-1 md:grid-cols-3 gap-4"></div></div>
+            <div id="handicapView" class="hidden"><div class="card rounded-2xl overflow-hidden"><table class="w-full text-left"><tbody id="handicapBody" class="divide-y divide-slate-800"></tbody></table></div></div>
 
             <section id="adminPanel" class="hidden space-y-8 mt-12 border-t-2 border-dashed border-slate-800 pt-12">
-                <div class="card p-6 rounded-3xl shadow-2xl border-purple-900/30">
-                    <h2 class="text-lg font-black text-purple-400 uppercase mb-6">Administración de Eventos</h2>
-                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                        <input type="text" id="eventName" class="input-dark p-3 rounded-xl text-sm" placeholder="Nombre del Evento">
+                <div class="card p-6 rounded-3xl">
+                    <h2 class="text-purple-400 font-black uppercase mb-4">Gestión de Eventos</h2>
+                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-4">
+                        <input type="text" id="eventName" class="input-dark p-3 rounded-xl text-sm" placeholder="Nombre">
                         <input type="date" id="eventDate" class="input-dark p-3 rounded-xl text-sm">
                         <input type="text" id="eventDesc" class="input-dark p-3 rounded-xl text-sm" placeholder="Lugar">
                     </div>
-                    <button onclick="saveEvent()" class="mt-4 bg-purple-600 text-white px-8 py-3 rounded-xl font-black uppercase text-xs">Guardar Evento</button>
+                    <button onclick="saveEvent()" class="bg-purple-600 text-white px-6 py-2 rounded-xl font-black text-xs uppercase">Crear Evento</button>
+                    <div class="mt-6"><div id="adminEventsList" class="space-y-2"></div></div>
                 </div>
 
-                <div class="card p-6 rounded-3xl shadow-2xl border-blue-900/30">
-                    <h2 class="text-lg font-black text-blue-400 uppercase mb-6">Registro de Atletas</h2>
-                    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                        <select id="playerEvent" class="input-dark p-3 rounded-xl text-sm bg-slate-950 col-span-full"><option value="">Seleccionar Evento...</option></select>
-                        <input type="text" id="playerName" class="input-dark p-3 rounded-xl text-sm" placeholder="Nombre Completo">
+                <div class="card p-6 rounded-3xl">
+                    <h2 class="text-blue-400 font-black uppercase mb-4">Registro Atleta</h2>
+                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                        <select id="playerEvent" class="input-dark p-3 rounded-xl text-sm bg-slate-950 col-span-full"></select>
+                        <input type="text" id="playerName" class="input-dark p-3 rounded-xl text-sm" placeholder="Nombre">
                         <select id="playerSex" class="input-dark p-3 rounded-xl text-sm bg-slate-950"><option value="M">Masculino</option><option value="F">Femenino</option><option value="TODOS">Relevos</option></select>
                         <select id="playerCategory" class="input-dark p-3 rounded-xl text-sm bg-slate-950">
                             <option value="U09">U09</option><option value="U11">U11</option><option value="U13">U13</option><option value="U15">U15</option>
@@ -187,7 +147,8 @@
                 document.getElementById('app').classList.replace('opacity-0', 'opacity-100');
             });
             onSnapshot(collection(db, 'artifacts', appId, 'public', 'data', 'events'), (snap) => {
-                events = snap.docs.map(d => ({ id: d.id, ...d.data() })); updateEventSelect(); renderEventsList();
+                events = snap.docs.map(d => ({ id: d.id, ...d.data() })); 
+                updateEventSelect(); renderEventsList(); renderAdminEvents();
             });
         }
 
@@ -216,28 +177,16 @@
             let data = players.map(p => getFullStats(p)).filter(p => p.sex === selSex && p.phase === selPhase);
             data.sort((a, b) => b.totalFinal - a.totalFinal);
 
-            // Tabla General (Con Laser Run)
             document.getElementById('scoreboardBody').innerHTML = data.map(p => `<tr><td class="p-5 text-xs font-black uppercase">${p.name}<br><span class="cat-tag">${p.category}</span></td><td class="p-5 pts-value">${p.obsPts}</td><td class="p-5 pts-value">${p.natPts}</td><td class="p-5 pts-value">${p.lasPts}</td><td class="p-5 font-black text-blue-400">${p.totalFinal}</td><td class="p-5 text-right admin-only ${isAdmin ? '' : 'hidden'}"><button onclick="deleteAthlete('${p.id}')" class="text-red-500 font-black">X</button></td></tr>`).join('');
-            
-            // Grid Esgrima
-            document.getElementById('statusGrid').innerHTML = data.map(p => `<div class="card p-5 rounded-2xl"><h3 class="text-xs font-black uppercase mb-4">${p.name}</h3><div class="grid grid-cols-2 gap-2"><div class="bg-slate-950 p-2 rounded-xl text-center"><p class="text-[8px] text-slate-500">V</p><p class="text-lg font-black text-green-400">${p.esgrimaV || 0}</p></div><div class="bg-slate-950 p-2 rounded-xl text-center"><p class="text-[8px] text-slate-500">D</p><p class="text-lg font-black text-red-400">${p.esgrimaD || 0}</p></div></div></div>`).join('');
+            document.getElementById('statusGrid').innerHTML = data.map(p => `<div class="card p-5 rounded-2xl"><h3 class="text-xs font-black uppercase mb-4">${p.name}</h3><div class="grid grid-cols-2 gap-2"><div class="bg-slate-950 p-2 rounded-xl text-center"><p class="text-lg font-black text-green-400">${p.esgrimaV || 0}V</p></div><div class="bg-slate-950 p-2 rounded-xl text-center"><p class="text-lg font-black text-red-400">${p.esgrimaD || 0}D</p></div></div></div>`).join('');
 
-            // Eliminación Directa
-            const pairs = []; const bracketData = [...data];
-            while(bracketData.length > 1) { pairs.push([bracketData.shift(), bracketData.pop()]); }
-            if(bracketData.length === 1) pairs.push([bracketData[0], {name: 'BYE', esgrimaPts: 0}]);
-            
-            document.getElementById('tournamentBrackets').innerHTML = pairs.map(pair => `<div class="card p-4 rounded-2xl border-l-4 border-l-blue-600"><div class="flex justify-between items-center text-[10px] font-black"><span>${pair[0].name}</span><span class="text-blue-400">${pair[0].esgrimaPts}</span></div><div class="vs-circle">VS</div><div class="flex justify-between items-center text-[10px] font-black"><span>${pair[1].name}</span><span class="text-blue-400">${pair[1].esgrimaPts}</span></div></div>`).join('');
-            
-            // Hándicap
             const hData = [...data].sort((a,b) => b.handicapPts - a.handicapPts); const best = hData[0]?.handicapPts || 0;
-            document.getElementById('handicapBody').innerHTML = hData.map((p, i) => `<tr><td class="p-5 text-center text-xs font-black text-slate-600">${i+1}</td><td class="p-5 text-xs font-black uppercase">${p.name}</td><td class="p-5 pts-value">${p.handicapPts}</td><td class="p-5 text-green-500 font-mono text-[10px]">${i === 0 ? 'SALIDA' : `+${best - p.handicapPts}s`}</td></tr>`).join('');
+            document.getElementById('handicapBody').innerHTML = hData.map((p, i) => `<tr><td class="p-5 text-xs font-black uppercase">${p.name}</td><td class="p-5 pts-value">${p.handicapPts}</td><td class="p-5 text-green-500 font-mono text-[10px]">${i === 0 ? 'SALIDA' : `+${best - p.handicapPts}s`}</td></tr>`).join('');
         };
 
         window.switchView = (view) => {
             ['ranking', 'status', 'tournament', 'handicap', 'publicEvents'].forEach(v => {
-                const el = document.getElementById(v + 'View');
-                if(el) el.classList.add('hidden');
+                const el = document.getElementById(v + 'View'); if(el) el.classList.add('hidden');
                 const btn = document.getElementById('btnView' + v.charAt(0).toUpperCase() + v.slice(1));
                 if(btn) btn.className = "bg-slate-800 text-slate-400 text-[9px] font-black uppercase px-4 py-2 rounded-lg";
             });
@@ -246,59 +195,73 @@
             if(targetBtn) targetBtn.className = "bg-blue-600 text-white text-[9px] font-black uppercase px-4 py-2 rounded-lg";
         };
 
+        window.toggleAdminMode = () => {
+            if (isAdmin) {
+                // Si ya es admin, el botón "Usuario Normal" lo devuelve a usuario
+                logout();
+            } else {
+                openLoginModal();
+            }
+        };
+
+        window.logout = () => {
+            isAdmin = false;
+            document.getElementById('adminPanel').classList.add('hidden');
+            document.getElementById('adminBadge').classList.add('hidden');
+            document.getElementById('adminToggleBtn').innerText = "Admin";
+            document.querySelectorAll('.admin-only').forEach(el => el.classList.add('hidden'));
+            renderViews();
+        };
+
         window.saveEvent = async () => {
             const name = document.getElementById('eventName').value;
-            const date = document.getElementById('eventDate').value;
-            const desc = document.getElementById('eventDesc').value;
             if(!name) return;
-            await setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'events', crypto.randomUUID()), { name, date, location: desc });
+            await setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'events', crypto.randomUUID()), { name, date: document.getElementById('eventDate').value, location: document.getElementById('eventDesc').value });
             alert("Evento Guardado");
         };
 
+        window.deleteEvent = async (id) => { if(confirm("¿Eliminar evento?")) await deleteDoc(doc(db, 'artifacts', appId, 'public', 'data', 'events', id)); };
+
         window.savePlayer = async () => {
             const data = {
-                event: document.getElementById('playerEvent').value,
-                name: document.getElementById('playerName').value,
-                sex: document.getElementById('playerSex').value,
-                category: document.getElementById('playerCategory').value,
-                phase: document.getElementById('playerPhase').value,
-                esgrimaV: document.getElementById('playerEsgrimaV').value,
-                esgrimaD: document.getElementById('playerEsgrimaD').value,
-                esgrimaTotal: document.getElementById('playerEsgrimaTotal').value,
-                obstaculos: document.getElementById('playerObstaculos').value,
-                natacion: document.getElementById('playerNatacion').value,
+                event: document.getElementById('playerEvent').value, name: document.getElementById('playerName').value,
+                sex: document.getElementById('playerSex').value, category: document.getElementById('playerCategory').value,
+                phase: document.getElementById('playerPhase').value, esgrimaV: document.getElementById('playerEsgrimaV').value,
+                esgrimaD: document.getElementById('playerEsgrimaD').value, esgrimaTotal: document.getElementById('playerEsgrimaTotal').value,
+                obstaculos: document.getElementById('playerObstaculos').value, natacion: document.getElementById('playerNatacion').value,
                 laser: document.getElementById('playerLaser').value
             };
             await setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'athletes', crypto.randomUUID()), data);
             alert("Atleta Guardado");
         };
 
-        function updateEventSelect() {
-            const select = document.getElementById('playerEvent');
-            if(select) select.innerHTML = '<option value="">Seleccionar Evento...</option>' + events.map(e => `<option value="${e.name}">${e.name}</option>`).join('');
-        }
+        function updateEventSelect() { document.getElementById('playerEvent').innerHTML = '<option value="">Seleccionar Evento...</option>' + events.map(e => `<option value="${e.name}">${e.name}</option>`).join(''); }
+        function renderEventsList() { document.getElementById('publicEventsList').innerHTML = events.map(e => `<div class="card p-4 rounded-2xl"><p class="text-[10px] font-black text-white uppercase">${e.name}</p><p class="text-[8px] text-purple-400 uppercase">${e.location} • ${e.date}</p></div>`).join(''); }
+        function renderAdminEvents() { document.getElementById('adminEventsList').innerHTML = events.map(e => `<div class="flex justify-between items-center bg-slate-900 p-2 rounded-lg border border-slate-800"><span class="text-[10px] font-bold uppercase">${e.name}</span><button onclick="deleteEvent('${e.id}')" class="text-red-500 text-[10px] font-black uppercase">Eliminar</button></div>`).join(''); }
 
-        function renderEventsList() {
-            const list = document.getElementById('publicEventsList');
-            if(list) list.innerHTML = events.map(e => `<div class="card p-4 rounded-2xl"><p class="text-[10px] font-black uppercase text-white">${e.name}</p><p class="text-[8px] text-purple-400 uppercase">${e.location} • ${e.date}</p></div>`).join('');
-        }
-
-        window.openLoginModal = () => isAdmin ? logout() : document.getElementById('loginModal').classList.remove('hidden');
+        window.openLoginModal = () => document.getElementById('loginModal').classList.remove('hidden');
         window.closeLoginModal = () => document.getElementById('loginModal').classList.add('hidden');
-        window.checkPassword = () => { if (document.getElementById('adminPass').value === "Newman.999") { 
-            isAdmin = true; 
-            document.getElementById('adminPanel').classList.remove('hidden'); 
-            document.getElementById('adminBadge').classList.remove('hidden');
-            document.querySelectorAll('.admin-only').forEach(el => el.classList.remove('hidden')); 
-            closeLoginModal(); renderViews(); 
-        } };
+        
+        window.checkPassword = () => { 
+            if (document.getElementById('adminPass').value === "Newman.999") { 
+                isAdmin = true; 
+                document.getElementById('adminPanel').classList.remove('hidden'); 
+                document.getElementById('adminBadge').classList.remove('hidden');
+                document.getElementById('adminToggleBtn').innerText = "Usuario Normal";
+                document.querySelectorAll('.admin-only').forEach(el => el.classList.remove('hidden')); 
+                closeLoginModal(); 
+                renderViews(); 
+            } else {
+                alert("Clave incorrecta");
+            }
+        };
         window.deleteAthlete = async (id) => { if(confirm("¿Eliminar?")) await deleteDoc(doc(db, 'artifacts', appId, 'public', 'data', 'athletes', id)); };
         start();
     </script>
 
-    <div id="loginModal" class="fixed inset-0 bg-slate-950/95 hidden flex items-center justify-center p-6 z-50 backdrop-blur-md">
+    <div id="loginModal" class="fixed inset-0 bg-slate-950/95 hidden flex items-center justify-center p-6 z-50">
         <div class="bg-slate-900 p-8 rounded-[2rem] w-full max-w-sm border border-slate-800 text-center">
-            <h2 class="text-xl font-black mb-6 text-white uppercase italic tracking-tighter">Acceso Admin</h2>
+            <h2 class="text-xl font-black mb-6 text-white uppercase italic">Acceso Admin</h2>
             <input type="password" id="adminPass" class="input-dark w-full p-4 rounded-2xl mb-6 text-center text-2xl tracking-[0.5em]" placeholder="**">
             <button onclick="checkPassword()" class="btn-primary w-full py-4 rounded-2xl font-black text-white text-xs uppercase">Entrar</button>
             <button onclick="closeLoginModal()" class="mt-4 text-slate-600 text-[10px] font-bold uppercase">Cancelar</button>
