@@ -171,15 +171,10 @@
         window.renderViews = () => {
             const selSex = document.getElementById('filterSex')?.value || 'M';
             const selPhase = document.getElementById('filterPhase')?.value || 'Final';
-            
-            let data = players.map(p => getFullStats(p)).filter(p => 
-                p.event === currentSelectedEvent && p.sex === selSex && p.phase === selPhase
-            );
+            let data = players.map(p => getFullStats(p)).filter(p => p.event === currentSelectedEvent && p.sex === selSex && p.phase === selPhase);
             data.sort((a, b) => b.totalFinal - a.totalFinal);
-
             document.getElementById('scoreboardBody').innerHTML = data.map(p => `<tr><td class="p-5 text-xs font-black uppercase">${p.name}<br><span class="cat-tag">${p.category}</span></td><td class="p-5 pts-value">${p.obsPts}</td><td class="p-5 pts-value">${p.natPts}</td><td class="p-5 pts-value">${p.lasPts}</td><td class="p-5 font-black text-blue-400">${p.totalFinal}</td><td class="p-5 text-right admin-only ${isAdmin ? '' : 'hidden'}"><button onclick="deleteAthlete('${p.id}')" class="text-red-500 font-black">X</button></td></tr>`).join('');
             document.getElementById('statusGrid').innerHTML = data.map(p => `<div class="card p-5 rounded-2xl"><h3 class="text-xs font-black uppercase mb-4">${p.name}</h3><div class="grid grid-cols-2 gap-2"><div class="bg-slate-950 p-2 rounded-xl text-center"><p class="text-lg font-black text-green-400">${p.esgrimaV || 0}V</p></div><div class="bg-slate-950 p-2 rounded-xl text-center"><p class="text-lg font-black text-red-400">${p.esgrimaD || 0}D</p></div></div></div>`).join('');
-
             const hData = [...data].sort((a,b) => b.handicapPts - a.handicapPts); const best = hData[0]?.handicapPts || 0;
             document.getElementById('handicapBody').innerHTML = hData.map((p, i) => `<tr><td class="p-5 text-xs font-black uppercase">${p.name}</td><td class="p-5 pts-value">${p.handicapPts}</td><td class="p-5 text-green-500 font-mono text-[10px]">${i === 0 ? 'SALIDA' : `+${best - p.handicapPts}s`}</td></tr>`).join('');
         };
@@ -276,9 +271,7 @@
                 document.querySelectorAll('.admin-only').forEach(el => el.classList.remove('hidden')); 
                 closeLoginModal(); 
                 renderViews(); 
-            } else {
-                alert("Clave incorrecta");
-            }
+            } else { alert("Clave incorrecta"); }
         };
         window.deleteAthlete = async (id) => { if(confirm("¿Eliminar?")) await deleteDoc(doc(db, 'artifacts', appId, 'public', 'data', 'athletes', id)); };
         start();
