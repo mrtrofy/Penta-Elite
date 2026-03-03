@@ -23,7 +23,7 @@
 <body class="p-2 md:p-8">
     
     <div class="flex justify-between items-center mb-4">
-        <button onclick="window.location.href='index.html'" class="px-6 py-2 bg-red-600/20 border border-red-500/50 text-red-500 hover:bg-red-600 hover:text-white rounded-lg font-bold text-xs uppercase tracking-widest transition-all">
+        <button onclick="location.reload()" class="px-6 py-2 bg-red-600/20 border border-red-500/50 text-red-500 hover:bg-red-600 hover:text-white rounded-lg font-bold text-xs uppercase tracking-widest transition-all">
             Cerrar Sesión
         </button>
         <div id="adminBadge" class="hidden bg-blue-600/20 border border-blue-500/50 text-blue-500 px-3 py-1 rounded-full text-[10px] font-black uppercase">Modo Admin</div>
@@ -42,7 +42,7 @@
             </div>
             <div class="flex gap-2">
                 <button onclick="switchView('publicEvents')" class="bg-purple-900/40 text-purple-400 border border-purple-800/50 px-6 py-2 rounded-xl text-xs font-black uppercase">Eventos</button>
-                <button id="adminToggleBtn" onclick="toggleAdminMode()" class="bg-slate-800 hover:bg-slate-700 px-6 py-2 rounded-xl text-xs font-black uppercase border border-slate-700">Admin</button>
+                <button id="adminToggleBtn" onclick="openLoginModal()" class="bg-slate-800 hover:bg-slate-700 px-6 py-2 rounded-xl text-xs font-black uppercase border border-slate-700">Admin</button>
             </div>
         </header>
 
@@ -85,6 +85,7 @@
                     </table>
                 </div>
             </div>
+
             <div id="statusView" class="hidden"><div id="statusGrid" class="grid grid-cols-1 md:grid-cols-3 gap-4"></div></div>
             <div id="tournamentView" class="hidden"><div id="tournamentBrackets" class="grid grid-cols-1 md:grid-cols-3 gap-4"></div></div>
             <div id="handicapView" class="hidden"><div class="card rounded-2xl overflow-hidden"><table class="w-full text-left"><tbody id="handicapBody" class="divide-y divide-slate-800"></tbody></table></div></div>
@@ -98,7 +99,11 @@
                         <input type="text" id="eventDesc" class="input-dark p-3 rounded-xl text-sm" placeholder="Lugar">
                     </div>
                     <button onclick="saveEvent()" class="bg-purple-600 text-white px-6 py-2 rounded-xl font-black text-xs uppercase">Crear Evento</button>
-                    <div class="mt-6"><div id="adminEventsList" class="space-y-2"></div></div>
+                    
+                    <div class="mt-6">
+                        <p class="text-[10px] text-slate-500 font-bold uppercase mb-2">Eventos Existentes (Para eliminar):</p>
+                        <div id="adminEventsList" class="space-y-2"></div>
+                    </div>
                 </div>
 
                 <div class="card p-6 rounded-3xl">
@@ -115,7 +120,7 @@
                         <input type="number" id="playerEsgrimaV" class="input-dark p-3 rounded-xl text-sm" placeholder="Victorias">
                         <input type="number" id="playerEsgrimaD" class="input-dark p-3 rounded-xl text-sm" placeholder="Derrotas">
                         <input type="number" id="playerEsgrimaTotal" class="input-dark p-3 rounded-xl text-sm" placeholder="Total Bouts">
-                        <input type="text" id="playerObstaculos" class="input-dark p-3 rounded-xl text-sm" placeholder="Obs (seg)">
+                        <input type="text" id="playerObstaculos" class="input-dark p-3 rounded-xl text-sm" placeholder="Obs (seg o m:s)">
                         <input type="text" id="playerNatacion" class="input-dark p-3 rounded-xl text-sm" placeholder="Nat (m:s)">
                         <input type="text" id="playerLaser" class="input-dark p-3 rounded-xl text-sm" placeholder="Laser (m:s)">
                     </div>
@@ -180,6 +185,11 @@
             document.getElementById('scoreboardBody').innerHTML = data.map(p => `<tr><td class="p-5 text-xs font-black uppercase">${p.name}<br><span class="cat-tag">${p.category}</span></td><td class="p-5 pts-value">${p.obsPts}</td><td class="p-5 pts-value">${p.natPts}</td><td class="p-5 pts-value">${p.lasPts}</td><td class="p-5 font-black text-blue-400">${p.totalFinal}</td><td class="p-5 text-right admin-only ${isAdmin ? '' : 'hidden'}"><button onclick="deleteAthlete('${p.id}')" class="text-red-500 font-black">X</button></td></tr>`).join('');
             document.getElementById('statusGrid').innerHTML = data.map(p => `<div class="card p-5 rounded-2xl"><h3 class="text-xs font-black uppercase mb-4">${p.name}</h3><div class="grid grid-cols-2 gap-2"><div class="bg-slate-950 p-2 rounded-xl text-center"><p class="text-lg font-black text-green-400">${p.esgrimaV || 0}V</p></div><div class="bg-slate-950 p-2 rounded-xl text-center"><p class="text-lg font-black text-red-400">${p.esgrimaD || 0}D</p></div></div></div>`).join('');
 
+            const pairs = []; const bracketData = [...data];
+            while(bracketData.length > 1) { pairs.push([bracketData.shift(), bracketData.pop()]); }
+            if(bracketData.length === 1) pairs.push([bracketData[0], {name: 'BYE', esgrimaPts: 0}]);
+            document.getElementById('tournamentBrackets').innerHTML = pairs.map(pair => `<div class="card p-4 rounded-2xl border-l-4 border-l-blue-600"><div class="flex justify-between items-center text-[10px] font-black"><span>${pair[0].name}</span><span class="text-blue-400">${pair[0].esgrimaPts}</span></div><div class="vs-circle">VS</div><div class="flex justify-between items-center text-[10px] font-black"><span>${pair[1].name}</span><span class="text-blue-400">${pair[1].esgrimaPts}</span></div></div>`).join('');
+            
             const hData = [...data].sort((a,b) => b.handicapPts - a.handicapPts); const best = hData[0]?.handicapPts || 0;
             document.getElementById('handicapBody').innerHTML = hData.map((p, i) => `<tr><td class="p-5 text-xs font-black uppercase">${p.name}</td><td class="p-5 pts-value">${p.handicapPts}</td><td class="p-5 text-green-500 font-mono text-[10px]">${i === 0 ? 'SALIDA' : `+${best - p.handicapPts}s`}</td></tr>`).join('');
         };
@@ -195,24 +205,6 @@
             if(targetBtn) targetBtn.className = "bg-blue-600 text-white text-[9px] font-black uppercase px-4 py-2 rounded-lg";
         };
 
-        window.toggleAdminMode = () => {
-            if (isAdmin) {
-                // Si ya es admin, el botón "Usuario Normal" lo devuelve a usuario
-                logout();
-            } else {
-                openLoginModal();
-            }
-        };
-
-        window.logout = () => {
-            isAdmin = false;
-            document.getElementById('adminPanel').classList.add('hidden');
-            document.getElementById('adminBadge').classList.add('hidden');
-            document.getElementById('adminToggleBtn').innerText = "Admin";
-            document.querySelectorAll('.admin-only').forEach(el => el.classList.add('hidden'));
-            renderViews();
-        };
-
         window.saveEvent = async () => {
             const name = document.getElementById('eventName').value;
             if(!name) return;
@@ -220,7 +212,7 @@
             alert("Evento Guardado");
         };
 
-        window.deleteEvent = async (id) => { if(confirm("¿Eliminar evento?")) await deleteDoc(doc(db, 'artifacts', appId, 'public', 'data', 'events', id)); };
+        window.deleteEvent = async (id) => { if(confirm("¿Eliminar evento y todos sus datos?")) await deleteDoc(doc(db, 'artifacts', appId, 'public', 'data', 'events', id)); };
 
         window.savePlayer = async () => {
             const data = {
@@ -239,22 +231,12 @@
         function renderEventsList() { document.getElementById('publicEventsList').innerHTML = events.map(e => `<div class="card p-4 rounded-2xl"><p class="text-[10px] font-black text-white uppercase">${e.name}</p><p class="text-[8px] text-purple-400 uppercase">${e.location} • ${e.date}</p></div>`).join(''); }
         function renderAdminEvents() { document.getElementById('adminEventsList').innerHTML = events.map(e => `<div class="flex justify-between items-center bg-slate-900 p-2 rounded-lg border border-slate-800"><span class="text-[10px] font-bold uppercase">${e.name}</span><button onclick="deleteEvent('${e.id}')" class="text-red-500 text-[10px] font-black uppercase">Eliminar</button></div>`).join(''); }
 
-        window.openLoginModal = () => document.getElementById('loginModal').classList.remove('hidden');
+        window.openLoginModal = () => isAdmin ? logout() : document.getElementById('loginModal').classList.remove('hidden');
         window.closeLoginModal = () => document.getElementById('loginModal').classList.add('hidden');
-        
-        window.checkPassword = () => { 
-            if (document.getElementById('adminPass').value === "Newman.999") { 
-                isAdmin = true; 
-                document.getElementById('adminPanel').classList.remove('hidden'); 
-                document.getElementById('adminBadge').classList.remove('hidden');
-                document.getElementById('adminToggleBtn').innerText = "Usuario Normal";
-                document.querySelectorAll('.admin-only').forEach(el => el.classList.remove('hidden')); 
-                closeLoginModal(); 
-                renderViews(); 
-            } else {
-                alert("Clave incorrecta");
-            }
-        };
+        window.checkPassword = () => { if (document.getElementById('adminPass').value === "Newman.999") { 
+            isAdmin = true; document.getElementById('adminPanel').classList.remove('hidden'); document.getElementById('adminBadge').classList.remove('hidden');
+            document.querySelectorAll('.admin-only').forEach(el => el.classList.remove('hidden')); closeLoginModal(); renderViews(); 
+        } };
         window.deleteAthlete = async (id) => { if(confirm("¿Eliminar?")) await deleteDoc(doc(db, 'artifacts', appId, 'public', 'data', 'athletes', id)); };
         start();
     </script>
