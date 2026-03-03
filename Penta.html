@@ -27,29 +27,22 @@
         .state-tag { font-size: 0.6rem; color: #94a3b8; font-weight: 600; text-transform: uppercase; margin-left: 4px; }
         .vs-circle { background: #1e293b; width: 24px; height: 24px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 8px; font-weight: 900; border: 1px solid #334155; margin: 10px auto; color: #38bdf8; }
         .status-pill { font-size: 0.65rem; font-weight: 900; padding: 2px 8px; border-radius: 99px; text-transform: uppercase; }
-        
-        /* Estilos nuevos para las llaves ramificadas */
+        .event-details { max-height: 0; overflow: hidden; transition: max-height 0.3s; }
+        .event-card.active .event-details { max-height: 500px; margin-top: 1rem; border-top: 1px solid #1e293b; padding-top: 1rem; }
         .bracket-container { display: flex; gap: 20px; padding: 20px; overflow-x: auto; }
         .bracket-round { display: flex; flex-direction: column; justify-content: space-around; min-width: 200px; }
     </style>
 </head>
 <body class="p-2 md:p-8">
     
-    <button id="btnSalir" class="px-6 py-2 bg-red-600/20 border border-red-500/50 text-red-500 hover:bg-red-600 hover:text-white rounded-lg font-bold text-xs uppercase tracking-widest transition-all">
-        Cerrar Sesión
-    </button>
+    <button id="btnSalir" class="px-6 py-2 bg-red-600/20 border border-red-500/50 text-red-500 hover:bg-red-600 hover:text-white rounded-lg font-bold text-xs uppercase tracking-widest transition-all">Cerrar Sesión</button>
 
-    <div id="loadingOverlay" class="fixed inset-0">
-        <div class="text-center">
-            <div class="inline-block animate-spin rounded-full h-10 w-10 border-t-2 border-b-2 border-blue-500 mb-4"></div>
-            <p class="neon-blue font-bold uppercase tracking-tighter text-sm">Cargando...</p>
-        </div>
-    </div>
+    <div id="loadingOverlay" class="fixed inset-0"><div class="text-center"><div class="inline-block animate-spin rounded-full h-10 w-10 border-t-2 border-b-2 border-blue-500 mb-4"></div><p class="neon-blue font-bold uppercase tracking-tighter text-sm">Cargando...</p></div></div>
 
     <div id="app" class="max-w-7xl mx-auto opacity-0 transition-opacity duration-700 flex flex-col min-h-[90vh]">
         <header class="flex flex-col md:flex-row justify-between items-center mb-6 border-b border-slate-800 pb-6 gap-4">
             <div class="flex items-center gap-4">
-                <img src="/deeee.jpeg" alt="Logo" class="h-20 w-auto rounded-lg shadow-lg object-contain" onerror="this.src='https://via.placeholder.com/80?text=Logo'">
+                <img src="/deeee.jpeg" alt="Logo" class="h-20 w-auto rounded-lg shadow-lg object-contain">
                 <div class="text-left">
                     <h1 class="text-2xl font-black italic tracking-tighter text-white uppercase">Penta Elite</h1>
                     <p class="text-[10px] text-blue-400 font-bold tracking-[0.2em] uppercase">Sistema de Resultados</p>
@@ -61,28 +54,23 @@
             </div>
         </header>
 
-        <div id="publicEventsView" class="hidden mb-8">
-            <div class="card p-6 rounded-3xl border-purple-900/30">
-                <h3 class="text-xs font-black uppercase text-purple-400 mb-4">Configuración de Consulta</h3>
+        <div id="publicEventsView" class="hidden mb-6">
+            <div class="card p-6 rounded-3xl border-purple-900/30 mb-6">
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
                     <div>
-                        <label class="text-[9px] uppercase font-bold text-slate-500 ml-2">Categoría</label>
+                        <label class="text-[9px] uppercase font-bold text-slate-500 ml-2">Género</label>
                         <select id="filterSex" class="input-dark w-full p-3 rounded-xl mt-1 text-xs">
-                            <option value="M">HOMBRE</option>
-                            <option value="F">MUJER</option>
-                            <option value="TODOS">RELEVO</option>
+                            <option value="M">HOMBRE</option><option value="F">MUJER</option><option value="TODOS">RELEVOS</option>
                         </select>
                     </div>
                     <div>
                         <label class="text-[9px] uppercase font-bold text-slate-500 ml-2">Fase</label>
                         <select id="filterPhase" class="input-dark w-full p-3 rounded-xl mt-1 text-xs">
-                            <option value="Calificación">CALIFICACIÓN</option>
-                            <option value="Semifinal">SEMIFINAL</option>
-                            <option value="Final">FINAL</option>
+                            <option value="Calificación">CALIFICACIÓN</option><option value="Semifinal">SEMIFINAL</option><option value="Final">FINAL</option>
                         </select>
                     </div>
                     <div class="flex items-end">
-                        <button onclick="applyMainFilters()" class="btn-primary w-full p-3 rounded-xl text-xs font-black uppercase">Ver Resultados</button>
+                        <button onclick="applyMainFilters()" class="btn-primary w-full p-3 rounded-xl text-xs font-black uppercase">Resultados</button>
                     </div>
                 </div>
                 
@@ -93,6 +81,7 @@
                     <button onclick="switchView('handicap')" id="btnViewHandicap" class="bg-slate-800 text-slate-400 text-[9px] font-black uppercase px-4 py-2 rounded-lg">Hándicap</button>
                 </div>
             </div>
+            <div id="publicEventsList" class="grid grid-cols-1 sm:grid-cols-2 gap-4"></div>
         </div>
 
         <main class="flex-grow">
@@ -114,7 +103,7 @@
             <div id="tournamentView" class="hidden">
                 <div id="tournamentBrackets" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"></div>
                 <div class="mt-12 bg-slate-900/20 p-6 rounded-3xl border border-slate-800">
-                    <h3 class="text-center text-xs font-black uppercase text-blue-400 mb-8 italic">Esquema Eliminatorio Ramificado</h3>
+                    <h3 class="text-center text-xs font-black uppercase text-blue-400 mb-8 italic">Tabla Eliminatoria Ramificada</h3>
                     <div id="ramifiedBracket" class="bracket-container"></div>
                 </div>
             </div>
@@ -131,20 +120,23 @@
             </div>
 
             <section id="adminPanel" class="hidden space-y-8 mt-12 border-t-2 border-dashed border-slate-800 pt-12">
+                <div class="card p-6 rounded-3xl shadow-2xl border border-purple-900/30">
+                    <h2 class="text-lg font-black text-purple-400 italic uppercase mb-6 flex items-center gap-2"><span class="w-2 h-6 bg-purple-600"></span> Registro de Evento</h2>
+                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                        <input type="text" id="eventName" class="input-dark p-3 rounded-xl text-sm" placeholder="Nombre del Evento">
+                        <input type="date" id="eventDate" class="input-dark p-3 rounded-xl text-sm">
+                        <input type="text" id="eventDesc" class="input-dark p-3 rounded-xl text-sm" placeholder="Descripción">
+                    </div>
+                    <button onclick="saveEvent()" class="mt-4 bg-purple-600 text-white px-8 py-3 rounded-xl font-black uppercase text-xs w-full sm:w-auto">Guardar Evento</button>
+                </div>
+
                 <div class="card p-6 rounded-3xl shadow-2xl border border-blue-900/30">
                     <h2 id="adminFormTitle" class="text-lg font-black text-blue-400 italic uppercase mb-6 flex items-center gap-2"><span class="w-2 h-6 bg-blue-600"></span> Registro Atleta</h2>
                     <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                        <select id="playerEvent" class="input-dark p-3 rounded-xl text-sm bg-slate-950 col-span-full"><option value="">Seleccionar Evento...</option></select>
                         <input type="text" id="playerName" class="input-dark p-3 rounded-xl text-sm" placeholder="Nombre">
-                        <select id="playerSex" class="input-dark p-3 rounded-xl text-sm bg-slate-950">
-                            <option value="M">Hombre</option>
-                            <option value="F">Mujer</option>
-                            <option value="TODOS">Relevo</option>
-                        </select>
-                        <select id="playerPhase" class="input-dark p-3 rounded-xl text-sm bg-slate-950">
-                            <option value="Calificación">Calificación</option>
-                            <option value="Semifinal">Semifinal</option>
-                            <option value="Final">Final</option>
-                        </select>
+                        <select id="playerSex" class="input-dark p-3 rounded-xl text-sm bg-slate-950"><option value="M">Masculino</option><option value="F">Femenino</option><option value="TODOS">Relevos</option></select>
+                        <select id="playerPhase" class="input-dark p-3 rounded-xl text-sm bg-slate-950"><option value="Calificación">Calificación</option><option value="Semifinal">Semifinal</option><option value="Final">Final</option></select>
                         <input type="number" id="playerEsgrimaV" class="input-dark p-3 rounded-xl text-sm" placeholder="Victorias">
                         <input type="number" id="playerEsgrimaD" class="input-dark p-3 rounded-xl text-sm" placeholder="Derrotas">
                         <input type="number" id="playerEsgrimaTotal" class="input-dark p-3 rounded-xl text-sm" placeholder="Total Bouts">
@@ -152,7 +144,9 @@
                         <input type="text" id="playerNatacion" class="input-dark p-3 rounded-xl text-sm" placeholder="Nat (m:s)">
                         <input type="text" id="playerLaser" class="input-dark p-3 rounded-xl text-sm" placeholder="Laser (m:s)">
                     </div>
-                    <button onclick="savePlayer()" class="btn-primary mt-6 text-white px-10 py-4 rounded-2xl font-black uppercase text-xs w-full">Guardar Atleta</button>
+                    <div class="mt-6 flex gap-3">
+                        <button onclick="savePlayer()" class="btn-primary text-white px-10 py-4 rounded-2xl font-black uppercase text-xs flex-1">Guardar Atleta</button>
+                    </div>
                 </div>
             </section>
         </main>
@@ -163,161 +157,46 @@
         import { getAuth, signInAnonymously, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
         import { getFirestore, doc, setDoc, onSnapshot, collection, deleteDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
-        const firebaseConfig = {
-            apiKey: "AIzaSyAtWCkDlZuv11AueTW6WEPNwAn97Vf-3yQ",
-            authDomain: "pentatlon-scores.firebaseapp.com",
-            projectId: "pentatlon-scores",
-            storageBucket: "pentatlon-scores.firebasestorage.app",
-            messagingSenderId: "650229123946",
-            appId: "1:650229123946:web:a3769c31f8ce1a23edb313"
-        };
-        
+        const firebaseConfig = { apiKey: "AIzaSyAtWCkDlZuv11AueTW6WEPNwAn97Vf-3yQ", authDomain: "pentatlon-scores.firebaseapp.com", projectId: "pentatlon-scores", storageBucket: "pentatlon-scores.firebasestorage.app", messagingSenderId: "650229123946", appId: "1:650229123946:web:a3769c31f8ce1a23edb313" };
         const appId = 'penta-tourney-v2';
-        let firebaseApp, auth, db;
-        let players = [], isAdmin = false, editingId = null;
+        let firebaseApp, auth, db, players = [], events = [], isAdmin = false;
 
         async function start() {
-            firebaseApp = initializeApp(firebaseConfig);
-            auth = getAuth(firebaseApp);
-            db = getFirestore(firebaseApp);
+            firebaseApp = initializeApp(firebaseConfig); auth = getAuth(firebaseApp); db = getFirestore(firebaseApp);
             await signInAnonymously(auth);
             onAuthStateChanged(auth, (user) => { if (user) setupListeners(); });
         }
 
         function setupListeners() {
             onSnapshot(collection(db, 'artifacts', appId, 'public', 'data', 'athletes'), (snap) => {
-                players = snap.docs.map(d => ({ id: d.id, ...d.data() }));
-                renderViews();
+                players = snap.docs.map(d => ({ id: d.id, ...d.data() })); renderViews(); renderEvents();
                 document.getElementById('loadingOverlay').style.display = 'none';
                 document.getElementById('app').classList.replace('opacity-0', 'opacity-100');
             });
-        }
-
-        window.applyMainFilters = () => {
-            document.getElementById('subViewButtons').classList.remove('hidden');
-            renderViews();
-            switchView('ranking');
-        };
-
-        function parseTime(val) {
-            if (!val) return 0;
-            let clean = val.toString().trim().replace(',', '.');
-            if (clean.includes(':')) {
-                const parts = clean.split(':');
-                return (parseFloat(parts[0]) || 0) * 60 + (parseFloat(parts[1]) || 0);
-            }
-            return parseFloat(clean) || 0;
-        }
-
-        function getFullStats(p) {
-            const bouts = parseInt(p.esgrimaTotal) || 0;
-            const victories = parseInt(p.esgrimaV) || 0;
-            const defeats = parseInt(p.esgrimaD) || 0;
-            const esgrimaPts = bouts > 0 ? Math.max(0, 250 + (victories - Math.ceil(bouts * 0.7)) * 5) : 0;
-            const tObs = parseTime(p.obstaculos);
-            let obsPts = tObs >= 15.00 ? Math.max(0, 400 - Math.floor((tObs - 15.00) / 0.33)) : (tObs > 0 ? 401 : 0);
-            const tNat = parseTime(p.natacion);
-            let natPts = tNat > 0 ? Math.max(0, 375 - Math.ceil((tNat - 45.00) / 0.20)) : 0;
-            const tLas = parseTime(p.laser);
-            let lasPts = tLas > 0 ? Math.max(0, 700 - Math.floor(tLas - 600.00)) : 0;
-            const handicapPts = esgrimaPts + obsPts + natPts;
-            return { ...p, victories, defeats, esgrimaPts, obsPts, natPts, lasPts, handicapPts, totalFinal: Math.round(handicapPts + lasPts) };
-        }
-
-        function renderViews() {
-            const selSex = document.getElementById('filterSex').value;
-            const selPhase = document.getElementById('filterPhase').value;
-            
-            let data = players.map(p => getFullStats(p))
-                .filter(p => p.sex === selSex && p.phase === selPhase);
-            
-            data.sort((a, b) => b.totalFinal - a.totalFinal);
-
-            // TABLA GENERAL (Sin puntos de esgrima)
-            document.getElementById('scoreboardBody').innerHTML = data.map((p, i) => `
-                <tr>
-                    <td class="p-5">
-                        <p class="text-xs font-black uppercase">${p.name}</p>
-                    </td>
-                    <td class="p-5 pts-value">${p.obsPts}</td>
-                    <td class="p-5 pts-value">${p.natPts}</td>
-                    <td class="p-5 pts-value">${p.lasPts}</td>
-                    <td class="p-5 text-right admin-only ${isAdmin ? '' : 'hidden'}">
-                        <button onclick="deleteAthlete('${p.id}')" class="text-red-500 text-[9px] font-black">Eliminar</button>
-                    </td>
-                </tr>`).join('');
-
-            // CLASIFICACIÓN ESGRIMA
-            document.getElementById('statusGrid').innerHTML = data.map(p => `
-                <div class="card p-5 rounded-2xl">
-                    <h3 class="text-sm font-black uppercase italic mb-4">${p.name}</h3>
-                    <div class="grid grid-cols-2 gap-2">
-                        <div class="bg-slate-950/50 p-2 rounded-xl text-center">
-                            <p class="text-[8px] text-slate-500 uppercase">Victorias</p>
-                            <p class="text-lg font-black text-green-400">${p.victories}</p>
-                        </div>
-                        <div class="bg-slate-950/50 p-2 rounded-xl text-center">
-                            <p class="text-[8px] text-slate-500 uppercase">Derrotas</p>
-                            <p class="text-lg font-black text-red-400">${p.defeats}</p>
-                        </div>
-                    </div>
-                </div>`).join('');
-
-            // ELIMINACIÓN DIRECTA (1 vs Último)
-            const bracketData = [...data];
-            const pairs = [];
-            while(bracketData.length > 1) {
-                pairs.push([bracketData.shift(), bracketData.pop()]);
-            }
-            if(bracketData.length === 1) pairs.push([bracketData[0], {name: 'BYE', totalFinal: 0, esgrimaPts: 0}]);
-
-            document.getElementById('tournamentBrackets').innerHTML = pairs.map(pair => `
-                <div class="card p-5 rounded-2xl border-l-4 border-l-blue-600">
-                    <div class="space-y-4">
-                        <div class="flex justify-between items-center">
-                            <p class="text-[10px] font-black uppercase">${pair[0].name}</p>
-                            <p class="text-xs font-mono font-bold text-blue-400">${pair[0].esgrimaPts} pts</p>
-                        </div>
-                        <div class="vs-circle">VS</div>
-                        <div class="flex justify-between items-center">
-                            <p class="text-[10px] font-black uppercase text-slate-300">${pair[1].name}</p>
-                            <p class="text-xs font-mono font-bold text-blue-400">${pair[1].esgrimaPts} pts</p>
-                        </div>
-                    </div>
-                </div>`).join('');
-
-            // LLAVE RAMIFICADA (Simulación visual)
-            renderRamified(pairs);
-
-            // HANDICAP
-            const hData = [...data].sort((a,b) => b.handicapPts - a.handicapPts);
-            const best = hData[0]?.handicapPts || 0;
-            document.getElementById('handicapBody').innerHTML = hData.map((p, i) => `
-                <tr>
-                    <td class="p-5 text-center text-xs font-black text-slate-600">${i+1}</td>
-                    <td class="p-5"><p class="text-xs font-black uppercase">${p.name}</p></td>
-                    <td class="p-5 pts-value">${p.handicapPts}</td>
-                    <td class="p-5 text-green-500 font-mono text-[10px]">${i === 0 ? 'SALIDA' : `+${best - p.handicapPts}s`}</td>
-                </tr>`).join('');
-        }
-
-        function renderRamified(pairs) {
-            const container = document.getElementById('ramifiedBracket');
-            let html = '<div class="bracket-round">';
-            pairs.forEach(p => {
-                html += `
-                    <div class="card p-2 mb-4 text-[9px] font-bold uppercase border-l-2 border-blue-500">
-                        <div>${p[0].name}</div>
-                        <div class="text-slate-600 my-1">vs</div>
-                        <div>${p[1].name}</div>
-                    </div>`;
+            onSnapshot(collection(db, 'artifacts', appId, 'public', 'data', 'events'), (snap) => {
+                events = snap.docs.map(d => ({ id: d.id, ...d.data() })); renderEvents(); updateEventSelect();
             });
-            html += '</div><div class="bracket-round"><div class="h-full flex flex-col justify-around text-[10px] font-black text-slate-700 italic">SEMIFINAL...</div></div>';
-            container.innerHTML = html;
         }
+
+        window.applyMainFilters = () => { document.getElementById('subViewButtons').classList.remove('hidden'); renderViews(); switchView('ranking'); };
+
+        function updateEventSelect() {
+            const select = document.getElementById('playerEvent');
+            if(select) select.innerHTML = '<option value="">Seleccionar Evento...</option>' + events.map(e => `<option value="${e.name}">${e.name}</option>`).join('');
+        }
+
+        window.saveEvent = async () => {
+            const name = document.getElementById('eventName').value;
+            const date = document.getElementById('eventDate').value;
+            const desc = document.getElementById('eventDesc').value;
+            if(!name) return alert("Nombre obligatorio");
+            await setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'events', crypto.randomUUID()), { name, date, location: desc });
+            document.getElementById('eventName').value = ""; document.getElementById('eventDate').value = ""; document.getElementById('eventDesc').value = "";
+        };
 
         window.savePlayer = async () => {
             const data = {
+                event: document.getElementById('playerEvent').value,
                 name: document.getElementById('playerName').value,
                 sex: document.getElementById('playerSex').value,
                 phase: document.getElementById('playerPhase').value,
@@ -332,23 +211,68 @@
             alert("Atleta Guardado");
         };
 
+        function parseTime(val) {
+            if (!val) return 0;
+            let clean = val.toString().trim().replace(',', '.');
+            if (clean.includes(':')) { const parts = clean.split(':'); return (parseFloat(parts[0]) || 0) * 60 + (parseFloat(parts[1]) || 0); }
+            return parseFloat(clean) || 0;
+        }
+
+        function getFullStats(p) {
+            const victories = parseInt(p.esgrimaV) || 0;
+            const esgrimaPts = (parseInt(p.esgrimaTotal) || 0) > 0 ? Math.max(0, 250 + (victories - Math.ceil(parseInt(p.esgrimaTotal) * 0.7)) * 5) : 0;
+            const tObs = parseTime(p.obstaculos); let obsPts = tObs >= 15 ? Math.max(0, 400 - Math.floor((tObs - 15) / 0.33)) : (tObs > 0 ? 401 : 0);
+            const tNat = parseTime(p.natacion); let natPts = tNat > 0 ? Math.max(0, 375 - Math.ceil((tNat - 45) / 0.2)) : 0;
+            const tLas = parseTime(p.laser); let lasPts = tLas > 0 ? Math.max(0, 700 - Math.floor(tLas - 600)) : 0;
+            const handicapPts = esgrimaPts + obsPts + natPts;
+            return { ...p, esgrimaPts, obsPts, natPts, lasPts, handicapPts, totalFinal: Math.round(handicapPts + lasPts) };
+        }
+
+        function renderViews() {
+            const selSex = document.getElementById('filterSex').value;
+            const selPhase = document.getElementById('filterPhase').value;
+            let data = players.map(p => getFullStats(p)).filter(p => p.sex === selSex && p.phase === selPhase);
+            data.sort((a, b) => b.totalFinal - a.totalFinal);
+
+            document.getElementById('scoreboardBody').innerHTML = data.map(p => `<tr><td class="p-5 text-xs font-black uppercase">${p.name}</td><td class="p-5 pts-value">${p.obsPts}</td><td class="p-5 pts-value">${p.natPts}</td><td class="p-5 pts-value">${p.lasPts}</td><td class="p-5 text-right admin-only ${isAdmin ? '' : 'hidden'}"><button onclick="deleteAthlete('${p.id}')" class="text-red-500 text-[9px] font-black">DEL</button></td></tr>`).join('');
+            document.getElementById('statusGrid').innerHTML = data.map(p => `<div class="card p-5 rounded-2xl"><h3 class="text-sm font-black uppercase italic mb-4">${p.name}</h3><div class="grid grid-cols-2 gap-2"><div class="bg-slate-950/50 p-2 rounded-xl text-center"><p class="text-[8px] text-slate-500 uppercase">V</p><p class="text-lg font-black text-green-400">${p.esgrimaV || 0}</p></div><div class="bg-slate-950/50 p-2 rounded-xl text-center"><p class="text-[8px] text-slate-500 uppercase">D</p><p class="text-lg font-black text-red-400">${p.esgrimaD || 0}</p></div></div></div>`).join('');
+
+            const pairs = []; const bracketData = [...data];
+            while(bracketData.length > 1) { pairs.push([bracketData.shift(), bracketData.pop()]); }
+            if(bracketData.length === 1) pairs.push([bracketData[0], {name: 'BYE', esgrimaPts: 0}]);
+            
+            document.getElementById('tournamentBrackets').innerHTML = pairs.map(pair => `<div class="card p-5 rounded-2xl border-l-4 border-l-blue-600"><div class="flex justify-between items-center"><p class="text-[10px] font-black uppercase">${pair[0].name}</p><p class="text-xs font-bold text-blue-400">${pair[0].esgrimaPts} pts</p></div><div class="vs-circle">VS</div><div class="flex justify-between items-center"><p class="text-[10px] font-black uppercase">${pair[1].name}</p><p class="text-xs font-bold text-blue-400">${pair[1].esgrimaPts} pts</p></div></div>`).join('');
+            
+            let bracketHtml = '<div class="bracket-round">';
+            pairs.forEach(p => bracketHtml += `<div class="card p-2 mb-4 text-[9px] font-bold uppercase border-l-2 border-blue-500"><div>${p[0].name}</div><div class="text-slate-600 my-1 text-center">vs</div><div>${p[1].name}</div></div>`);
+            document.getElementById('ramifiedBracket').innerHTML = bracketHtml + '</div>';
+
+            const hData = [...data].sort((a,b) => b.handicapPts - a.handicapPts); const best = hData[0]?.handicapPts || 0;
+            document.getElementById('handicapBody').innerHTML = hData.map((p, i) => `<tr><td class="p-5 text-center text-xs font-black text-slate-600">${i+1}</td><td class="p-5 text-xs font-black uppercase">${p.name}</td><td class="p-5 pts-value">${p.handicapPts}</td><td class="p-5 text-green-500 font-mono text-[10px]">${i === 0 ? 'SALIDA' : `+${best - p.handicapPts}s`}</td></tr>`).join('');
+        }
+
         window.switchView = (view) => {
-            ['ranking', 'status', 'tournament', 'handicap', 'publicEvents'].forEach(v => {
-                document.getElementById(v + 'View').classList.add('hidden');
-                const btn = document.getElementById('btnView' + v.charAt(0).toUpperCase() + v.slice(1));
-                if(btn) btn.className = "bg-slate-800 text-slate-400 text-[9px] font-black uppercase px-4 py-2 rounded-lg";
-            });
+            ['ranking', 'status', 'tournament', 'handicap', 'publicEvents'].forEach(v => { document.getElementById(v + 'View').classList.add('hidden'); const btn = document.getElementById('btnView' + v.charAt(0).toUpperCase() + v.slice(1)); if(btn) btn.className = "bg-slate-800 text-slate-400 text-[9px] font-black uppercase px-4 py-2 rounded-lg"; });
             document.getElementById(view + 'View').classList.remove('hidden');
             const targetBtn = document.getElementById('btnView' + view.charAt(0).toUpperCase() + view.slice(1));
             if(targetBtn) targetBtn.className = "bg-blue-600 text-white text-[9px] font-black uppercase px-4 py-2 rounded-lg";
         };
 
-        window.openLoginModal = () => { isAdmin ? logout() : document.getElementById('loginModal').classList.remove('hidden'); };
-        window.closeLoginModal = () => { document.getElementById('loginModal').classList.add('hidden'); };
-        window.checkPassword = () => { if (document.getElementById('adminPass').value === "Newman.999") { isAdmin = true; document.getElementById('adminPanel').classList.remove('hidden'); closeLoginModal(); renderViews(); } };
-        window.logout = () => { isAdmin = false; document.getElementById('adminPanel').classList.add('hidden'); };
-        window.deleteAthlete = async (id) => { if(confirm("¿Eliminar?")) await deleteDoc(doc(db, 'artifacts', appId, 'public', 'data', 'athletes', id)); };
+        window.toggleEvent = (id) => document.getElementById('event-' + id).classList.toggle('active');
+        
+        function renderEvents() {
+            const list = document.getElementById('publicEventsList');
+            if(list) list.innerHTML = events.map(e => {
+                const ep = players.filter(p => p.event === e.name);
+                return `<div id="event-${e.id}" class="event-card card p-4 rounded-2xl cursor-pointer" onclick="toggleEvent('${e.id}')"><div class="flex justify-between items-center"><div><p class="text-[10px] font-black uppercase text-white">${e.name}</p><p class="text-[8px] text-purple-400 uppercase">${e.location} • ${e.date}</p></div><svg class="w-4 h-4 text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M19 9l-7 7-7-7"></path></svg></div><div class="event-details"><div class="space-y-1">${ep.map(p => `<div class="text-[10px] font-bold py-1 border-b border-slate-800/50 uppercase">${p.name}</div>`).join('')}</div></div></div>`;
+            }).join('');
+        }
 
+        window.openLoginModal = () => isAdmin ? logout() : document.getElementById('loginModal').classList.remove('hidden');
+        window.closeLoginModal = () => document.getElementById('loginModal').classList.add('hidden');
+        window.checkPassword = () => { if (document.getElementById('adminPass').value === "Newman.999") { isAdmin = true; document.getElementById('adminPanel').classList.remove('hidden'); document.querySelectorAll('.admin-only').forEach(el => el.classList.remove('hidden')); closeLoginModal(); renderViews(); } };
+        window.logout = () => { isAdmin = false; document.getElementById('adminPanel').classList.add('hidden'); document.querySelectorAll('.admin-only').forEach(el => el.classList.add('hidden')); };
+        window.deleteAthlete = async (id) => { if(confirm("¿Eliminar?")) await deleteDoc(doc(db, 'artifacts', appId, 'public', 'data', 'athletes', id)); };
         start();
     </script>
 
