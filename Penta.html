@@ -15,37 +15,22 @@
     <link rel="shortcut icon" href="/logo1.ico" type="image/x-icon">
     <link rel="manifest" href="/manifest.json">
     <style>
-        body { 
-            background-color: #020617; 
-            color: #f1f5f9; 
-            font-family: 'Inter', sans-serif;
-            -webkit-tap-highlight-color: transparent;
-        }
+        body { background-color: #020617; color: #f1f5f9; font-family: 'Inter', sans-serif; -webkit-tap-highlight-color: transparent; }
         .card { background: #0f172a; border: 1px solid #1e293b; }
         .input-dark { background: #020617; border: 1px solid #334155; color: #f1f5f9; outline: none; }
         .input-dark:focus { border-color: #3b82f6; box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.2); }
         .neon-blue { color: #38bdf8; text-shadow: 0 0 10px rgba(56, 189, 248, 0.4); }
         .btn-primary { background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%); transition: all 0.2s; }
-        
-        #loadingOverlay { 
-            background: #020617; 
-            display: flex; 
-            align-items: center; 
-            justify-content: center; 
-            z-index: 100; 
-        }
+        #loadingOverlay { background: #020617; display: flex; align-items: center; justify-content: center; z-index: 100; }
         .pts-value { font-size: 0.85rem; font-weight: 800; color: #f1f5f9; }
         .cat-tag { font-size: 0.65rem; background: #1e293b; color: #38bdf8; padding: 2px 6px; border-radius: 4px; font-weight: 700; border: 1px solid #334155; }
         .state-tag { font-size: 0.6rem; color: #94a3b8; font-weight: 600; text-transform: uppercase; margin-left: 4px; }
-        
         .vs-circle { background: #1e293b; width: 24px; height: 24px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 8px; font-weight: 900; border: 1px solid #334155; margin: 10px auto; color: #38bdf8; }
         .status-pill { font-size: 0.65rem; font-weight: 900; padding: 2px 8px; border-radius: 99px; text-transform: uppercase; }
         
-        /* Estilos para el acordeón de eventos */
-        .event-details { max-height: 0; overflow: hidden; transition: max-height 0.3s ease-out; }
-        .event-card.active .event-details { max-height: 500px; margin-top: 1rem; border-top: 1px solid #1e293b; padding-top: 1rem; }
-        .event-card.active .chevron { transform: rotate(180deg); }
-        .chevron { transition: transform 0.3s; }
+        /* Estilos nuevos para las llaves ramificadas */
+        .bracket-container { display: flex; gap: 20px; padding: 20px; overflow-x: auto; }
+        .bracket-round { display: flex; flex-direction: column; justify-content: space-around; min-width: 200px; }
     </style>
 </head>
 <body class="p-2 md:p-8">
@@ -71,26 +56,51 @@
                 </div>
             </div>
             <div class="flex gap-2">
-                <button onclick="switchView('publicEvents')" class="bg-purple-900/40 text-purple-400 border border-purple-800/50 px-6 py-2 rounded-xl text-xs font-black uppercase hover:bg-purple-800/60">Eventos</button>
+                <button onclick="switchView('publicEvents')" class="bg-purple-900/40 text-purple-400 border border-purple-800/50 px-6 py-2 rounded-xl text-xs font-black uppercase">Eventos</button>
                 <button id="adminToggleBtn" onclick="openLoginModal()" class="bg-slate-800 hover:bg-slate-700 px-6 py-2 rounded-xl text-xs font-black uppercase border border-slate-700">Admin</button>
             </div>
         </header>
 
-        <div class="flex flex-col gap-4 mb-6">
-            <div class="flex flex-wrap gap-2">
-                <button onclick="switchView('ranking')" id="btnViewRanking" class="bg-blue-600 text-white text-[9px] font-black uppercase px-4 py-2 rounded-lg">Tabla De Valores</button>
-                <button onclick="switchView('status')" id="btnViewStatus" class="bg-slate-800 text-slate-400 text-[9px] font-black uppercase px-4 py-2 rounded-lg hover:bg-slate-700">Clasificacion</button>
-                <button onclick="switchView('tournament')" id="btnViewTournament" class="bg-slate-800 text-slate-400 text-[9px] font-black uppercase px-4 py-2 rounded-lg hover:bg-slate-700">Llaves 1vs1</button>
-                <button onclick="switchView('handicap')" id="btnViewHandicap" class="bg-slate-800 text-slate-400 text-[9px] font-black uppercase px-4 py-2 rounded-lg hover:bg-slate-700">Hándicap</button>
+        <div id="publicEventsView" class="hidden mb-8">
+            <div class="card p-6 rounded-3xl border-purple-900/30">
+                <h3 class="text-xs font-black uppercase text-purple-400 mb-4">Configuración de Consulta</h3>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+                    <div>
+                        <label class="text-[9px] uppercase font-bold text-slate-500 ml-2">Categoría</label>
+                        <select id="filterSex" class="input-dark w-full p-3 rounded-xl mt-1 text-xs">
+                            <option value="M">HOMBRE</option>
+                            <option value="F">MUJER</option>
+                            <option value="TODOS">RELEVO</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="text-[9px] uppercase font-bold text-slate-500 ml-2">Fase</label>
+                        <select id="filterPhase" class="input-dark w-full p-3 rounded-xl mt-1 text-xs">
+                            <option value="Calificación">CALIFICACIÓN</option>
+                            <option value="Semifinal">SEMIFINAL</option>
+                            <option value="Final">FINAL</option>
+                        </select>
+                    </div>
+                    <div class="flex items-end">
+                        <button onclick="applyMainFilters()" class="btn-primary w-full p-3 rounded-xl text-xs font-black uppercase">Ver Resultados</button>
+                    </div>
+                </div>
+                
+                <div id="subViewButtons" class="hidden flex flex-wrap gap-2 pt-4 border-t border-slate-800">
+                    <button onclick="switchView('ranking')" id="btnViewRanking" class="bg-blue-600 text-white text-[9px] font-black uppercase px-4 py-2 rounded-lg">Tabla General</button>
+                    <button onclick="switchView('status')" id="btnViewStatus" class="bg-slate-800 text-slate-400 text-[9px] font-black uppercase px-4 py-2 rounded-lg">Clasificación Esgrima</button>
+                    <button onclick="switchView('tournament')" id="btnViewTournament" class="bg-slate-800 text-slate-400 text-[9px] font-black uppercase px-4 py-2 rounded-lg">Eliminación Directa</button>
+                    <button onclick="switchView('handicap')" id="btnViewHandicap" class="bg-slate-800 text-slate-400 text-[9px] font-black uppercase px-4 py-2 rounded-lg">Hándicap</button>
+                </div>
             </div>
         </div>
 
         <main class="flex-grow">
-            <div id="rankingView" class="block">
+            <div id="rankingView" class="hidden">
                 <div class="overflow-x-auto shadow-2xl rounded-2xl border border-slate-800 bg-slate-900/40">
                     <table class="w-full text-left border-collapse">
                         <thead class="text-slate-500 uppercase text-[9px] font-black tracking-widest bg-slate-800/50">
-                            <tr><th class="p-5">Atleta</th><th class="p-5">Esgrima</th><th class="p-5">Obstáculos</th><th class="p-5">Natación</th><th class="p-5">Laser Run</th><th class="p-5 bg-blue-600/20 text-blue-100">Total</th><th class="p-5 admin-only hidden text-right">Acciones</th></tr>
+                            <tr><th class="p-5">Atleta</th><th class="p-5">Obstáculos</th><th class="p-5">Natación</th><th class="p-5">Laser Run</th><th class="p-5 admin-only hidden text-right">Acciones</th></tr>
                         </thead>
                         <tbody id="scoreboardBody" class="divide-y divide-slate-800/50"></tbody>
                     </table>
@@ -103,6 +113,10 @@
 
             <div id="tournamentView" class="hidden">
                 <div id="tournamentBrackets" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"></div>
+                <div class="mt-12 bg-slate-900/20 p-6 rounded-3xl border border-slate-800">
+                    <h3 class="text-center text-xs font-black uppercase text-blue-400 mb-8 italic">Esquema Eliminatorio Ramificado</h3>
+                    <div id="ramifiedBracket" class="bracket-container"></div>
+                </div>
             </div>
             
             <div id="handicapView" class="hidden">
@@ -116,65 +130,32 @@
                 </div>
             </div>
 
-            <div id="publicEventsView" class="hidden">
-                <div class="flex gap-2 p-1 bg-slate-900/50 rounded-xl w-fit border border-slate-800 mb-6">
-                    <button onclick="setSexFilter('TODOS')" id="filterSexTODOS" class="px-4 py-1.5 rounded-lg text-[10px] font-black uppercase transition-all bg-blue-600 text-white">Relevos</button>
-                    <button onclick="setSexFilter('M')" id="filterSexM" class="px-4 py-1.5 rounded-lg text-[10px] font-black uppercase transition-all text-slate-400 hover:bg-slate-800">Masculino</button>
-                    <button onclick="setSexFilter('F')" id="filterSexF" class="px-4 py-1.5 rounded-lg text-[10px] font-black uppercase transition-all text-slate-400 hover:bg-slate-800">Femenino</button>
-                </div>
-                <div id="publicEventsList" class="grid grid-cols-1 sm:grid-cols-2 gap-4"></div>
-            </div>
-
             <section id="adminPanel" class="hidden space-y-8 mt-12 border-t-2 border-dashed border-slate-800 pt-12">
-                <div class="card p-6 rounded-3xl shadow-2xl border border-purple-900/30">
-                    <h2 class="text-lg font-black text-purple-400 italic uppercase mb-6 flex items-center gap-2"><span class="w-2 h-6 bg-purple-600"></span> Registro de Evento</h2>
-                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                        <input type="text" id="eventName" class="input-dark p-3 rounded-xl text-sm" placeholder="Nombre del Evento">
-                        <input type="date" id="eventDate" class="input-dark p-3 rounded-xl text-sm">
-                        <input type="text" id="eventDesc" class="input-dark p-3 rounded-xl text-sm" placeholder="Descripción">
-                    </div>
-                    <button onclick="saveEvent()" class="mt-4 bg-purple-600 text-white px-8 py-3 rounded-xl font-black uppercase text-xs w-full sm:w-auto">Guardar Evento</button>
-                </div>
-
                 <div class="card p-6 rounded-3xl shadow-2xl border border-blue-900/30">
                     <h2 id="adminFormTitle" class="text-lg font-black text-blue-400 italic uppercase mb-6 flex items-center gap-2"><span class="w-2 h-6 bg-blue-600"></span> Registro Atleta</h2>
                     <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                        <select id="playerEvent" class="input-dark p-3 rounded-xl text-sm bg-slate-950 col-span-full">
-                            <option value="">Seleccionar Evento...</option>
-                        </select>
-                        <input type="text" id="playerCountry" class="input-dark p-3 rounded-xl text-sm" placeholder="País">
-                        <input type="text" id="playerState" class="input-dark p-3 rounded-xl text-sm" placeholder="Estado">
                         <input type="text" id="playerName" class="input-dark p-3 rounded-xl text-sm" placeholder="Nombre">
                         <select id="playerSex" class="input-dark p-3 rounded-xl text-sm bg-slate-950">
-                            <option value="M">Masculino</option>
-                            <option value="F">Femenino</option>
+                            <option value="M">Hombre</option>
+                            <option value="F">Mujer</option>
+                            <option value="TODOS">Relevo</option>
                         </select>
-                        <select id="playerCategory" class="input-dark p-3 rounded-xl text-sm bg-slate-950">
-                            <option value="U09">U09</option><option value="U11">U11</option><option value="U13">U13</option><option value="U15">U15</option>
-                            <option value="U17">U17</option><option value="U19">U19</option><option value="Junior">Junior</option><option value="Senior">Senior</option>
+                        <select id="playerPhase" class="input-dark p-3 rounded-xl text-sm bg-slate-950">
+                            <option value="Calificación">Calificación</option>
+                            <option value="Semifinal">Semifinal</option>
+                            <option value="Final">Final</option>
                         </select>
                         <input type="number" id="playerEsgrimaV" class="input-dark p-3 rounded-xl text-sm" placeholder="Victorias">
+                        <input type="number" id="playerEsgrimaD" class="input-dark p-3 rounded-xl text-sm" placeholder="Derrotas">
                         <input type="number" id="playerEsgrimaTotal" class="input-dark p-3 rounded-xl text-sm" placeholder="Total Bouts">
                         <input type="text" id="playerObstaculos" class="input-dark p-3 rounded-xl text-sm" placeholder="Obs (seg)">
                         <input type="text" id="playerNatacion" class="input-dark p-3 rounded-xl text-sm" placeholder="Nat (m:s)">
                         <input type="text" id="playerLaser" class="input-dark p-3 rounded-xl text-sm" placeholder="Laser (m:s)">
                     </div>
-                    <div class="mt-6 flex gap-3">
-                        <button onclick="savePlayer()" class="btn-primary text-white px-10 py-4 rounded-2xl font-black uppercase text-xs flex-1">Guardar Atleta</button>
-                        <button id="btnCancelEdit" onclick="cancelEdit()" class="hidden bg-slate-800 text-white px-6 py-4 rounded-2xl font-black uppercase text-xs">Cancelar</button>
-                    </div>
+                    <button onclick="savePlayer()" class="btn-primary mt-6 text-white px-10 py-4 rounded-2xl font-black uppercase text-xs w-full">Guardar Atleta</button>
                 </div>
             </section>
         </main>
-    </div>
-
-    <div id="loginModal" class="fixed inset-0 bg-slate-950/95 hidden flex items-center justify-center p-6 z-50 backdrop-blur-md">
-        <div class="bg-slate-900 p-8 rounded-[2rem] w-full max-w-sm border border-slate-800 text-center">
-            <h2 class="text-xl font-black mb-6 text-white uppercase italic tracking-tighter">Acceso Admin</h2>
-            <input type="password" id="adminPass" class="input-dark w-full p-4 rounded-2xl mb-6 text-center text-2xl tracking-[0.5em]" placeholder="**">
-            <button onclick="checkPassword()" class="btn-primary w-full py-4 rounded-2xl font-black text-white text-xs uppercase">Entrar</button>
-            <button onclick="closeLoginModal()" class="mt-4 text-slate-600 text-[10px] font-bold uppercase hover:text-slate-400">Cancelar</button>
-        </div>
     </div>
 
     <script type="module">
@@ -193,22 +174,13 @@
         
         const appId = 'penta-tourney-v2';
         let firebaseApp, auth, db;
-        let players = [], events = [], isAdmin = false, editingId = null, currentSexFilter = 'TODOS';
+        let players = [], isAdmin = false, editingId = null;
 
         async function start() {
             firebaseApp = initializeApp(firebaseConfig);
             auth = getAuth(firebaseApp);
             db = getFirestore(firebaseApp);
             await signInAnonymously(auth);
-
-            const btnSalir = document.getElementById('btnSalir');
-            if (btnSalir) {
-                btnSalir.onclick = async () => {
-                    await signOut(auth);
-                    window.location.href = 'index.html'; 
-                };
-            }
-
             onAuthStateChanged(auth, (user) => { if (user) setupListeners(); });
         }
 
@@ -216,34 +188,15 @@
             onSnapshot(collection(db, 'artifacts', appId, 'public', 'data', 'athletes'), (snap) => {
                 players = snap.docs.map(d => ({ id: d.id, ...d.data() }));
                 renderViews();
-                renderEvents(); // Re-renderizar eventos cuando cambien los jugadores
                 document.getElementById('loadingOverlay').style.display = 'none';
                 document.getElementById('app').classList.replace('opacity-0', 'opacity-100');
             });
-            onSnapshot(collection(db, 'artifacts', appId, 'public', 'data', 'events'), (snap) => {
-                events = snap.docs.map(d => ({ id: d.id, ...d.data() }));
-                renderEvents();
-                updateEventSelect();
-            });
         }
 
-        function updateEventSelect() {
-            const select = document.getElementById('playerEvent');
-            if(select) {
-                select.innerHTML = '<option value="">Seleccionar Evento...</option>' + 
-                events.map(e => `<option value="${e.name}">${e.name}</option>`).join('');
-            }
-        }
-
-        window.saveEvent = async () => {
-            const name = document.getElementById('eventName').value;
-            const date = document.getElementById('eventDate').value;
-            const desc = document.getElementById('eventDesc').value;
-            if(!name) return alert("Nombre obligatorio");
-            await setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'events', crypto.randomUUID()), { name, date, location: desc });
-            document.getElementById('eventName').value = "";
-            document.getElementById('eventDate').value = "";
-            document.getElementById('eventDesc').value = "";
+        window.applyMainFilters = () => {
+            document.getElementById('subViewButtons').classList.remove('hidden');
+            renderViews();
+            switchView('ranking');
         };
 
         function parseTime(val) {
@@ -259,6 +212,7 @@
         function getFullStats(p) {
             const bouts = parseInt(p.esgrimaTotal) || 0;
             const victories = parseInt(p.esgrimaV) || 0;
+            const defeats = parseInt(p.esgrimaD) || 0;
             const esgrimaPts = bouts > 0 ? Math.max(0, 250 + (victories - Math.ceil(bouts * 0.7)) * 5) : 0;
             const tObs = parseTime(p.obstaculos);
             let obsPts = tObs >= 15.00 ? Math.max(0, 400 - Math.floor((tObs - 15.00) / 0.33)) : (tObs > 0 ? 401 : 0);
@@ -267,213 +221,144 @@
             const tLas = parseTime(p.laser);
             let lasPts = tLas > 0 ? Math.max(0, 700 - Math.floor(tLas - 600.00)) : 0;
             const handicapPts = esgrimaPts + obsPts + natPts;
-            return { ...p, victories, defeats: Math.max(0, bouts - victories), esgrimaPts, obsPts, natPts, lasPts, handicapPts, totalFinal: Math.round(handicapPts + lasPts) };
+            return { ...p, victories, defeats, esgrimaPts, obsPts, natPts, lasPts, handicapPts, totalFinal: Math.round(handicapPts + lasPts) };
         }
 
-        window.savePlayer = async () => {
-            const data = {
-                event: document.getElementById('playerEvent').value,
-                country: document.getElementById('playerCountry').value,
-                state: document.getElementById('playerState').value,
-                name: document.getElementById('playerName').value,
-                sex: document.getElementById('playerSex').value,
-                category: document.getElementById('playerCategory').value,
-                esgrimaV: document.getElementById('playerEsgrimaV').value,
-                esgrimaTotal: document.getElementById('playerEsgrimaTotal').value,
-                obstaculos: document.getElementById('playerObstaculos').value,
-                natacion: document.getElementById('playerNatacion').value,
-                laser: document.getElementById('playerLaser').value
-            };
-            await setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'athletes', editingId || crypto.randomUUID()), data);
-            cancelEdit();
-        };
-
-        window.editPlayer = (id) => {
-            const p = players.find(x => x.id === id);
-            if(!p) return;
-            editingId = id;
-            document.getElementById('playerEvent').value = p.event || '';
-            document.getElementById('playerCountry').value = p.country || '';
-            document.getElementById('playerState').value = p.state || '';
-            document.getElementById('playerName').value = p.name || '';
-            document.getElementById('playerSex').value = p.sex || 'M';
-            document.getElementById('playerCategory').value = p.category || 'Senior';
-            document.getElementById('playerEsgrimaV').value = p.esgrimaV || '';
-            document.getElementById('playerEsgrimaTotal').value = p.esgrimaTotal || '';
-            document.getElementById('playerObstaculos').value = p.obstaculos || '';
-            document.getElementById('playerNatacion').value = p.natacion || '';
-            document.getElementById('playerLaser').value = p.laser || '';
-            document.getElementById('adminFormTitle').innerText = "Editando Atleta";
-            document.getElementById('btnCancelEdit').classList.remove('hidden');
-            window.scrollTo({ top: document.getElementById('adminPanel').offsetTop, behavior: 'smooth' });
-        };
-
-        window.cancelEdit = () => {
-            editingId = null;
-            document.getElementById('adminFormTitle').innerText = "Registro Atleta";
-            document.getElementById('btnCancelEdit').classList.add('hidden');
-            ['playerEvent','playerCountry','playerState','playerName','playerEsgrimaV','playerEsgrimaTotal','playerObstaculos','playerNatacion','playerLaser'].forEach(id => {
-                const el = document.getElementById(id);
-                if(el) el.value = "";
-            });
-        };
-
         function renderViews() {
-            let data = players.map(p => getFullStats(p));
-            if (currentSexFilter !== 'TODOS') data = data.filter(p => p.sex === currentSexFilter);
+            const selSex = document.getElementById('filterSex').value;
+            const selPhase = document.getElementById('filterPhase').value;
+            
+            let data = players.map(p => getFullStats(p))
+                .filter(p => p.sex === selSex && p.phase === selPhase);
+            
             data.sort((a, b) => b.totalFinal - a.totalFinal);
 
+            // TABLA GENERAL (Sin puntos de esgrima)
             document.getElementById('scoreboardBody').innerHTML = data.map((p, i) => `
                 <tr>
                     <td class="p-5">
                         <p class="text-xs font-black uppercase">${p.name}</p>
-                        <div class="flex items-center gap-1 mt-1">
-                            <span class="cat-tag">${p.category}</span>
-                            <span class="state-tag">${p.state || 'N/A'}</span>
-                        </div>
                     </td>
-                    <td class="p-5 pts-value">${p.esgrimaPts}</td><td class="p-5 pts-value">${p.obsPts}</td>
-                    <td class="p-5 pts-value">${p.natPts}</td><td class="p-5 pts-value">${p.lasPts}</td>
-                    <td class="p-5 text-blue-400 font-black">${p.totalFinal}</td>
+                    <td class="p-5 pts-value">${p.obsPts}</td>
+                    <td class="p-5 pts-value">${p.natPts}</td>
+                    <td class="p-5 pts-value">${p.lasPts}</td>
                     <td class="p-5 text-right admin-only ${isAdmin ? '' : 'hidden'}">
-                        <button onclick="editPlayer('${p.id}')" class="text-blue-500 text-[9px] font-black mr-2">Edit</button>
-                        <button onclick="deleteAthlete('${p.id}')" class="text-red-500 text-[9px] font-black">Del</button>
+                        <button onclick="deleteAthlete('${p.id}')" class="text-red-500 text-[9px] font-black">Eliminar</button>
                     </td>
                 </tr>`).join('');
 
+            // CLASIFICACIÓN ESGRIMA
             document.getElementById('statusGrid').innerHTML = data.map(p => `
-                <div class="card p-5 rounded-2xl relative overflow-hidden">
-                    <div class="flex justify-between items-start mb-4">
-                        <div>
-                            <div class="flex items-center gap-2 mb-1">
-                                <p class="text-[10px] font-black uppercase text-blue-400">${p.category}</p>
-                                <span class="text-[8px] text-slate-500 uppercase font-bold tracking-widest">${p.state || ''}</span>
-                            </div>
-                            <h3 class="text-sm font-black uppercase italic">${p.name}</h3>
-                        </div>
-                        <span class="status-pill bg-green-500/10 text-green-500 border border-green-500/20">Esgrima</span>
-                    </div>
+                <div class="card p-5 rounded-2xl">
+                    <h3 class="text-sm font-black uppercase italic mb-4">${p.name}</h3>
                     <div class="grid grid-cols-2 gap-2">
-                        <div class="bg-slate-950/50 p-3 rounded-xl border border-slate-800 text-center">
-                            <p class="text-[8px] text-slate-500 uppercase font-black">Victorias</p>
-                            <p class="text-xl font-black text-green-400">${p.victories}</p>
+                        <div class="bg-slate-950/50 p-2 rounded-xl text-center">
+                            <p class="text-[8px] text-slate-500 uppercase">Victorias</p>
+                            <p class="text-lg font-black text-green-400">${p.victories}</p>
                         </div>
-                        <div class="bg-slate-950/50 p-3 rounded-xl border border-slate-800 text-center">
-                            <p class="text-[8px] text-slate-500 uppercase font-black">Derrotas</p>
-                            <p class="text-xl font-black text-red-400">${p.defeats}</p>
+                        <div class="bg-slate-950/50 p-2 rounded-xl text-center">
+                            <p class="text-[8px] text-slate-500 uppercase">Derrotas</p>
+                            <p class="text-lg font-black text-red-400">${p.defeats}</p>
                         </div>
                     </div>
                 </div>`).join('');
 
-            const bracketHTML = [];
-            for (let i = 0; i < data.length; i += 2) {
-                const p1 = data[i]; const p2 = data[i + 1];
-                if (p1 && p2) {
-                    bracketHTML.push(`
-                        <div class="card p-5 rounded-2xl border-l-4 border-l-blue-600">
-                            <div class="flex justify-between items-center mb-4">
-                                <span class="text-[8px] font-black text-slate-500 uppercase tracking-widest">Match Oficial</span>
-                                <span class="status-pill bg-blue-500/20 text-blue-400">En Espera</span>
-                            </div>
-                            <div class="space-y-4">
-                                <div class="flex justify-between items-center">
-                                    <p class="text-[10px] font-black uppercase">${p1.name} <span class="text-[8px] text-slate-600 ml-1">(${p1.state || ''})</span></p>
-                                    <p class="text-xs font-mono font-bold text-slate-400">${p1.totalFinal}</p>
-                                </div>
-                                <div class="vs-circle">VS</div>
-                                <div class="flex justify-between items-center">
-                                    <p class="text-[10px] font-black uppercase text-slate-300">${p2.name} <span class="text-[8px] text-slate-600 ml-1">(${p2.state || ''})</span></p>
-                                    <p class="text-xs font-mono font-bold text-slate-400">${p2.totalFinal}</p>
-                                </div>
-                            </div>
-                        </div>`);
-                }
+            // ELIMINACIÓN DIRECTA (1 vs Último)
+            const bracketData = [...data];
+            const pairs = [];
+            while(bracketData.length > 1) {
+                pairs.push([bracketData.shift(), bracketData.pop()]);
             }
-            document.getElementById('tournamentBrackets').innerHTML = bracketHTML.join('') || '<p class="text-center text-slate-500 col-span-full">No hay suficientes atletas para llaves.</p>';
+            if(bracketData.length === 1) pairs.push([bracketData[0], {name: 'BYE', totalFinal: 0, esgrimaPts: 0}]);
 
+            document.getElementById('tournamentBrackets').innerHTML = pairs.map(pair => `
+                <div class="card p-5 rounded-2xl border-l-4 border-l-blue-600">
+                    <div class="space-y-4">
+                        <div class="flex justify-between items-center">
+                            <p class="text-[10px] font-black uppercase">${pair[0].name}</p>
+                            <p class="text-xs font-mono font-bold text-blue-400">${pair[0].esgrimaPts} pts</p>
+                        </div>
+                        <div class="vs-circle">VS</div>
+                        <div class="flex justify-between items-center">
+                            <p class="text-[10px] font-black uppercase text-slate-300">${pair[1].name}</p>
+                            <p class="text-xs font-mono font-bold text-blue-400">${pair[1].esgrimaPts} pts</p>
+                        </div>
+                    </div>
+                </div>`).join('');
+
+            // LLAVE RAMIFICADA (Simulación visual)
+            renderRamified(pairs);
+
+            // HANDICAP
             const hData = [...data].sort((a,b) => b.handicapPts - a.handicapPts);
             const best = hData[0]?.handicapPts || 0;
             document.getElementById('handicapBody').innerHTML = hData.map((p, i) => `
                 <tr>
                     <td class="p-5 text-center text-xs font-black text-slate-600">${i+1}</td>
-                    <td class="p-5">
-                        <p class="text-xs font-black uppercase">${p.name}</p>
-                        <p class="text-[8px] text-slate-500 uppercase">${p.state || ''}</p>
-                    </td>
+                    <td class="p-5"><p class="text-xs font-black uppercase">${p.name}</p></td>
                     <td class="p-5 pts-value">${p.handicapPts}</td>
                     <td class="p-5 text-green-500 font-mono text-[10px]">${i === 0 ? 'SALIDA' : `+${best - p.handicapPts}s`}</td>
                 </tr>`).join('');
         }
 
+        function renderRamified(pairs) {
+            const container = document.getElementById('ramifiedBracket');
+            let html = '<div class="bracket-round">';
+            pairs.forEach(p => {
+                html += `
+                    <div class="card p-2 mb-4 text-[9px] font-bold uppercase border-l-2 border-blue-500">
+                        <div>${p[0].name}</div>
+                        <div class="text-slate-600 my-1">vs</div>
+                        <div>${p[1].name}</div>
+                    </div>`;
+            });
+            html += '</div><div class="bracket-round"><div class="h-full flex flex-col justify-around text-[10px] font-black text-slate-700 italic">SEMIFINAL...</div></div>';
+            container.innerHTML = html;
+        }
+
+        window.savePlayer = async () => {
+            const data = {
+                name: document.getElementById('playerName').value,
+                sex: document.getElementById('playerSex').value,
+                phase: document.getElementById('playerPhase').value,
+                esgrimaV: document.getElementById('playerEsgrimaV').value,
+                esgrimaD: document.getElementById('playerEsgrimaD').value,
+                esgrimaTotal: document.getElementById('playerEsgrimaTotal').value,
+                obstaculos: document.getElementById('playerObstaculos').value,
+                natacion: document.getElementById('playerNatacion').value,
+                laser: document.getElementById('playerLaser').value
+            };
+            await setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'athletes', crypto.randomUUID()), data);
+            alert("Atleta Guardado");
+        };
+
         window.switchView = (view) => {
             ['ranking', 'status', 'tournament', 'handicap', 'publicEvents'].forEach(v => {
-                const el = document.getElementById(v + 'View');
-                if(el) el.classList.add('hidden');
+                document.getElementById(v + 'View').classList.add('hidden');
                 const btn = document.getElementById('btnView' + v.charAt(0).toUpperCase() + v.slice(1));
                 if(btn) btn.className = "bg-slate-800 text-slate-400 text-[9px] font-black uppercase px-4 py-2 rounded-lg";
             });
-            const targetView = document.getElementById(view + 'View');
-            if(targetView) targetView.classList.remove('hidden');
+            document.getElementById(view + 'View').classList.remove('hidden');
             const targetBtn = document.getElementById('btnView' + view.charAt(0).toUpperCase() + view.slice(1));
             if(targetBtn) targetBtn.className = "bg-blue-600 text-white text-[9px] font-black uppercase px-4 py-2 rounded-lg";
         };
 
         window.openLoginModal = () => { isAdmin ? logout() : document.getElementById('loginModal').classList.remove('hidden'); };
         window.closeLoginModal = () => { document.getElementById('loginModal').classList.add('hidden'); };
-        window.checkPassword = () => { if (document.getElementById('adminPass').value === "Newman.999") { isAdmin = true; document.getElementById('adminPanel').classList.remove('hidden'); document.getElementById('adminToggleBtn').innerText = "Cerrar Panel"; document.querySelectorAll('.admin-only').forEach(el => el.classList.remove('hidden')); closeLoginModal(); renderViews(); } };
-        window.logout = () => { isAdmin = false; document.getElementById('adminPanel').classList.add('hidden'); document.getElementById('adminToggleBtn').innerText = "Admin"; document.querySelectorAll('.admin-only').forEach(el => el.classList.add('hidden')); };
+        window.checkPassword = () => { if (document.getElementById('adminPass').value === "Newman.999") { isAdmin = true; document.getElementById('adminPanel').classList.remove('hidden'); closeLoginModal(); renderViews(); } };
+        window.logout = () => { isAdmin = false; document.getElementById('adminPanel').classList.add('hidden'); };
         window.deleteAthlete = async (id) => { if(confirm("¿Eliminar?")) await deleteDoc(doc(db, 'artifacts', appId, 'public', 'data', 'athletes', id)); };
-        
-        window.setSexFilter = (sex) => { 
-            currentSexFilter = sex; 
-            ['TODOS', 'M', 'F'].forEach(s => { 
-                const btn = document.getElementById('filterSex' + s);
-                if(btn) btn.className = "px-4 py-1.5 rounded-lg text-[10px] font-black uppercase text-slate-400 hover:bg-slate-800"; 
-            }); 
-            const activeBtn = document.getElementById('filterSex' + sex);
-            if(activeBtn) activeBtn.className = "px-4 py-1.5 rounded-lg text-[10px] font-black uppercase bg-blue-600 text-white"; 
-            renderViews(); 
-        };
-
-        // Función para abrir/cerrar los detalles del evento
-        window.toggleEvent = (id) => {
-            const card = document.getElementById('event-' + id);
-            if(card) card.classList.toggle('active');
-        };
-
-        function renderEvents() {
-            const list = document.getElementById('publicEventsList');
-            if(list) {
-                list.innerHTML = events.map(e => {
-                    // Filtrar jugadores por este evento
-                    const eventPlayers = players.filter(p => p.event === e.name);
-                    const playersHTML = eventPlayers.length > 0 
-                        ? eventPlayers.map(p => `<div class="text-[10px] font-bold py-1 border-b border-slate-800/50 flex justify-between uppercase"><span>${p.name}</span><span class="text-blue-400">${p.category}</span></div>`).join('')
-                        : '<p class="text-[9px] text-slate-500 uppercase">Sin atletas inscritos</p>';
-
-                    return `
-                    <div id="event-${e.id}" class="event-card card p-4 rounded-2xl cursor-pointer" onclick="toggleEvent('${e.id}')">
-                        <div class="flex justify-between items-center">
-                            <div>
-                                <p class="text-[10px] font-black uppercase text-white">${e.name}</p>
-                                <p class="text-[8px] text-purple-400 uppercase">${e.location} • ${e.date}</p>
-                            </div>
-                            <svg class="chevron w-4 h-4 text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M19 9l-7 7-7-7"></path>
-                            </svg>
-                        </div>
-                        <div class="event-details">
-                            <p class="text-[9px] font-black text-slate-500 uppercase mb-2 tracking-widest">Atletas Participantes:</p>
-                            <div class="space-y-1">
-                                ${playersHTML}
-                            </div>
-                        </div>
-                    </div>`;
-                }).join('') || 'No hay eventos.';
-            }
-        }
 
         start();
     </script>
+
+    <div id="loginModal" class="fixed inset-0 bg-slate-950/95 hidden flex items-center justify-center p-6 z-50 backdrop-blur-md">
+        <div class="bg-slate-900 p-8 rounded-[2rem] w-full max-w-sm border border-slate-800 text-center">
+            <h2 class="text-xl font-black mb-6 text-white uppercase italic tracking-tighter">Acceso Admin</h2>
+            <input type="password" id="adminPass" class="input-dark w-full p-4 rounded-2xl mb-6 text-center text-2xl tracking-[0.5em]" placeholder="**">
+            <button onclick="checkPassword()" class="btn-primary w-full py-4 rounded-2xl font-black text-white text-xs uppercase">Entrar</button>
+            <button onclick="closeLoginModal()" class="mt-4 text-slate-600 text-[10px] font-bold uppercase">Cancelar</button>
+        </div>
+    </div>
 </body>
 </html>
