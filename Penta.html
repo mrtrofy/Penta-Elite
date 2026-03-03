@@ -18,14 +18,14 @@
         .pts-value { font-size: 0.85rem; font-weight: 800; color: #f1f5f9; }
         .cat-tag { font-size: 0.65rem; background: #1e293b; color: #38bdf8; padding: 2px 6px; border-radius: 4px; font-weight: 700; border: 1px solid #334155; }
         .vs-circle { background: #1e293b; width: 24px; height: 24px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 8px; font-weight: 900; border: 1px solid #334155; margin: 10px auto; color: #38bdf8; }
-        .accordion-content { max-height: 0; overflow: hidden; transition: max-height 0.3s ease-out; }
-        .accordion-open { max-height: 500px; }
+        .accordion-content { max-height: 0; overflow: hidden; transition: max-height 0.5s ease-in-out; }
+        .accordion-open { max-height: 2000px; }
     </style>
 </head>
 <body class="p-2 md:p-8">
     
     <div class="flex justify-between items-center mb-4">
-        <button onclick="window.location.href='index.html'" class="px-6 py-2 bg-red-600/20 border border-red-500/50 text-red-500 hover:bg-red-600 hover:text-white rounded-lg font-bold text-xs uppercase tracking-widest transition-all">
+        <button onclick="window.location.replace('index.html')" class="px-6 py-2 bg-red-600/20 border border-red-500/50 text-red-500 hover:bg-red-600 hover:text-white rounded-lg font-bold text-xs uppercase tracking-widest transition-all">
             Cerrar Sesión
         </button>
         <div id="adminBadge" class="hidden bg-blue-600/20 border border-blue-500/50 text-blue-500 px-3 py-1 rounded-full text-[10px] font-black uppercase">Modo Admin</div>
@@ -43,66 +43,65 @@
                 </div>
             </div>
             <div class="flex gap-2">
-                <button onclick="switchView('publicEvents')" class="bg-purple-900/40 text-purple-400 border border-purple-800/50 px-6 py-2 rounded-xl text-xs font-black uppercase">Eventos</button>
+                <button onclick="location.reload()" class="bg-purple-900/40 text-purple-400 border border-purple-800/50 px-6 py-2 rounded-xl text-xs font-black uppercase">Eventos</button>
                 <button id="adminToggleBtn" onclick="toggleAdminMode()" class="bg-slate-800 hover:bg-slate-700 px-6 py-2 rounded-xl text-xs font-black uppercase border border-slate-700">Admin</button>
             </div>
         </header>
 
-        <div id="publicEventsView" class="hidden mb-6">
+        <div id="publicEventsView" class="block mb-6">
             <div id="publicEventsList" class="grid grid-cols-1 gap-4 mb-6"></div>
-            
-            <div id="subViewButtons" class="hidden flex flex-wrap gap-2 py-4 border-t border-slate-800 mb-4">
-                <button onclick="switchView('ranking')" id="btnViewRanking" class="bg-blue-600 text-white text-[9px] font-black uppercase px-4 py-2 rounded-lg">Tabla General</button>
-                <button onclick="switchView('status')" id="btnViewStatus" class="bg-slate-800 text-slate-400 text-[9px] font-black uppercase px-4 py-2 rounded-lg">Esgrima</button>
-                <button onclick="switchView('tournament')" id="btnViewTournament" class="bg-slate-800 text-slate-400 text-[9px] font-black uppercase px-4 py-2 rounded-lg">Eliminación</button>
-                <button onclick="switchView('handicap')" id="btnViewHandicap" class="bg-slate-800 text-slate-400 text-[9px] font-black uppercase px-4 py-2 rounded-lg">Hándicap</button>
-            </div>
         </div>
 
         <main>
-            <div id="rankingView" class="hidden">
-                <div class="overflow-x-auto card rounded-2xl">
-                    <table class="w-full text-left">
-                        <thead class="bg-slate-800 text-[9px] uppercase font-black text-slate-400">
-                            <tr><th class="p-5">Atleta</th><th class="p-5">Obs</th><th class="p-5">Nat</th><th class="p-5">Laser</th><th class="p-5">Total</th><th class="p-5 admin-only hidden text-right">Acciones</th></tr>
-                        </thead>
-                        <tbody id="scoreboardBody" class="divide-y divide-slate-800"></tbody>
-                    </table>
+            <div id="resultsContainer" class="hidden space-y-6">
+                <div id="navButtonsResults" class="flex flex-wrap gap-2 py-4 border-b border-slate-800">
+                    <button onclick="showSubView('ranking')" id="btnRank" class="bg-blue-600 text-white text-[9px] font-black uppercase px-4 py-2 rounded-lg">Tabla General</button>
+                    <button onclick="showSubView('status')" id="btnStat" class="bg-slate-800 text-slate-400 text-[9px] font-black uppercase px-4 py-2 rounded-lg">Esgrima</button>
+                    <button onclick="showSubView('handicap')" id="btnHandi" class="bg-slate-800 text-slate-400 text-[9px] font-black uppercase px-4 py-2 rounded-lg">Hándicap</button>
                 </div>
+
+                <div id="rankingSubView" class="subview">
+                    <div class="overflow-x-auto card rounded-2xl">
+                        <table class="w-full text-left text-xs">
+                            <thead class="bg-slate-800 uppercase font-black text-slate-400">
+                                <tr><th class="p-4">Atleta</th><th class="p-4">Obs</th><th class="p-4">Nat</th><th class="p-4">Laser</th><th class="p-4">Total</th></tr>
+                            </thead>
+                            <tbody id="scoreboardBody" class="divide-y divide-slate-800"></tbody>
+                        </table>
+                    </div>
+                </div>
+                <div id="statusSubView" class="subview hidden"><div id="statusGrid" class="grid grid-cols-1 md:grid-cols-3 gap-4"></div></div>
+                <div id="handicapSubView" class="subview hidden"><div class="card rounded-2xl overflow-hidden"><table class="w-full text-left"><tbody id="handicapBody" class="divide-y divide-slate-800"></tbody></table></div></div>
             </div>
-            <div id="statusView" class="hidden"><div id="statusGrid" class="grid grid-cols-1 md:grid-cols-3 gap-4"></div></div>
-            <div id="tournamentView" class="hidden"><div id="tournamentBrackets" class="grid grid-cols-1 md:grid-cols-3 gap-4"></div></div>
-            <div id="handicapView" class="hidden"><div class="card rounded-2xl overflow-hidden"><table class="w-full text-left"><tbody id="handicapBody" class="divide-y divide-slate-800"></tbody></table></div></div>
 
             <section id="adminPanel" class="hidden space-y-8 mt-12 border-t-2 border-dashed border-slate-800 pt-12">
                 <div class="card p-6 rounded-3xl">
-                    <h2 class="text-purple-400 font-black uppercase mb-4">Gestión de Eventos</h2>
+                    <h2 class="text-purple-400 font-black uppercase mb-4 text-sm">Crear Evento</h2>
                     <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-4">
-                        <input type="text" id="eventName" class="input-dark p-3 rounded-xl text-sm" placeholder="Nombre">
-                        <input type="date" id="eventDate" class="input-dark p-3 rounded-xl text-sm">
-                        <input type="text" id="eventDesc" class="input-dark p-3 rounded-xl text-sm" placeholder="Lugar">
+                        <input type="text" id="eventName" class="input-dark p-3 rounded-xl text-xs" placeholder="Nombre Evento">
+                        <input type="date" id="eventDate" class="input-dark p-3 rounded-xl text-xs">
+                        <input type="text" id="eventDesc" class="input-dark p-3 rounded-xl text-xs" placeholder="Lugar">
                     </div>
-                    <button onclick="saveEvent()" class="bg-purple-600 text-white px-6 py-2 rounded-xl font-black text-xs uppercase">Crear Evento</button>
-                    <div class="mt-6"><div id="adminEventsList" class="space-y-2"></div></div>
+                    <button onclick="saveEvent()" class="bg-purple-600 text-white px-6 py-2 rounded-xl font-black text-[10px] uppercase">Guardar Evento</button>
+                    <div id="adminEventsList" class="mt-4 space-y-2"></div>
                 </div>
-
                 <div class="card p-6 rounded-3xl">
-                    <h2 class="text-blue-400 font-black uppercase mb-4">Registro Atleta</h2>
+                    <h2 class="text-blue-400 font-black uppercase mb-4 text-sm">Registrar Atleta</h2>
                     <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                        <select id="playerEvent" class="input-dark p-3 rounded-xl text-sm bg-slate-950 col-span-full"></select>
-                        <input type="text" id="playerName" class="input-dark p-3 rounded-xl text-sm" placeholder="Nombre">
-                        <select id="playerSex" class="input-dark p-3 rounded-xl text-sm bg-slate-950"><option value="M">Masculino</option><option value="F">Femenino</option><option value="TODOS">Relevos</option></select>
-                        <select id="playerCategory" class="input-dark p-3 rounded-xl text-sm bg-slate-950">
+                        <select id="playerEvent" class="input-dark p-3 rounded-xl text-xs bg-slate-950 col-span-full"></select>
+                        <input type="text" id="playerName" class="input-dark p-3 rounded-xl text-xs" placeholder="Nombre Completo">
+                        <select id="playerSex" class="input-dark p-3 rounded-xl text-xs bg-slate-950"><option value="M">Masculino</option><option value="F">Femenino</option><option value="TODOS">Relevos</option></select>
+                        <select id="playerCategory" class="input-dark p-3 rounded-xl text-xs bg-slate-950">
                             <option value="U09">U09</option><option value="U11">U11</option><option value="U13">U13</option><option value="U15">U15</option>
                             <option value="U17">U17</option><option value="U19">U19</option><option value="Junior">Junior</option><option value="Senior">Senior</option>
                         </select>
-                        <select id="playerPhase" class="input-dark p-3 rounded-xl text-sm bg-slate-950"><option value="Calificación">Calificación</option><option value="Semifinal">Semifinal</option><option value="Final">Final</option></select>
-                        <input type="number" id="playerEsgrimaV" class="input-dark p-3 rounded-xl text-sm" placeholder="Victorias">
-                        <input type="number" id="playerEsgrimaD" class="input-dark p-3 rounded-xl text-sm" placeholder="Derrotas">
-                        <input type="number" id="playerEsgrimaTotal" class="input-dark p-3 rounded-xl text-sm" placeholder="Total Bouts">
-                        <input type="text" id="playerObstaculos" class="input-dark p-3 rounded-xl text-sm" placeholder="Obs (seg)">
-                        <input type="text" id="playerNatacion" class="input-dark p-3 rounded-xl text-sm" placeholder="Nat (m:s)">
-                        <input type="text" id="playerLaser" class="input-dark p-3 rounded-xl text-sm" placeholder="Laser (m:s)">
+                        <select id="playerPhase" class="input-dark p-3 rounded-xl text-xs bg-slate-950"><option value="Calificación">Calificación</option><option value="Semifinal">Semifinal</option><option value="Final">Final</option></select>
+                        <input type="number" id="playerEsgrimaV" class="input-dark p-3 rounded-xl text-xs" placeholder="Victorias">
+                        <input type="number" id="playerEsgrimaD" class="input-dark p-3 rounded-xl text-xs" placeholder="Derrotas">
+                        <input type="number" id="playerEsgrimaTotal" class="input-dark p-3 rounded-xl text-xs" placeholder="Total Bouts">
+                        <input type="text" id="playerObstaculos" class="input-dark p-3 rounded-xl text-xs" placeholder="Obs (seg)">
+                        <input type="text" id="playerNatacion" class="input-dark p-3 rounded-xl text-xs" placeholder="Nat (m:s)">
+                        <input type="text" id="playerLaser" class="input-dark p-3 rounded-xl text-xs" placeholder="Laser (m:s)">
                     </div>
                     <button onclick="savePlayer()" class="btn-primary mt-6 text-white px-10 py-4 rounded-2xl font-black uppercase text-xs w-full">Guardar Atleta</button>
                 </div>
@@ -117,7 +116,7 @@
 
         const firebaseConfig = { apiKey: "AIzaSyAtWCkDlZuv11AueTW6WEPNwAn97Vf-3yQ", authDomain: "pentatlon-scores.firebaseapp.com", projectId: "pentatlon-scores", storageBucket: "pentatlon-scores.firebasestorage.app", messagingSenderId: "650229123946", appId: "1:650229123946:web:a3769c31f8ce1a23edb313" };
         const appId = 'penta-tourney-v2';
-        let firebaseApp, auth, db, players = [], events = [], isAdmin = false, currentSelectedEvent = null;
+        let firebaseApp, auth, db, players = [], events = [], isAdmin = false;
 
         async function start() {
             firebaseApp = initializeApp(firebaseConfig); auth = getAuth(firebaseApp); db = getFirestore(firebaseApp);
@@ -127,7 +126,7 @@
 
         function setupListeners() {
             onSnapshot(collection(db, 'artifacts', appId, 'public', 'data', 'athletes'), (snap) => {
-                players = snap.docs.map(d => ({ id: d.id, ...d.data() })); renderViews();
+                players = snap.docs.map(d => ({ id: d.id, ...d.data() }));
                 document.getElementById('loadingOverlay').style.display = 'none';
                 document.getElementById('app').classList.replace('opacity-0', 'opacity-100');
             });
@@ -138,17 +137,28 @@
         }
 
         window.toggleAccordion = (id) => {
+            document.querySelectorAll('.accordion-content').forEach(c => { if(c.id !== 'acc-'+id) c.classList.remove('accordion-open'); });
             const content = document.getElementById('acc-' + id);
-            const icon = document.getElementById('icon-' + id);
             content.classList.toggle('accordion-open');
-            icon.style.transform = content.classList.contains('accordion-open') ? 'rotate(180deg)' : 'rotate(0deg)';
         };
 
-        window.applyMainFilters = (eventName) => { 
-            currentSelectedEvent = eventName;
-            document.getElementById('subViewButtons').classList.remove('hidden'); 
-            renderViews(); 
-            switchView('ranking'); 
+        window.applyFilters = (eventName, eventId) => {
+            const sex = document.getElementById('sex-'+eventId).value;
+            const phase = document.getElementById('phase-'+eventId).value;
+            
+            // Mostrar contenedor de resultados y ocultar lista de eventos
+            document.getElementById('publicEventsList').classList.add('hidden');
+            document.getElementById('resultsContainer').classList.remove('hidden');
+            
+            renderResults(eventName, sex, phase);
+        };
+
+        window.showSubView = (view) => {
+            document.querySelectorAll('.subview').forEach(v => v.classList.add('hidden'));
+            document.getElementById(view + 'SubView').classList.remove('hidden');
+            ['Rank', 'Stat', 'Handi'].forEach(id => document.getElementById('btn'+id).className = "bg-slate-800 text-slate-400 text-[9px] font-black uppercase px-4 py-2 rounded-lg");
+            const btnMap = {ranking: 'Rank', status: 'Stat', handicap: 'Handi'};
+            document.getElementById('btn'+btnMap[view]).className = "bg-blue-600 text-white text-[9px] font-black uppercase px-4 py-2 rounded-lg";
         };
 
         function parseTime(val) {
@@ -158,37 +168,25 @@
             return parseFloat(clean) || 0;
         }
 
-        function getFullStats(p) {
-            const victories = parseInt(p.esgrimaV) || 0;
-            const esgrimaPts = (parseInt(p.esgrimaTotal) || 0) > 0 ? Math.max(0, 250 + (victories - Math.ceil(parseInt(p.esgrimaTotal) * 0.7)) * 5) : 0;
-            const tObs = parseTime(p.obstaculos); let obsPts = tObs >= 15 ? Math.max(0, 400 - Math.floor((tObs - 15) / 0.33)) : (tObs > 0 ? 401 : 0);
-            const tNat = parseTime(p.natacion); let natPts = tNat > 0 ? Math.max(0, 375 - Math.ceil((tNat - 45) / 0.2)) : 0;
-            const tLas = parseTime(p.laser); let lasPts = tLas > 0 ? Math.max(0, 700 - Math.floor(tLas - 600)) : 0;
-            const handicapPts = esgrimaPts + obsPts + natPts;
-            return { ...p, esgrimaPts, obsPts, natPts, lasPts, handicapPts, totalFinal: Math.round(handicapPts + lasPts) };
+        function renderResults(eventName, sex, phase) {
+            let data = players.filter(p => p.event === eventName && p.sex === sex && p.phase === phase).map(p => {
+                const victories = parseInt(p.esgrimaV) || 0;
+                const totalBouts = parseInt(p.esgrimaTotal) || 1;
+                const esgrimaPts = Math.max(0, 250 + (victories - Math.ceil(totalBouts * 0.7)) * 5);
+                const tObs = parseTime(p.obstaculos); let obsPts = tObs > 0 ? Math.max(0, 400 - Math.floor((tObs - 15) / 0.33)) : 0;
+                const tNat = parseTime(p.natacion); let natPts = tNat > 0 ? Math.max(0, 375 - Math.ceil((tNat - 45) / 0.2)) : 0;
+                const tLas = parseTime(p.laser); let lasPts = tLas > 0 ? Math.max(0, 700 - Math.floor(tLas - 600)) : 0;
+                const hPts = esgrimaPts + obsPts + natPts;
+                return { ...p, esgrimaPts, obsPts, natPts, lasPts, hPts, total: Math.round(hPts + lasPts) };
+            }).sort((a,b) => b.total - a.total);
+
+            document.getElementById('scoreboardBody').innerHTML = data.map(p => `<tr><td class="p-4 font-black uppercase">${p.name}<br><span class="cat-tag">${p.category}</span></td><td class="p-4 pts-value">${p.obsPts}</td><td class="p-4 pts-value">${p.natPts}</td><td class="p-4 pts-value">${p.lasPts}</td><td class="p-4 font-black text-blue-400">${p.total}</td></tr>`).join('');
+            document.getElementById('statusGrid').innerHTML = data.map(p => `<div class="card p-4 rounded-xl text-center"><p class="text-[10px] font-black uppercase mb-2">${p.name}</p><div class="grid grid-cols-2 gap-2"><div class="bg-green-900/20 p-2 rounded text-green-400 font-bold">${p.esgrimaV}V</div><div class="bg-red-900/20 p-2 rounded text-red-400 font-bold">${p.esgrimaD}D</div></div></div>`).join('');
+            
+            const hData = [...data].sort((a,b) => b.hPts - a.hPts); const best = hData[0]?.hPts || 0;
+            document.getElementById('handicapBody').innerHTML = hData.map((p, i) => `<tr><td class="p-4 font-black uppercase">${p.name}</td><td class="p-4 pts-value">${p.hPts}</td><td class="p-4 text-green-500 font-mono">${i === 0 ? 'SALIDA' : `+${best - p.hPts}s`}</td></tr>`).join('');
+            showSubView('ranking');
         }
-
-        window.renderViews = () => {
-            const selSex = document.getElementById('filterSex')?.value || 'M';
-            const selPhase = document.getElementById('filterPhase')?.value || 'Final';
-            let data = players.map(p => getFullStats(p)).filter(p => p.event === currentSelectedEvent && p.sex === selSex && p.phase === selPhase);
-            data.sort((a, b) => b.totalFinal - a.totalFinal);
-            document.getElementById('scoreboardBody').innerHTML = data.map(p => `<tr><td class="p-5 text-xs font-black uppercase">${p.name}<br><span class="cat-tag">${p.category}</span></td><td class="p-5 pts-value">${p.obsPts}</td><td class="p-5 pts-value">${p.natPts}</td><td class="p-5 pts-value">${p.lasPts}</td><td class="p-5 font-black text-blue-400">${p.totalFinal}</td><td class="p-5 text-right admin-only ${isAdmin ? '' : 'hidden'}"><button onclick="deleteAthlete('${p.id}')" class="text-red-500 font-black">X</button></td></tr>`).join('');
-            document.getElementById('statusGrid').innerHTML = data.map(p => `<div class="card p-5 rounded-2xl"><h3 class="text-xs font-black uppercase mb-4">${p.name}</h3><div class="grid grid-cols-2 gap-2"><div class="bg-slate-950 p-2 rounded-xl text-center"><p class="text-lg font-black text-green-400">${p.esgrimaV || 0}V</p></div><div class="bg-slate-950 p-2 rounded-xl text-center"><p class="text-lg font-black text-red-400">${p.esgrimaD || 0}D</p></div></div></div>`).join('');
-            const hData = [...data].sort((a,b) => b.handicapPts - a.handicapPts); const best = hData[0]?.handicapPts || 0;
-            document.getElementById('handicapBody').innerHTML = hData.map((p, i) => `<tr><td class="p-5 text-xs font-black uppercase">${p.name}</td><td class="p-5 pts-value">${p.handicapPts}</td><td class="p-5 text-green-500 font-mono text-[10px]">${i === 0 ? 'SALIDA' : `+${best - p.handicapPts}s`}</td></tr>`).join('');
-        };
-
-        window.switchView = (view) => {
-            ['ranking', 'status', 'tournament', 'handicap', 'publicEvents'].forEach(v => {
-                const el = document.getElementById(v + 'View'); if(el) el.classList.add('hidden');
-                const btn = document.getElementById('btnView' + v.charAt(0).toUpperCase() + v.slice(1));
-                if(btn) btn.className = "bg-slate-800 text-slate-400 text-[9px] font-black uppercase px-4 py-2 rounded-lg";
-            });
-            document.getElementById(view + 'View').classList.remove('hidden');
-            const targetBtn = document.getElementById('btnView' + view.charAt(0).toUpperCase() + view.slice(1));
-            if(targetBtn) targetBtn.className = "bg-blue-600 text-white text-[9px] font-black uppercase px-4 py-2 rounded-lg";
-        };
 
         window.toggleAdminMode = () => { if (isAdmin) { logout(); } else { openLoginModal(); } };
         window.logout = () => {
@@ -196,8 +194,7 @@
             document.getElementById('adminPanel').classList.add('hidden');
             document.getElementById('adminBadge').classList.add('hidden');
             document.getElementById('adminToggleBtn').innerText = "Admin";
-            document.querySelectorAll('.admin-only').forEach(el => el.classList.add('hidden'));
-            renderViews();
+            location.reload();
         };
 
         window.saveEvent = async () => {
@@ -206,8 +203,6 @@
             await setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'events', crypto.randomUUID()), { name, date: document.getElementById('eventDate').value, location: document.getElementById('eventDesc').value });
             alert("Evento Guardado");
         };
-
-        window.deleteEvent = async (id) => { if(confirm("¿Eliminar evento?")) await deleteDoc(doc(db, 'artifacts', appId, 'public', 'data', 'events', id)); };
 
         window.savePlayer = async () => {
             const data = {
@@ -222,67 +217,63 @@
             alert("Atleta Guardado");
         };
 
-        function updateEventSelect() { document.getElementById('playerEvent').innerHTML = '<option value="">Seleccionar Evento...</option>' + events.map(e => `<option value="${e.name}">${e.name}</option>`).join(''); }
-        
         function renderEventsList() { 
             document.getElementById('publicEventsList').innerHTML = events.map(e => `
-                <div class="card rounded-2xl overflow-hidden">
-                    <div onclick="toggleAccordion('${e.id}')" class="p-5 flex justify-between items-center cursor-pointer hover:bg-slate-800/50 transition-all">
+                <div class="card rounded-2xl overflow-hidden shadow-2xl">
+                    <div onclick="toggleAccordion('${e.id}')" class="p-6 flex justify-between items-center cursor-pointer hover:bg-slate-800/40">
                         <div>
-                            <p class="text-[10px] font-black text-white uppercase">${e.name}</p>
-                            <p class="text-[8px] text-purple-400 uppercase">${e.location} • ${e.date}</p>
+                            <p class="text-xs font-black text-white uppercase tracking-tighter">${e.name}</p>
+                            <p class="text-[9px] text-blue-400 font-bold uppercase mt-1">${e.location} • ${e.date}</p>
                         </div>
-                        <span id="icon-${e.id}" class="text-blue-500 font-black transition-transform duration-300">▼</span>
+                        <div class="bg-slate-800 p-2 rounded-lg text-blue-500">▼</div>
                     </div>
-                    <div id="acc-${e.id}" class="accordion-content bg-slate-900/30 px-5">
-                        <div class="py-4 border-t border-slate-800/50 grid grid-cols-1 sm:grid-cols-3 gap-3">
-                            <div>
-                                <label class="text-[8px] uppercase font-bold text-slate-500">Género</label>
-                                <select id="filterSex" class="input-dark w-full p-2 rounded-lg mt-1 text-[10px]">
-                                    <option value="M">HOMBRE</option><option value="F">MUJER</option><option value="TODOS">RELEVOS</option>
-                                </select>
+                    <div id="acc-${e.id}" class="accordion-content bg-slate-900/20 px-6">
+                        <div class="py-6 border-t border-slate-800/50 space-y-4">
+                            <div class="grid grid-cols-2 gap-4">
+                                <div>
+                                    <label class="text-[9px] uppercase font-black text-slate-500 ml-1">Género</label>
+                                    <select id="sex-${e.id}" class="input-dark w-full p-3 rounded-xl mt-1 text-xs">
+                                        <option value="M">HOMBRE</option><option value="F">MUJER</option><option value="TODOS">RELEVOS</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label class="text-[9px] uppercase font-black text-slate-500 ml-1">Fase</label>
+                                    <select id="phase-${e.id}" class="input-dark w-full p-3 rounded-xl mt-1 text-xs">
+                                        <option value="Final">FINAL</option><option value="Semifinal">SEMIFINAL</option><option value="Calificación">CALIFICACIÓN</option>
+                                    </select>
+                                </div>
                             </div>
-                            <div>
-                                <label class="text-[8px] uppercase font-bold text-slate-500">Fase</label>
-                                <select id="filterPhase" class="input-dark w-full p-2 rounded-lg mt-1 text-[10px]">
-                                    <option value="Calificación">CALIFICACIÓN</option><option value="Semifinal">SEMIFINAL</option><option value="Final">FINAL</option>
-                                </select>
-                            </div>
-                            <div class="flex items-end">
-                                <button onclick="applyMainFilters('${e.name}')" class="btn-primary w-full p-2 rounded-lg text-[10px] font-black uppercase">Resultados</button>
-                            </div>
+                            <button onclick="applyFilters('${e.name}', '${e.id}')" class="btn-primary w-full py-4 rounded-2xl text-xs font-black uppercase shadow-lg shadow-blue-900/20">Ver Resultados</button>
                         </div>
                     </div>
                 </div>
             `).join(''); 
         }
 
-        function renderAdminEvents() { document.getElementById('adminEventsList').innerHTML = events.map(e => `<div class="flex justify-between items-center bg-slate-900 p-2 rounded-lg border border-slate-800"><span class="text-[10px] font-bold uppercase">${e.name}</span><button onclick="deleteEvent('${e.id}')" class="text-red-500 text-[10px] font-black uppercase">Eliminar</button></div>`).join(''); }
+        function updateEventSelect() { document.getElementById('playerEvent').innerHTML = events.map(e => `<option value="${e.name}">${e.name}</option>`).join(''); }
+        function renderAdminEvents() { document.getElementById('adminEventsList').innerHTML = events.map(e => `<div class="flex justify-between items-center bg-slate-900 p-2 rounded-lg border border-slate-800"><span class="text-[10px] font-bold uppercase">${e.name}</span><button onclick="deleteEvent('${e.id}')" class="text-red-500 font-black">ELIMINAR</button></div>`).join(''); }
+        window.deleteEvent = async (id) => { if(confirm("¿Eliminar?")) await deleteDoc(doc(db, 'artifacts', appId, 'public', 'data', 'events', id)); };
 
         window.openLoginModal = () => document.getElementById('loginModal').classList.remove('hidden');
         window.closeLoginModal = () => document.getElementById('loginModal').classList.add('hidden');
-        
         window.checkPassword = () => { 
             if (document.getElementById('adminPass').value === "Newman.999") { 
                 isAdmin = true; 
                 document.getElementById('adminPanel').classList.remove('hidden'); 
                 document.getElementById('adminBadge').classList.remove('hidden');
                 document.getElementById('adminToggleBtn').innerText = "Usuario Normal";
-                document.querySelectorAll('.admin-only').forEach(el => el.classList.remove('hidden')); 
                 closeLoginModal(); 
-                renderViews(); 
-            } else { alert("Clave incorrecta"); }
+            } else { alert("Error"); }
         };
-        window.deleteAthlete = async (id) => { if(confirm("¿Eliminar?")) await deleteDoc(doc(db, 'artifacts', appId, 'public', 'data', 'athletes', id)); };
         start();
     </script>
 
-    <div id="loginModal" class="fixed inset-0 bg-slate-950/95 hidden flex items-center justify-center p-6 z-50">
+    <div id="loginModal" class="fixed inset-0 bg-slate-950/98 hidden flex items-center justify-center p-6 z-50">
         <div class="bg-slate-900 p-8 rounded-[2rem] w-full max-w-sm border border-slate-800 text-center">
-            <h2 class="text-xl font-black mb-6 text-white uppercase italic">Acceso Admin</h2>
-            <input type="password" id="adminPass" class="input-dark w-full p-4 rounded-2xl mb-6 text-center text-2xl tracking-[0.5em]" placeholder="**">
+            <h2 class="text-xl font-black mb-6 text-white uppercase">Acceso Admin</h2>
+            <input type="password" id="adminPass" class="input-dark w-full p-4 rounded-2xl mb-6 text-center text-2xl" placeholder="****">
             <button onclick="checkPassword()" class="btn-primary w-full py-4 rounded-2xl font-black text-white text-xs uppercase">Entrar</button>
-            <button onclick="closeLoginModal()" class="mt-4 text-slate-600 text-[10px] font-bold uppercase">Cancelar</button>
+            <button onclick="closeLoginModal()" class="mt-4 text-slate-600 text-[10px] font-bold uppercase">Cerrar</button>
         </div>
     </div>
 </body>
