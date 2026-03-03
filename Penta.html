@@ -77,12 +77,6 @@
                 <button onclick="switchView('tournament')" id="btnViewTournament" class="bg-slate-800 text-slate-400 text-[9px] font-black uppercase px-4 py-2 rounded-lg hover:bg-slate-700">Llaves 1vs1</button>
                 <button onclick="switchView('handicap')" id="btnViewHandicap" class="bg-slate-800 text-slate-400 text-[9px] font-black uppercase px-4 py-2 rounded-lg hover:bg-slate-700">Hándicap</button>
             </div>
-            
-            <div class="flex gap-2 p-1 bg-slate-900/50 rounded-xl w-fit border border-slate-800">
-                <button onclick="setSexFilter('TODOS')" id="filterSexTODOS" class="px-4 py-1.5 rounded-lg text-[10px] font-black uppercase transition-all bg-blue-600 text-white">Todos</button>
-                <button onclick="setSexFilter('M')" id="filterSexM" class="px-4 py-1.5 rounded-lg text-[10px] font-black uppercase transition-all text-slate-400 hover:bg-slate-800">Masculino</button>
-                <button onclick="setSexFilter('F')" id="filterSexF" class="px-4 py-1.5 rounded-lg text-[10px] font-black uppercase transition-all text-slate-400 hover:bg-slate-800">Femenino</button>
-            </div>
         </div>
 
         <main class="flex-grow">
@@ -117,6 +111,11 @@
             </div>
 
             <div id="publicEventsView" class="hidden">
+                <div class="flex gap-2 p-1 bg-slate-900/50 rounded-xl w-fit border border-slate-800 mb-6">
+                    <button onclick="setSexFilter('TODOS')" id="filterSexTODOS" class="px-4 py-1.5 rounded-lg text-[10px] font-black uppercase transition-all bg-blue-600 text-white">Relevos</button>
+                    <button onclick="setSexFilter('M')" id="filterSexM" class="px-4 py-1.5 rounded-lg text-[10px] font-black uppercase transition-all text-slate-400 hover:bg-slate-800">Masculino</button>
+                    <button onclick="setSexFilter('F')" id="filterSexF" class="px-4 py-1.5 rounded-lg text-[10px] font-black uppercase transition-all text-slate-400 hover:bg-slate-800">Femenino</button>
+                </div>
                 <div id="publicEventsList" class="grid grid-cols-1 sm:grid-cols-2 gap-4"></div>
             </div>
 
@@ -223,8 +222,10 @@
 
         function updateEventSelect() {
             const select = document.getElementById('playerEvent');
-            select.innerHTML = '<option value="">Seleccionar Evento...</option>' + 
+            if(select) {
+                select.innerHTML = '<option value="">Seleccionar Evento...</option>' + 
                 events.map(e => `<option value="${e.name}">${e.name}</option>`).join('');
+            }
         }
 
         window.saveEvent = async () => {
@@ -304,7 +305,10 @@
             editingId = null;
             document.getElementById('adminFormTitle').innerText = "Registro Atleta";
             document.getElementById('btnCancelEdit').classList.add('hidden');
-            ['playerEvent','playerCountry','playerState','playerName','playerEsgrimaV','playerEsgrimaTotal','playerObstaculos','playerNatacion','playerLaser'].forEach(id => document.getElementById(id).value = "");
+            ['playerEvent','playerCountry','playerState','playerName','playerEsgrimaV','playerEsgrimaTotal','playerObstaculos','playerNatacion','playerLaser'].forEach(id => {
+                const el = document.getElementById(id);
+                if(el) el.value = "";
+            });
         };
 
         function renderViews() {
@@ -396,11 +400,13 @@
 
         window.switchView = (view) => {
             ['ranking', 'status', 'tournament', 'handicap', 'publicEvents'].forEach(v => {
-                document.getElementById(v + 'View').classList.add('hidden');
+                const el = document.getElementById(v + 'View');
+                if(el) el.classList.add('hidden');
                 const btn = document.getElementById('btnView' + v.charAt(0).toUpperCase() + v.slice(1));
                 if(btn) btn.className = "bg-slate-800 text-slate-400 text-[9px] font-black uppercase px-4 py-2 rounded-lg";
             });
-            document.getElementById(view + 'View').classList.remove('hidden');
+            const targetView = document.getElementById(view + 'View');
+            if(targetView) targetView.classList.remove('hidden');
             const targetBtn = document.getElementById('btnView' + view.charAt(0).toUpperCase() + view.slice(1));
             if(targetBtn) targetBtn.className = "bg-blue-600 text-white text-[9px] font-black uppercase px-4 py-2 rounded-lg";
         };
@@ -410,11 +416,23 @@
         window.checkPassword = () => { if (document.getElementById('adminPass').value === "Newman.999") { isAdmin = true; document.getElementById('adminPanel').classList.remove('hidden'); document.getElementById('adminToggleBtn').innerText = "Cerrar Panel"; document.querySelectorAll('.admin-only').forEach(el => el.classList.remove('hidden')); closeLoginModal(); renderViews(); } };
         window.logout = () => { isAdmin = false; document.getElementById('adminPanel').classList.add('hidden'); document.getElementById('adminToggleBtn').innerText = "Admin"; document.querySelectorAll('.admin-only').forEach(el => el.classList.add('hidden')); };
         window.deleteAthlete = async (id) => { if(confirm("¿Eliminar?")) await deleteDoc(doc(db, 'artifacts', appId, 'public', 'data', 'athletes', id)); };
-        window.setSexFilter = (sex) => { currentSexFilter = sex; ['TODOS', 'M', 'F'].forEach(s => { document.getElementById('filterSex' + s).className = "px-4 py-1.5 rounded-lg text-[10px] font-black uppercase text-slate-400 hover:bg-slate-800"; }); document.getElementById('filterSex' + sex).className = "px-4 py-1.5 rounded-lg text-[10px] font-black uppercase bg-blue-600 text-white"; renderViews(); };
+        
+        window.setSexFilter = (sex) => { 
+            currentSexFilter = sex; 
+            ['TODOS', 'M', 'F'].forEach(s => { 
+                const btn = document.getElementById('filterSex' + s);
+                if(btn) btn.className = "px-4 py-1.5 rounded-lg text-[10px] font-black uppercase text-slate-400 hover:bg-slate-800"; 
+            }); 
+            const activeBtn = document.getElementById('filterSex' + sex);
+            if(activeBtn) activeBtn.className = "px-4 py-1.5 rounded-lg text-[10px] font-black uppercase bg-blue-600 text-white"; 
+            renderViews(); 
+        };
 
         function renderEvents() {
             const list = document.getElementById('publicEventsList');
-            list.innerHTML = events.map(e => `<div class="card p-4 rounded-2xl"><div><p class="text-[10px] font-black uppercase text-white">${e.name}</p><p class="text-[8px] text-purple-400 uppercase">${e.location} • ${e.date}</p></div></div>`).join('') || 'No hay eventos.';
+            if(list) {
+                list.innerHTML = events.map(e => `<div class="card p-4 rounded-2xl"><div><p class="text-[10px] font-black uppercase text-white">${e.name}</p><p class="text-[8px] text-purple-400 uppercase">${e.location} • ${e.date}</p></div></div>`).join('') || 'No hay eventos.';
+            }
         }
 
         start();
