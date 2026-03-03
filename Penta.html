@@ -136,6 +136,12 @@
                         <select id="playerEvent" class="input-dark p-3 rounded-xl text-sm bg-slate-950 col-span-full"><option value="">Seleccionar Evento...</option></select>
                         <input type="text" id="playerName" class="input-dark p-3 rounded-xl text-sm" placeholder="Nombre">
                         <select id="playerSex" class="input-dark p-3 rounded-xl text-sm bg-slate-950"><option value="M">Masculino</option><option value="F">Femenino</option><option value="TODOS">Relevos</option></select>
+                        
+                        <select id="playerCategory" class="input-dark p-3 rounded-xl text-sm bg-slate-950">
+                            <option value="U09">U09</option><option value="U11">U11</option><option value="U13">U13</option><option value="U15">U15</option>
+                            <option value="U17">U17</option><option value="U19">U19</option><option value="Junior">Junior</option><option value="Senior">Senior</option>
+                        </select>
+
                         <select id="playerPhase" class="input-dark p-3 rounded-xl text-sm bg-slate-950"><option value="Calificación">Calificación</option><option value="Semifinal">Semifinal</option><option value="Final">Final</option></select>
                         <input type="number" id="playerEsgrimaV" class="input-dark p-3 rounded-xl text-sm" placeholder="Victorias">
                         <input type="number" id="playerEsgrimaD" class="input-dark p-3 rounded-xl text-sm" placeholder="Derrotas">
@@ -199,6 +205,7 @@
                 event: document.getElementById('playerEvent').value,
                 name: document.getElementById('playerName').value,
                 sex: document.getElementById('playerSex').value,
+                category: document.getElementById('playerCategory').value,
                 phase: document.getElementById('playerPhase').value,
                 esgrimaV: document.getElementById('playerEsgrimaV').value,
                 esgrimaD: document.getElementById('playerEsgrimaD').value,
@@ -234,7 +241,7 @@
             let data = players.map(p => getFullStats(p)).filter(p => p.sex === selSex && p.phase === selPhase);
             data.sort((a, b) => b.totalFinal - a.totalFinal);
 
-            document.getElementById('scoreboardBody').innerHTML = data.map(p => `<tr><td class="p-5 text-xs font-black uppercase">${p.name}</td><td class="p-5 pts-value">${p.obsPts}</td><td class="p-5 pts-value">${p.natPts}</td><td class="p-5 pts-value">${p.lasPts}</td><td class="p-5 text-right admin-only ${isAdmin ? '' : 'hidden'}"><button onclick="deleteAthlete('${p.id}')" class="text-red-500 text-[9px] font-black">DEL</button></td></tr>`).join('');
+            document.getElementById('scoreboardBody').innerHTML = data.map(p => `<tr><td class="p-5 text-xs font-black uppercase">${p.name}<br><span class="cat-tag">${p.category}</span></td><td class="p-5 pts-value">${p.obsPts}</td><td class="p-5 pts-value">${p.natPts}</td><td class="p-5 pts-value">${p.lasPts}</td><td class="p-5 text-right admin-only ${isAdmin ? '' : 'hidden'}"><button onclick="deleteAthlete('${p.id}')" class="text-red-500 text-[9px] font-black">DEL</button></td></tr>`).join('');
             document.getElementById('statusGrid').innerHTML = data.map(p => `<div class="card p-5 rounded-2xl"><h3 class="text-sm font-black uppercase italic mb-4">${p.name}</h3><div class="grid grid-cols-2 gap-2"><div class="bg-slate-950/50 p-2 rounded-xl text-center"><p class="text-[8px] text-slate-500 uppercase">V</p><p class="text-lg font-black text-green-400">${p.esgrimaV || 0}</p></div><div class="bg-slate-950/50 p-2 rounded-xl text-center"><p class="text-[8px] text-slate-500 uppercase">D</p><p class="text-lg font-black text-red-400">${p.esgrimaD || 0}</p></div></div></div>`).join('');
 
             const pairs = []; const bracketData = [...data];
@@ -264,7 +271,7 @@
             const list = document.getElementById('publicEventsList');
             if(list) list.innerHTML = events.map(e => {
                 const ep = players.filter(p => p.event === e.name);
-                return `<div id="event-${e.id}" class="event-card card p-4 rounded-2xl cursor-pointer" onclick="toggleEvent('${e.id}')"><div class="flex justify-between items-center"><div><p class="text-[10px] font-black uppercase text-white">${e.name}</p><p class="text-[8px] text-purple-400 uppercase">${e.location} • ${e.date}</p></div><svg class="w-4 h-4 text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M19 9l-7 7-7-7"></path></svg></div><div class="event-details"><div class="space-y-1">${ep.map(p => `<div class="text-[10px] font-bold py-1 border-b border-slate-800/50 uppercase">${p.name}</div>`).join('')}</div></div></div>`;
+                return `<div id="event-${e.id}" class="event-card card p-4 rounded-2xl cursor-pointer" onclick="toggleEvent('${e.id}')"><div class="flex justify-between items-center"><div><p class="text-[10px] font-black uppercase text-white">${e.name}</p><p class="text-[8px] text-purple-400 uppercase">${e.location} • ${e.date}</p></div><svg class="w-4 h-4 text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M19 9l-7 7-7-7"></path></svg></div><div class="event-details"><div class="space-y-1">${ep.map(p => `<div class="text-[10px] font-bold py-1 border-b border-slate-800/50 uppercase">${p.name} <span class="text-[8px] text-blue-400">(${p.category})</span></div>`).join('')}</div></div></div>`;
             }).join('');
         }
 
