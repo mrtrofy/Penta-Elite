@@ -157,5 +157,36 @@
             }
         };
     </script>
+
+    <script>
+    // Deshabilitar menú contextual (Clic derecho)
+    document.addEventListener('contextmenu', function(e) {
+        e.preventDefault();
+    }, false);
+
+    // Bloquear atajos de teclado comunes
+    document.addEventListener('keydown', function(e) {
+        // Bloquear F12
+        if (e.key === "F12") {
+            e.preventDefault();
+        }
+        // Bloquear Ctrl+Shift+I (Inspeccionar)
+        if (e.ctrlKey && e.shiftKey && e.key === "I") {
+            e.preventDefault();
+        }
+        // Bloquear Ctrl+Shift+J (Consola)
+        if (e.ctrlKey && e.shiftKey && e.key === "J") {
+            e.preventDefault();
+        }
+        // Bloquear Ctrl+U (Ver código fuente)
+        if (e.ctrlKey && e.key === "u") {
+            e.preventDefault();
+        }
+        // Bloquear Ctrl+S (Guardar página)
+        if (e.ctrlKey && e.key === "s") {
+            e.preventDefault();
+        }
+    }, false);
+</script>
 </body>
 </html>
