@@ -98,7 +98,11 @@
                             <option value="U09">U09</option><option value="U11">U11</option><option value="U13">U13</option><option value="U15">U15</option>
                             <option value="U17">U17</option><option value="U19">U19</option><option value="Junior">Junior</option><option value="Senior">Senior</option>
                         </select>
-                        <select id="playerPhase" class="input-dark p-3 rounded-xl text-xs bg-slate-950"><option value="Calificación">Calificación</option><option value="Semifinal">Semifinal</option><option value="Final">Final</option></select>
+                        <select id="playerPhase" class="input-dark p-3 rounded-xl text-xs bg-slate-950">
+                            <option value="Clasificación">1. Clasificación</option>
+                            <option value="Semifinal">2. Semifinal</option>
+                            <option value="Final">3. Final</option>
+                        </select>
                         <input type="number" id="playerEsgrimaV" class="input-dark p-3 rounded-xl text-xs" placeholder="Victorias">
                         <input type="number" id="playerEsgrimaD" class="input-dark p-3 rounded-xl text-xs" placeholder="Derrotas">
                         <input type="number" id="playerEsgrimaTotal" class="input-dark p-3 rounded-xl text-xs" placeholder="Total Bouts">
@@ -123,25 +127,15 @@
 
         async function start() {
             firebaseApp = initializeApp(firebaseConfig); auth = getAuth(firebaseApp); db = getFirestore(firebaseApp);
-            // IMPORTANTE: Escuchar el estado de autenticación
             onAuthStateChanged(auth, (user) => { 
-                if (user) {
-                    setupListeners();
-                } else {
-                    // Si la sesión se cierra, forzar salida al index
-                    window.location.href = 'index.html';
-                }
+                if (user) { setupListeners(); } 
+                else { window.location.href = 'index.html'; }
             });
         }
 
-        // Función Global de Cierre de Sesión Real
         window.logoutSession = async () => {
-            try {
-                await signOut(auth);
-            } catch (error) {
-                console.error("Error al cerrar sesión", error);
-                window.location.href = 'index.html';
-            }
+            try { await signOut(auth); } 
+            catch (error) { window.location.href = 'index.html'; }
         };
 
         function setupListeners() {
@@ -221,8 +215,6 @@
         }
 
         window.toggleAdminMode = () => { if (isAdmin) { logoutAdmin(); } else { openLoginModal(); } };
-        
-        // Cierre solo de privilegios admin (sin cerrar sesión de usuario)
         function logoutAdmin() {
             isAdmin = false;
             document.getElementById('adminPanel').classList.add('hidden');
@@ -261,7 +253,12 @@
                         <div class="py-6 border-t border-slate-800/50 space-y-4">
                             <div class="grid grid-cols-2 gap-4">
                                 <div><label class="text-[9px] uppercase font-black text-slate-500 ml-1">Género</label><select id="sex-${e.id}" class="input-dark w-full p-3 rounded-xl mt-1 text-xs"><option value="M">HOMBRE</option><option value="F">MUJER</option><option value="TODOS">RELEVOS</option></select></div>
-                                <div><label class="text-[9px] uppercase font-black text-slate-500 ml-1">Fase</label><select id="phase-${e.id}" class="input-dark w-full p-3 rounded-xl mt-1 text-xs"><option value="Final">FINAL</option><option value="Semifinal">SEMIFINAL</option><option value="Calificación">CALIFICACIÓN</option></select></div>
+                                <div><label class="text-[9px] uppercase font-black text-slate-500 ml-1">Fase</label>
+                                <select id="phase-${e.id}" class="input-dark w-full p-3 rounded-xl mt-1 text-xs">
+                                    <option value="Clasificación">1. CLASIFICACIÓN</option>
+                                    <option value="Semifinal">2. SEMIFINAL</option>
+                                    <option value="Final">3. FINAL</option>
+                                </select></div>
                             </div>
                             <button onclick="applyFilters('${e.name}', '${e.id}')" class="btn-primary w-full py-4 rounded-2xl text-xs font-black uppercase">Ver Resultados</button>
                         </div>
@@ -270,14 +267,14 @@
             `).join(''); 
         }
 
+        window.deleteEvent = async (id) => { if(confirm("¿Eliminar?")) await deleteDoc(doc(db, 'artifacts', appId, 'public', 'data', 'events', id)); };
         function updateEventSelect() { document.getElementById('playerEvent').innerHTML = events.map(e => `<option value="${e.name}">${e.name}</option>`).join(''); }
         function renderAdminEvents() { document.getElementById('adminEventsList').innerHTML = events.map(e => `<div class="flex justify-between items-center bg-slate-900 p-2 rounded-lg border border-slate-800"><span class="text-[10px] font-bold uppercase">${e.name}</span><button onclick="deleteEvent('${e.id}')" class="text-red-500 font-black">ELIMINAR</button></div>`).join(''); }
-        window.deleteEvent = async (id) => { if(confirm("¿Eliminar?")) await deleteDoc(doc(db, 'artifacts', appId, 'public', 'data', 'events', id)); };
 
         window.openLoginModal = () => document.getElementById('loginModal').classList.remove('hidden');
         window.closeLoginModal = () => document.getElementById('loginModal').classList.add('hidden');
         window.checkPassword = () => { 
-            if (document.getElementById('adminPass').value === "Penta") { 
+            if (document.getElementById('adminPass').value === "Newman.999") { 
                 isAdmin = true; 
                 document.getElementById('adminPanel').classList.remove('hidden'); 
                 document.getElementById('adminBadge').classList.remove('hidden');
@@ -287,36 +284,6 @@
         };
         start();
     </script>
-    <script>
-    // Deshabilitar menú contextual (Clic derecho)
-    document.addEventListener('contextmenu', function(e) {
-        e.preventDefault();
-    }, false);
-
-    // Bloquear atajos de teclado comunes
-    document.addEventListener('keydown', function(e) {
-        // Bloquear F12
-        if (e.key === "F12") {
-            e.preventDefault();
-        }
-        // Bloquear Ctrl+Shift+I (Inspeccionar)
-        if (e.ctrlKey && e.shiftKey && e.key === "I") {
-            e.preventDefault();
-        }
-        // Bloquear Ctrl+Shift+J (Consola)
-        if (e.ctrlKey && e.shiftKey && e.key === "J") {
-            e.preventDefault();
-        }
-        // Bloquear Ctrl+U (Ver código fuente)
-        if (e.ctrlKey && e.key === "u") {
-            e.preventDefault();
-        }
-        // Bloquear Ctrl+S (Guardar página)
-        if (e.ctrlKey && e.key === "s") {
-            e.preventDefault();
-        }
-    }, false);
-</script>
 
     <div id="loginModal" class="fixed inset-0 bg-slate-950/98 hidden flex items-center justify-center p-6 z-50">
         <div class="bg-slate-900 p-8 rounded-[2rem] w-full max-w-sm border border-slate-800 text-center">
@@ -326,5 +293,14 @@
             <button onclick="closeLoginModal()" class="mt-4 text-slate-600 text-[10px] font-bold uppercase">Cerrar</button>
         </div>
     </div>
+
+    <script>
+        document.addEventListener('contextmenu', e => e.preventDefault());
+        document.addEventListener('keydown', e => {
+            if (e.key === "F12" || (e.ctrlKey && e.shiftKey && (e.key === "I" || e.key === "J")) || (e.ctrlKey && e.key === "u")) {
+                e.preventDefault();
+            }
+        });
+    </script>
 </body>
 </html>
