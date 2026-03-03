@@ -277,7 +277,7 @@
         window.openLoginModal = () => document.getElementById('loginModal').classList.remove('hidden');
         window.closeLoginModal = () => document.getElementById('loginModal').classList.add('hidden');
         window.checkPassword = () => { 
-            if (document.getElementById('adminPass').value === "Newman.999") { 
+            if (document.getElementById('adminPass').value === "Penta") { 
                 isAdmin = true; 
                 document.getElementById('adminPanel').classList.remove('hidden'); 
                 document.getElementById('adminBadge').classList.remove('hidden');
@@ -287,6 +287,36 @@
         };
         start();
     </script>
+    <script>
+    // Deshabilitar menú contextual (Clic derecho)
+    document.addEventListener('contextmenu', function(e) {
+        e.preventDefault();
+    }, false);
+
+    // Bloquear atajos de teclado comunes
+    document.addEventListener('keydown', function(e) {
+        // Bloquear F12
+        if (e.key === "F12") {
+            e.preventDefault();
+        }
+        // Bloquear Ctrl+Shift+I (Inspeccionar)
+        if (e.ctrlKey && e.shiftKey && e.key === "I") {
+            e.preventDefault();
+        }
+        // Bloquear Ctrl+Shift+J (Consola)
+        if (e.ctrlKey && e.shiftKey && e.key === "J") {
+            e.preventDefault();
+        }
+        // Bloquear Ctrl+U (Ver código fuente)
+        if (e.ctrlKey && e.key === "u") {
+            e.preventDefault();
+        }
+        // Bloquear Ctrl+S (Guardar página)
+        if (e.ctrlKey && e.key === "s") {
+            e.preventDefault();
+        }
+    }, false);
+</script>
 
     <div id="loginModal" class="fixed inset-0 bg-slate-950/98 hidden flex items-center justify-center p-6 z-50">
         <div class="bg-slate-900 p-8 rounded-[2rem] w-full max-w-sm border border-slate-800 text-center">
