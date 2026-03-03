@@ -25,7 +25,7 @@
 <body class="p-2 md:p-8">
     
     <div class="flex justify-between items-center mb-4">
-        <button onclick="window.location.href='index.html'" class="px-6 py-2 bg-red-600/20 border border-red-500/50 text-red-500 hover:bg-red-600 hover:text-white rounded-lg font-bold text-xs uppercase tracking-widest transition-all">
+        <button onclick="logoutSession()" class="px-6 py-2 bg-red-600/20 border border-red-500/50 text-red-500 hover:bg-red-600 hover:text-white rounded-lg font-bold text-xs uppercase tracking-widest transition-all">
             Cerrar Sesión
         </button>
         <div id="adminBadge" class="hidden bg-blue-600/20 border border-blue-500/50 text-blue-500 px-3 py-1 rounded-full text-[10px] font-black uppercase">Modo Admin</div>
@@ -114,7 +114,7 @@
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-        import { getAuth, signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getAuth, signInAnonymously, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
         import { getFirestore, doc, setDoc, onSnapshot, collection, deleteDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
         const firebaseConfig = { apiKey: "AIzaSyAtWCkDlZuv11AueTW6WEPNwAn97Vf-3yQ", authDomain: "pentatlon-scores.firebaseapp.com", projectId: "pentatlon-scores", storageBucket: "pentatlon-scores.firebasestorage.app", messagingSenderId: "650229123946", appId: "1:650229123946:web:a3769c31f8ce1a23edb313" };
@@ -123,9 +123,26 @@
 
         async function start() {
             firebaseApp = initializeApp(firebaseConfig); auth = getAuth(firebaseApp); db = getFirestore(firebaseApp);
-            await signInAnonymously(auth);
-            onAuthStateChanged(auth, (user) => { if (user) setupListeners(); });
+            // IMPORTANTE: Escuchar el estado de autenticación
+            onAuthStateChanged(auth, (user) => { 
+                if (user) {
+                    setupListeners();
+                } else {
+                    // Si la sesión se cierra, forzar salida al index
+                    window.location.href = 'index.html';
+                }
+            });
         }
+
+        // Función Global de Cierre de Sesión Real
+        window.logoutSession = async () => {
+            try {
+                await signOut(auth);
+            } catch (error) {
+                console.error("Error al cerrar sesión", error);
+                window.location.href = 'index.html';
+            }
+        };
 
         function setupListeners() {
             onSnapshot(collection(db, 'artifacts', appId, 'public', 'data', 'athletes'), (snap) => {
@@ -182,41 +199,36 @@
                 return { ...p, esgrimaPts, obsPts, natPts, lasPts, hPts, total: Math.round(hPts + lasPts) };
             }).sort((a,b) => b.total - a.total);
 
-            // Tabla General
             document.getElementById('scoreboardBody').innerHTML = data.map(p => `<tr><td class="p-4 font-black uppercase">${p.name}<br><span class="cat-tag">${p.category}</span></td><td class="p-4 pts-value">${p.obsPts}</td><td class="p-4 pts-value">${p.natPts}</td><td class="p-4 pts-value">${p.lasPts}</td><td class="p-4 font-black text-blue-400">${p.total}</td></tr>`).join('');
-            
-            // Esgrima
             document.getElementById('statusGrid').innerHTML = data.map(p => `<div class="card p-4 rounded-xl text-center"><p class="text-[10px] font-black uppercase mb-2">${p.name}</p><div class="grid grid-cols-2 gap-2"><div class="bg-green-900/20 p-2 rounded text-green-400 font-bold">${p.esgrimaV}V</div><div class="bg-red-900/20 p-2 rounded text-red-400 font-bold">${p.esgrimaD}D</div></div></div>`).join('');
             
-            // ELIMINACIÓN (1 vs Último, etc.)
             const pairs = [];
             let tempPlayers = [...data];
-            while (tempPlayers.length > 1) {
-                pairs.push({ p1: tempPlayers.shift(), p2: tempPlayers.pop() });
-            }
+            while (tempPlayers.length > 1) { pairs.push({ p1: tempPlayers.shift(), p2: tempPlayers.pop() }); }
             if (tempPlayers.length === 1) pairs.push({ p1: tempPlayers[0], p2: { name: "BYE", total: 0 } });
             
             document.getElementById('tournamentBrackets').innerHTML = pairs.map(pair => `
                 <div class="card p-4 rounded-2xl border-l-4 border-l-blue-600">
-                    <div class="flex justify-between items-center text-[10px] font-black uppercase">
-                        <span>${pair.p1.name}</span><span class="text-blue-400">${pair.p1.total}</span>
-                    </div>
+                    <div class="flex justify-between items-center text-[10px] font-black uppercase"><span>${pair.p1.name}</span><span class="text-blue-400">${pair.p1.total}</span></div>
                     <div class="vs-circle">VS</div>
-                    <div class="flex justify-between items-center text-[10px] font-black uppercase">
-                        <span>${pair.p2.name}</span><span class="text-blue-400">${pair.p2.total}</span>
-                    </div>
+                    <div class="flex justify-between items-center text-[10px] font-black uppercase"><span>${pair.p2.name}</span><span class="text-blue-400">${pair.p2.total}</span></div>
                 </div>
             `).join('');
 
-            // Handicap
             const hData = [...data].sort((a,b) => b.hPts - a.hPts); const best = hData[0]?.hPts || 0;
             document.getElementById('handicapBody').innerHTML = hData.map((p, i) => `<tr><td class="p-4 font-black uppercase">${p.name}</td><td class="p-4 pts-value">${p.hPts}</td><td class="p-4 text-green-500 font-mono">${i === 0 ? 'SALIDA' : `+${best - p.hPts}s`}</td></tr>`).join('');
-            
             showSubView('ranking');
         }
 
-        window.toggleAdminMode = () => { if (isAdmin) { logout(); } else { openLoginModal(); } };
-        window.logout = () => { isAdmin = false; location.reload(); };
+        window.toggleAdminMode = () => { if (isAdmin) { logoutAdmin(); } else { openLoginModal(); } };
+        
+        // Cierre solo de privilegios admin (sin cerrar sesión de usuario)
+        function logoutAdmin() {
+            isAdmin = false;
+            document.getElementById('adminPanel').classList.add('hidden');
+            document.getElementById('adminBadge').classList.add('hidden');
+            document.getElementById('adminToggleBtn').innerText = "Admin";
+        }
 
         window.saveEvent = async () => {
             const name = document.getElementById('eventName').value;
@@ -242,27 +254,14 @@
             document.getElementById('publicEventsList').innerHTML = events.map(e => `
                 <div class="card rounded-2xl overflow-hidden shadow-2xl">
                     <div onclick="toggleAccordion('${e.id}')" class="p-6 flex justify-between items-center cursor-pointer hover:bg-slate-800/40">
-                        <div>
-                            <p class="text-xs font-black text-white uppercase tracking-tighter">${e.name}</p>
-                            <p class="text-[9px] text-blue-400 font-bold uppercase mt-1">${e.location} • ${e.date}</p>
-                        </div>
+                        <div><p class="text-xs font-black text-white uppercase tracking-tighter">${e.name}</p><p class="text-[9px] text-blue-400 font-bold uppercase mt-1">${e.location} • ${e.date}</p></div>
                         <div class="bg-slate-800 p-2 rounded-lg text-blue-500">▼</div>
                     </div>
                     <div id="acc-${e.id}" class="accordion-content bg-slate-900/20 px-6">
                         <div class="py-6 border-t border-slate-800/50 space-y-4">
                             <div class="grid grid-cols-2 gap-4">
-                                <div>
-                                    <label class="text-[9px] uppercase font-black text-slate-500 ml-1">Género</label>
-                                    <select id="sex-${e.id}" class="input-dark w-full p-3 rounded-xl mt-1 text-xs">
-                                        <option value="M">HOMBRE</option><option value="F">MUJER</option><option value="TODOS">RELEVOS</option>
-                                    </select>
-                                </div>
-                                <div>
-                                    <label class="text-[9px] uppercase font-black text-slate-500 ml-1">Fase</label>
-                                    <select id="phase-${e.id}" class="input-dark w-full p-3 rounded-xl mt-1 text-xs">
-                                        <option value="Final">FINAL</option><option value="Semifinal">SEMIFINAL</option><option value="Calificación">CALIFICACIÓN</option>
-                                    </select>
-                                </div>
+                                <div><label class="text-[9px] uppercase font-black text-slate-500 ml-1">Género</label><select id="sex-${e.id}" class="input-dark w-full p-3 rounded-xl mt-1 text-xs"><option value="M">HOMBRE</option><option value="F">MUJER</option><option value="TODOS">RELEVOS</option></select></div>
+                                <div><label class="text-[9px] uppercase font-black text-slate-500 ml-1">Fase</label><select id="phase-${e.id}" class="input-dark w-full p-3 rounded-xl mt-1 text-xs"><option value="Final">FINAL</option><option value="Semifinal">SEMIFINAL</option><option value="Calificación">CALIFICACIÓN</option></select></div>
                             </div>
                             <button onclick="applyFilters('${e.name}', '${e.id}')" class="btn-primary w-full py-4 rounded-2xl text-xs font-black uppercase">Ver Resultados</button>
                         </div>
