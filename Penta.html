@@ -40,6 +40,12 @@
         
         .vs-circle { background: #1e293b; width: 24px; height: 24px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 8px; font-weight: 900; border: 1px solid #334155; margin: 10px auto; color: #38bdf8; }
         .status-pill { font-size: 0.65rem; font-weight: 900; padding: 2px 8px; border-radius: 99px; text-transform: uppercase; }
+        
+        /* Estilos para el acordeón de eventos */
+        .event-details { max-height: 0; overflow: hidden; transition: max-height 0.3s ease-out; }
+        .event-card.active .event-details { max-height: 500px; margin-top: 1rem; border-top: 1px solid #1e293b; padding-top: 1rem; }
+        .event-card.active .chevron { transform: rotate(180deg); }
+        .chevron { transition: transform 0.3s; }
     </style>
 </head>
 <body class="p-2 md:p-8">
@@ -210,6 +216,7 @@
             onSnapshot(collection(db, 'artifacts', appId, 'public', 'data', 'athletes'), (snap) => {
                 players = snap.docs.map(d => ({ id: d.id, ...d.data() }));
                 renderViews();
+                renderEvents(); // Re-renderizar eventos cuando cambien los jugadores
                 document.getElementById('loadingOverlay').style.display = 'none';
                 document.getElementById('app').classList.replace('opacity-0', 'opacity-100');
             });
@@ -428,10 +435,41 @@
             renderViews(); 
         };
 
+        // Función para abrir/cerrar los detalles del evento
+        window.toggleEvent = (id) => {
+            const card = document.getElementById('event-' + id);
+            if(card) card.classList.toggle('active');
+        };
+
         function renderEvents() {
             const list = document.getElementById('publicEventsList');
             if(list) {
-                list.innerHTML = events.map(e => `<div class="card p-4 rounded-2xl"><div><p class="text-[10px] font-black uppercase text-white">${e.name}</p><p class="text-[8px] text-purple-400 uppercase">${e.location} • ${e.date}</p></div></div>`).join('') || 'No hay eventos.';
+                list.innerHTML = events.map(e => {
+                    // Filtrar jugadores por este evento
+                    const eventPlayers = players.filter(p => p.event === e.name);
+                    const playersHTML = eventPlayers.length > 0 
+                        ? eventPlayers.map(p => `<div class="text-[10px] font-bold py-1 border-b border-slate-800/50 flex justify-between uppercase"><span>${p.name}</span><span class="text-blue-400">${p.category}</span></div>`).join('')
+                        : '<p class="text-[9px] text-slate-500 uppercase">Sin atletas inscritos</p>';
+
+                    return `
+                    <div id="event-${e.id}" class="event-card card p-4 rounded-2xl cursor-pointer" onclick="toggleEvent('${e.id}')">
+                        <div class="flex justify-between items-center">
+                            <div>
+                                <p class="text-[10px] font-black uppercase text-white">${e.name}</p>
+                                <p class="text-[8px] text-purple-400 uppercase">${e.location} • ${e.date}</p>
+                            </div>
+                            <svg class="chevron w-4 h-4 text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M19 9l-7 7-7-7"></path>
+                            </svg>
+                        </div>
+                        <div class="event-details">
+                            <p class="text-[9px] font-black text-slate-500 uppercase mb-2 tracking-widest">Atletas Participantes:</p>
+                            <div class="space-y-1">
+                                ${playersHTML}
+                            </div>
+                        </div>
+                    </div>`;
+                }).join('') || 'No hay eventos.';
             }
         }
 
