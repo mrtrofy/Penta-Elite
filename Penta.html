@@ -23,18 +23,17 @@
         .pts-value { font-size: 0.85rem; font-weight: 800; color: #f1f5f9; }
         .cat-tag { font-size: 0.65rem; background: #1e293b; color: #38bdf8; padding: 2px 6px; border-radius: 4px; font-weight: 700; border: 1px solid #334155; }
         .vs-circle { background: #1e293b; width: 24px; height: 24px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 8px; font-weight: 900; border: 1px solid #334155; margin: 10px auto; color: #38bdf8; }
-        .event-details { max-height: 0; overflow: hidden; transition: max-height 0.3s; }
-        .event-card.active .event-details { max-height: 500px; margin-top: 1rem; border-top: 1px solid #1e293b; padding-top: 1rem; }
         .bracket-container { display: flex; gap: 20px; padding: 20px; overflow-x: auto; }
         .bracket-round { display: flex; flex-direction: column; justify-content: space-around; min-width: 200px; }
     </style>
 </head>
 <body class="p-2 md:p-8">
     
-    <div class="flex justify-start mb-4">
-        <button id="btnLogout" onclick="logout()" class="hidden px-6 py-2 bg-red-600/20 border border-red-500/50 text-red-500 hover:bg-red-600 hover:text-white rounded-lg font-bold text-xs uppercase tracking-widest transition-all">
+    <div class="flex justify-between items-center mb-4">
+        <button onclick="location.reload()" class="px-6 py-2 bg-red-600/20 border border-red-500/50 text-red-500 hover:bg-red-600 hover:text-white rounded-lg font-bold text-xs uppercase tracking-widest transition-all">
             Cerrar Sesión
         </button>
+        <div id="adminBadge" class="hidden bg-blue-600/20 border border-blue-500/50 text-blue-500 px-3 py-1 rounded-full text-[10px] font-black uppercase">Modo Admin</div>
     </div>
 
     <div id="loadingOverlay">
@@ -94,7 +93,14 @@
                 <div class="overflow-x-auto shadow-2xl rounded-2xl border border-slate-800 bg-slate-900/40">
                     <table class="w-full text-left border-collapse">
                         <thead class="text-slate-500 uppercase text-[9px] font-black tracking-widest bg-slate-800/50">
-                            <tr><th class="p-5">Atleta</th><th class="p-5">Obstáculos</th><th class="p-5">Natación</th><th class="p-5">Laser Run</th><th class="p-5 admin-only hidden text-right">Acciones</th></tr>
+                            <tr>
+                                <th class="p-5">Atleta</th>
+                                <th class="p-5">Obstáculos</th>
+                                <th class="p-5">Natación</th>
+                                <th class="p-5">Laser Run</th>
+                                <th class="p-5">Total</th>
+                                <th class="p-5 text-right admin-only hidden">Acciones</th>
+                            </tr>
                         </thead>
                         <tbody id="scoreboardBody" class="divide-y divide-slate-800/50"></tbody>
                     </table>
@@ -125,21 +131,21 @@
             </div>
 
             <section id="adminPanel" class="hidden space-y-8 mt-12 border-t-2 border-dashed border-slate-800 pt-12">
-                <div class="card p-6 rounded-3xl shadow-2xl border border-purple-900/30">
-                    <h2 class="text-lg font-black text-purple-400 italic uppercase mb-6 flex items-center gap-2">Registro de Evento</h2>
+                <div class="card p-6 rounded-3xl shadow-2xl border-purple-900/30">
+                    <h2 class="text-lg font-black text-purple-400 uppercase mb-6">Administración de Eventos</h2>
                     <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
                         <input type="text" id="eventName" class="input-dark p-3 rounded-xl text-sm" placeholder="Nombre del Evento">
                         <input type="date" id="eventDate" class="input-dark p-3 rounded-xl text-sm">
-                        <input type="text" id="eventDesc" class="input-dark p-3 rounded-xl text-sm" placeholder="Descripción">
+                        <input type="text" id="eventDesc" class="input-dark p-3 rounded-xl text-sm" placeholder="Lugar">
                     </div>
-                    <button onclick="saveEvent()" class="mt-4 bg-purple-600 text-white px-8 py-3 rounded-xl font-black uppercase text-xs w-full sm:w-auto">Guardar Evento</button>
+                    <button onclick="saveEvent()" class="mt-4 bg-purple-600 text-white px-8 py-3 rounded-xl font-black uppercase text-xs">Guardar Evento</button>
                 </div>
 
-                <div class="card p-6 rounded-3xl shadow-2xl border border-blue-900/30">
-                    <h2 class="text-lg font-black text-blue-400 italic uppercase mb-6 flex items-center gap-2">Registro Atleta</h2>
+                <div class="card p-6 rounded-3xl shadow-2xl border-blue-900/30">
+                    <h2 class="text-lg font-black text-blue-400 uppercase mb-6">Registro de Atletas</h2>
                     <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                         <select id="playerEvent" class="input-dark p-3 rounded-xl text-sm bg-slate-950 col-span-full"><option value="">Seleccionar Evento...</option></select>
-                        <input type="text" id="playerName" class="input-dark p-3 rounded-xl text-sm" placeholder="Nombre">
+                        <input type="text" id="playerName" class="input-dark p-3 rounded-xl text-sm" placeholder="Nombre Completo">
                         <select id="playerSex" class="input-dark p-3 rounded-xl text-sm bg-slate-950"><option value="M">Masculino</option><option value="F">Femenino</option><option value="TODOS">Relevos</option></select>
                         <select id="playerCategory" class="input-dark p-3 rounded-xl text-sm bg-slate-950">
                             <option value="U09">U09</option><option value="U11">U11</option><option value="U13">U13</option><option value="U15">U15</option>
@@ -176,48 +182,16 @@
 
         function setupListeners() {
             onSnapshot(collection(db, 'artifacts', appId, 'public', 'data', 'athletes'), (snap) => {
-                players = snap.docs.map(d => ({ id: d.id, ...d.data() })); renderViews(); renderEvents();
+                players = snap.docs.map(d => ({ id: d.id, ...d.data() })); renderViews();
                 document.getElementById('loadingOverlay').style.display = 'none';
                 document.getElementById('app').classList.replace('opacity-0', 'opacity-100');
             });
             onSnapshot(collection(db, 'artifacts', appId, 'public', 'data', 'events'), (snap) => {
-                events = snap.docs.map(d => ({ id: d.id, ...d.data() })); renderEvents(); updateEventSelect();
+                events = snap.docs.map(d => ({ id: d.id, ...d.data() })); updateEventSelect(); renderEventsList();
             });
         }
 
         window.applyMainFilters = () => { document.getElementById('subViewButtons').classList.remove('hidden'); renderViews(); switchView('ranking'); };
-
-        function updateEventSelect() {
-            const select = document.getElementById('playerEvent');
-            if(select) select.innerHTML = '<option value="">Seleccionar Evento...</option>' + events.map(e => `<option value="${e.name}">${e.name}</option>`).join('');
-        }
-
-        window.saveEvent = async () => {
-            const name = document.getElementById('eventName').value;
-            const date = document.getElementById('eventDate').value;
-            const desc = document.getElementById('eventDesc').value;
-            if(!name) return alert("Nombre obligatorio");
-            await setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'events', crypto.randomUUID()), { name, date, location: desc });
-            document.getElementById('eventName').value = ""; document.getElementById('eventDate').value = ""; document.getElementById('eventDesc').value = "";
-        };
-
-        window.savePlayer = async () => {
-            const data = {
-                event: document.getElementById('playerEvent').value,
-                name: document.getElementById('playerName').value,
-                sex: document.getElementById('playerSex').value,
-                category: document.getElementById('playerCategory').value,
-                phase: document.getElementById('playerPhase').value,
-                esgrimaV: document.getElementById('playerEsgrimaV').value,
-                esgrimaD: document.getElementById('playerEsgrimaD').value,
-                esgrimaTotal: document.getElementById('playerEsgrimaTotal').value,
-                obstaculos: document.getElementById('playerObstaculos').value,
-                natacion: document.getElementById('playerNatacion').value,
-                laser: document.getElementById('playerLaser').value
-            };
-            await setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'athletes', crypto.randomUUID()), data);
-            alert("Atleta Guardado");
-        };
 
         function parseTime(val) {
             if (!val) return 0;
@@ -242,19 +216,20 @@
             let data = players.map(p => getFullStats(p)).filter(p => p.sex === selSex && p.phase === selPhase);
             data.sort((a, b) => b.totalFinal - a.totalFinal);
 
-            document.getElementById('scoreboardBody').innerHTML = data.map(p => `<tr><td class="p-5 text-xs font-black uppercase">${p.name}<br><span class="cat-tag">${p.category}</span></td><td class="p-5 pts-value">${p.obsPts}</td><td class="p-5 pts-value">${p.natPts}</td><td class="p-5 pts-value">${p.lasPts}</td><td class="p-5 text-right admin-only ${isAdmin ? '' : 'hidden'}"><button onclick="deleteAthlete('${p.id}')" class="text-red-500 text-[9px] font-black">DEL</button></td></tr>`).join('');
-            document.getElementById('statusGrid').innerHTML = data.map(p => `<div class="card p-5 rounded-2xl"><h3 class="text-sm font-black uppercase italic mb-4">${p.name}</h3><div class="grid grid-cols-2 gap-2"><div class="bg-slate-950/50 p-2 rounded-xl text-center"><p class="text-[8px] text-slate-500 uppercase">V</p><p class="text-lg font-black text-green-400">${p.esgrimaV || 0}</p></div><div class="bg-slate-950/50 p-2 rounded-xl text-center"><p class="text-[8px] text-slate-500 uppercase">D</p><p class="text-lg font-black text-red-400">${p.esgrimaD || 0}</p></div></div></div>`).join('');
+            // Tabla General (Con Laser Run)
+            document.getElementById('scoreboardBody').innerHTML = data.map(p => `<tr><td class="p-5 text-xs font-black uppercase">${p.name}<br><span class="cat-tag">${p.category}</span></td><td class="p-5 pts-value">${p.obsPts}</td><td class="p-5 pts-value">${p.natPts}</td><td class="p-5 pts-value">${p.lasPts}</td><td class="p-5 font-black text-blue-400">${p.totalFinal}</td><td class="p-5 text-right admin-only ${isAdmin ? '' : 'hidden'}"><button onclick="deleteAthlete('${p.id}')" class="text-red-500 font-black">X</button></td></tr>`).join('');
+            
+            // Grid Esgrima
+            document.getElementById('statusGrid').innerHTML = data.map(p => `<div class="card p-5 rounded-2xl"><h3 class="text-xs font-black uppercase mb-4">${p.name}</h3><div class="grid grid-cols-2 gap-2"><div class="bg-slate-950 p-2 rounded-xl text-center"><p class="text-[8px] text-slate-500">V</p><p class="text-lg font-black text-green-400">${p.esgrimaV || 0}</p></div><div class="bg-slate-950 p-2 rounded-xl text-center"><p class="text-[8px] text-slate-500">D</p><p class="text-lg font-black text-red-400">${p.esgrimaD || 0}</p></div></div></div>`).join('');
 
+            // Eliminación Directa
             const pairs = []; const bracketData = [...data];
             while(bracketData.length > 1) { pairs.push([bracketData.shift(), bracketData.pop()]); }
             if(bracketData.length === 1) pairs.push([bracketData[0], {name: 'BYE', esgrimaPts: 0}]);
             
-            document.getElementById('tournamentBrackets').innerHTML = pairs.map(pair => `<div class="card p-5 rounded-2xl border-l-4 border-l-blue-600"><div class="flex justify-between items-center"><p class="text-[10px] font-black uppercase">${pair[0].name}</p><p class="text-xs font-bold text-blue-400">${pair[0].esgrimaPts} pts</p></div><div class="vs-circle">VS</div><div class="flex justify-between items-center"><p class="text-[10px] font-black uppercase">${pair[1].name}</p><p class="text-xs font-bold text-blue-400">${pair[1].esgrimaPts} pts</p></div></div>`).join('');
+            document.getElementById('tournamentBrackets').innerHTML = pairs.map(pair => `<div class="card p-4 rounded-2xl border-l-4 border-l-blue-600"><div class="flex justify-between items-center text-[10px] font-black"><span>${pair[0].name}</span><span class="text-blue-400">${pair[0].esgrimaPts}</span></div><div class="vs-circle">VS</div><div class="flex justify-between items-center text-[10px] font-black"><span>${pair[1].name}</span><span class="text-blue-400">${pair[1].esgrimaPts}</span></div></div>`).join('');
             
-            let bracketHtml = '<div class="bracket-round">';
-            pairs.forEach(p => bracketHtml += `<div class="card p-2 mb-4 text-[9px] font-bold uppercase border-l-2 border-blue-500"><div>${p[0].name}</div><div class="text-slate-600 my-1 text-center">vs</div><div>${p[1].name}</div></div>`);
-            document.getElementById('ramifiedBracket').innerHTML = bracketHtml + '</div>';
-
+            // Hándicap
             const hData = [...data].sort((a,b) => b.handicapPts - a.handicapPts); const best = hData[0]?.handicapPts || 0;
             document.getElementById('handicapBody').innerHTML = hData.map((p, i) => `<tr><td class="p-5 text-center text-xs font-black text-slate-600">${i+1}</td><td class="p-5 text-xs font-black uppercase">${p.name}</td><td class="p-5 pts-value">${p.handicapPts}</td><td class="p-5 text-green-500 font-mono text-[10px]">${i === 0 ? 'SALIDA' : `+${best - p.handicapPts}s`}</td></tr>`).join('');
         };
@@ -271,20 +246,52 @@
             if(targetBtn) targetBtn.className = "bg-blue-600 text-white text-[9px] font-black uppercase px-4 py-2 rounded-lg";
         };
 
-        window.toggleEvent = (id) => document.getElementById('event-' + id).classList.toggle('active');
-        
-        function renderEvents() {
+        window.saveEvent = async () => {
+            const name = document.getElementById('eventName').value;
+            const date = document.getElementById('eventDate').value;
+            const desc = document.getElementById('eventDesc').value;
+            if(!name) return;
+            await setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'events', crypto.randomUUID()), { name, date, location: desc });
+            alert("Evento Guardado");
+        };
+
+        window.savePlayer = async () => {
+            const data = {
+                event: document.getElementById('playerEvent').value,
+                name: document.getElementById('playerName').value,
+                sex: document.getElementById('playerSex').value,
+                category: document.getElementById('playerCategory').value,
+                phase: document.getElementById('playerPhase').value,
+                esgrimaV: document.getElementById('playerEsgrimaV').value,
+                esgrimaD: document.getElementById('playerEsgrimaD').value,
+                esgrimaTotal: document.getElementById('playerEsgrimaTotal').value,
+                obstaculos: document.getElementById('playerObstaculos').value,
+                natacion: document.getElementById('playerNatacion').value,
+                laser: document.getElementById('playerLaser').value
+            };
+            await setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'athletes', crypto.randomUUID()), data);
+            alert("Atleta Guardado");
+        };
+
+        function updateEventSelect() {
+            const select = document.getElementById('playerEvent');
+            if(select) select.innerHTML = '<option value="">Seleccionar Evento...</option>' + events.map(e => `<option value="${e.name}">${e.name}</option>`).join('');
+        }
+
+        function renderEventsList() {
             const list = document.getElementById('publicEventsList');
-            if(list) list.innerHTML = events.map(e => {
-                const ep = players.filter(p => p.event === e.name);
-                return `<div id="event-${e.id}" class="event-card card p-4 rounded-2xl cursor-pointer" onclick="toggleEvent('${e.id}')"><div class="flex justify-between items-center"><div><p class="text-[10px] font-black uppercase text-white">${e.name}</p><p class="text-[8px] text-purple-400 uppercase">${e.location} • ${e.date}</p></div><svg class="w-4 h-4 text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M19 9l-7 7-7-7"></path></svg></div><div class="event-details"><div class="space-y-1">${ep.map(p => `<div class="text-[10px] font-bold py-1 border-b border-slate-800/50 uppercase">${p.name} <span class="text-[8px] text-blue-400">(${p.category})</span></div>`).join('')}</div></div></div>`;
-            }).join('');
+            if(list) list.innerHTML = events.map(e => `<div class="card p-4 rounded-2xl"><p class="text-[10px] font-black uppercase text-white">${e.name}</p><p class="text-[8px] text-purple-400 uppercase">${e.location} • ${e.date}</p></div>`).join('');
         }
 
         window.openLoginModal = () => isAdmin ? logout() : document.getElementById('loginModal').classList.remove('hidden');
         window.closeLoginModal = () => document.getElementById('loginModal').classList.add('hidden');
-        window.checkPassword = () => { if (document.getElementById('adminPass').value === "Newman.999") { isAdmin = true; document.getElementById('adminPanel').classList.remove('hidden'); document.getElementById('btnLogout').classList.remove('hidden'); document.querySelectorAll('.admin-only').forEach(el => el.classList.remove('hidden')); closeLoginModal(); renderViews(); } };
-        window.logout = () => { isAdmin = false; document.getElementById('adminPanel').classList.add('hidden'); document.getElementById('btnLogout').classList.add('hidden'); document.querySelectorAll('.admin-only').forEach(el => el.classList.add('hidden')); };
+        window.checkPassword = () => { if (document.getElementById('adminPass').value === "Newman.999") { 
+            isAdmin = true; 
+            document.getElementById('adminPanel').classList.remove('hidden'); 
+            document.getElementById('adminBadge').classList.remove('hidden');
+            document.querySelectorAll('.admin-only').forEach(el => el.classList.remove('hidden')); 
+            closeLoginModal(); renderViews(); 
+        } };
         window.deleteAthlete = async (id) => { if(confirm("¿Eliminar?")) await deleteDoc(doc(db, 'artifacts', appId, 'public', 'data', 'athletes', id)); };
         start();
     </script>
