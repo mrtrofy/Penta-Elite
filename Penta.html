@@ -12,8 +12,6 @@
     
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&display=swap" rel="stylesheet">
-    <link rel="shortcut icon" href="/logo1.ico" type="image/x-icon">
-    <link rel="manifest" href="/manifest.json">
     <style>
         body { background-color: #020617; color: #f1f5f9; font-family: 'Inter', sans-serif; -webkit-tap-highlight-color: transparent; }
         .card { background: #0f172a; border: 1px solid #1e293b; }
@@ -21,12 +19,10 @@
         .input-dark:focus { border-color: #3b82f6; box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.2); }
         .neon-blue { color: #38bdf8; text-shadow: 0 0 10px rgba(56, 189, 248, 0.4); }
         .btn-primary { background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%); transition: all 0.2s; }
-        #loadingOverlay { background: #020617; display: flex; align-items: center; justify-content: center; z-index: 100; }
+        #loadingOverlay { background: #020617; display: flex; align-items: center; justify-content: center; z-index: 100; position: fixed; inset: 0; }
         .pts-value { font-size: 0.85rem; font-weight: 800; color: #f1f5f9; }
         .cat-tag { font-size: 0.65rem; background: #1e293b; color: #38bdf8; padding: 2px 6px; border-radius: 4px; font-weight: 700; border: 1px solid #334155; }
-        .state-tag { font-size: 0.6rem; color: #94a3b8; font-weight: 600; text-transform: uppercase; margin-left: 4px; }
         .vs-circle { background: #1e293b; width: 24px; height: 24px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 8px; font-weight: 900; border: 1px solid #334155; margin: 10px auto; color: #38bdf8; }
-        .status-pill { font-size: 0.65rem; font-weight: 900; padding: 2px 8px; border-radius: 99px; text-transform: uppercase; }
         .event-details { max-height: 0; overflow: hidden; transition: max-height 0.3s; }
         .event-card.active .event-details { max-height: 500px; margin-top: 1rem; border-top: 1px solid #1e293b; padding-top: 1rem; }
         .bracket-container { display: flex; gap: 20px; padding: 20px; overflow-x: auto; }
@@ -35,9 +31,18 @@
 </head>
 <body class="p-2 md:p-8">
     
-    <button id="btnSalir" class="px-6 py-2 bg-red-600/20 border border-red-500/50 text-red-500 hover:bg-red-600 hover:text-white rounded-lg font-bold text-xs uppercase tracking-widest transition-all">Cerrar Sesión</button>
+    <div class="flex justify-start mb-4">
+        <button id="btnLogout" onclick="logout()" class="hidden px-6 py-2 bg-red-600/20 border border-red-500/50 text-red-500 hover:bg-red-600 hover:text-white rounded-lg font-bold text-xs uppercase tracking-widest transition-all">
+            Cerrar Sesión
+        </button>
+    </div>
 
-    <div id="loadingOverlay" class="fixed inset-0"><div class="text-center"><div class="inline-block animate-spin rounded-full h-10 w-10 border-t-2 border-b-2 border-blue-500 mb-4"></div><p class="neon-blue font-bold uppercase tracking-tighter text-sm">Cargando...</p></div></div>
+    <div id="loadingOverlay">
+        <div class="text-center">
+            <div class="inline-block animate-spin rounded-full h-10 w-10 border-t-2 border-b-2 border-blue-500 mb-4"></div>
+            <p class="neon-blue font-bold uppercase tracking-tighter text-sm">Cargando...</p>
+        </div>
+    </div>
 
     <div id="app" class="max-w-7xl mx-auto opacity-0 transition-opacity duration-700 flex flex-col min-h-[90vh]">
         <header class="flex flex-col md:flex-row justify-between items-center mb-6 border-b border-slate-800 pb-6 gap-4">
@@ -121,7 +126,7 @@
 
             <section id="adminPanel" class="hidden space-y-8 mt-12 border-t-2 border-dashed border-slate-800 pt-12">
                 <div class="card p-6 rounded-3xl shadow-2xl border border-purple-900/30">
-                    <h2 class="text-lg font-black text-purple-400 italic uppercase mb-6 flex items-center gap-2"><span class="w-2 h-6 bg-purple-600"></span> Registro de Evento</h2>
+                    <h2 class="text-lg font-black text-purple-400 italic uppercase mb-6 flex items-center gap-2">Registro de Evento</h2>
                     <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
                         <input type="text" id="eventName" class="input-dark p-3 rounded-xl text-sm" placeholder="Nombre del Evento">
                         <input type="date" id="eventDate" class="input-dark p-3 rounded-xl text-sm">
@@ -131,17 +136,15 @@
                 </div>
 
                 <div class="card p-6 rounded-3xl shadow-2xl border border-blue-900/30">
-                    <h2 id="adminFormTitle" class="text-lg font-black text-blue-400 italic uppercase mb-6 flex items-center gap-2"><span class="w-2 h-6 bg-blue-600"></span> Registro Atleta</h2>
+                    <h2 class="text-lg font-black text-blue-400 italic uppercase mb-6 flex items-center gap-2">Registro Atleta</h2>
                     <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                         <select id="playerEvent" class="input-dark p-3 rounded-xl text-sm bg-slate-950 col-span-full"><option value="">Seleccionar Evento...</option></select>
                         <input type="text" id="playerName" class="input-dark p-3 rounded-xl text-sm" placeholder="Nombre">
                         <select id="playerSex" class="input-dark p-3 rounded-xl text-sm bg-slate-950"><option value="M">Masculino</option><option value="F">Femenino</option><option value="TODOS">Relevos</option></select>
-                        
                         <select id="playerCategory" class="input-dark p-3 rounded-xl text-sm bg-slate-950">
                             <option value="U09">U09</option><option value="U11">U11</option><option value="U13">U13</option><option value="U15">U15</option>
                             <option value="U17">U17</option><option value="U19">U19</option><option value="Junior">Junior</option><option value="Senior">Senior</option>
                         </select>
-
                         <select id="playerPhase" class="input-dark p-3 rounded-xl text-sm bg-slate-950"><option value="Calificación">Calificación</option><option value="Semifinal">Semifinal</option><option value="Final">Final</option></select>
                         <input type="number" id="playerEsgrimaV" class="input-dark p-3 rounded-xl text-sm" placeholder="Victorias">
                         <input type="number" id="playerEsgrimaD" class="input-dark p-3 rounded-xl text-sm" placeholder="Derrotas">
@@ -150,9 +153,7 @@
                         <input type="text" id="playerNatacion" class="input-dark p-3 rounded-xl text-sm" placeholder="Nat (m:s)">
                         <input type="text" id="playerLaser" class="input-dark p-3 rounded-xl text-sm" placeholder="Laser (m:s)">
                     </div>
-                    <div class="mt-6 flex gap-3">
-                        <button onclick="savePlayer()" class="btn-primary text-white px-10 py-4 rounded-2xl font-black uppercase text-xs flex-1">Guardar Atleta</button>
-                    </div>
+                    <button onclick="savePlayer()" class="btn-primary mt-6 text-white px-10 py-4 rounded-2xl font-black uppercase text-xs w-full">Guardar Atleta</button>
                 </div>
             </section>
         </main>
@@ -160,7 +161,7 @@
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-        import { getAuth, signInAnonymously, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getAuth, signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
         import { getFirestore, doc, setDoc, onSnapshot, collection, deleteDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
         const firebaseConfig = { apiKey: "AIzaSyAtWCkDlZuv11AueTW6WEPNwAn97Vf-3yQ", authDomain: "pentatlon-scores.firebaseapp.com", projectId: "pentatlon-scores", storageBucket: "pentatlon-scores.firebasestorage.app", messagingSenderId: "650229123946", appId: "1:650229123946:web:a3769c31f8ce1a23edb313" };
@@ -235,7 +236,7 @@
             return { ...p, esgrimaPts, obsPts, natPts, lasPts, handicapPts, totalFinal: Math.round(handicapPts + lasPts) };
         }
 
-        function renderViews() {
+        window.renderViews = () => {
             const selSex = document.getElementById('filterSex').value;
             const selPhase = document.getElementById('filterPhase').value;
             let data = players.map(p => getFullStats(p)).filter(p => p.sex === selSex && p.phase === selPhase);
@@ -256,10 +257,15 @@
 
             const hData = [...data].sort((a,b) => b.handicapPts - a.handicapPts); const best = hData[0]?.handicapPts || 0;
             document.getElementById('handicapBody').innerHTML = hData.map((p, i) => `<tr><td class="p-5 text-center text-xs font-black text-slate-600">${i+1}</td><td class="p-5 text-xs font-black uppercase">${p.name}</td><td class="p-5 pts-value">${p.handicapPts}</td><td class="p-5 text-green-500 font-mono text-[10px]">${i === 0 ? 'SALIDA' : `+${best - p.handicapPts}s`}</td></tr>`).join('');
-        }
+        };
 
         window.switchView = (view) => {
-            ['ranking', 'status', 'tournament', 'handicap', 'publicEvents'].forEach(v => { document.getElementById(v + 'View').classList.add('hidden'); const btn = document.getElementById('btnView' + v.charAt(0).toUpperCase() + v.slice(1)); if(btn) btn.className = "bg-slate-800 text-slate-400 text-[9px] font-black uppercase px-4 py-2 rounded-lg"; });
+            ['ranking', 'status', 'tournament', 'handicap', 'publicEvents'].forEach(v => {
+                const el = document.getElementById(v + 'View');
+                if(el) el.classList.add('hidden');
+                const btn = document.getElementById('btnView' + v.charAt(0).toUpperCase() + v.slice(1));
+                if(btn) btn.className = "bg-slate-800 text-slate-400 text-[9px] font-black uppercase px-4 py-2 rounded-lg";
+            });
             document.getElementById(view + 'View').classList.remove('hidden');
             const targetBtn = document.getElementById('btnView' + view.charAt(0).toUpperCase() + view.slice(1));
             if(targetBtn) targetBtn.className = "bg-blue-600 text-white text-[9px] font-black uppercase px-4 py-2 rounded-lg";
@@ -277,8 +283,8 @@
 
         window.openLoginModal = () => isAdmin ? logout() : document.getElementById('loginModal').classList.remove('hidden');
         window.closeLoginModal = () => document.getElementById('loginModal').classList.add('hidden');
-        window.checkPassword = () => { if (document.getElementById('adminPass').value === "Newman.999") { isAdmin = true; document.getElementById('adminPanel').classList.remove('hidden'); document.querySelectorAll('.admin-only').forEach(el => el.classList.remove('hidden')); closeLoginModal(); renderViews(); } };
-        window.logout = () => { isAdmin = false; document.getElementById('adminPanel').classList.add('hidden'); document.querySelectorAll('.admin-only').forEach(el => el.classList.add('hidden')); };
+        window.checkPassword = () => { if (document.getElementById('adminPass').value === "Newman.999") { isAdmin = true; document.getElementById('adminPanel').classList.remove('hidden'); document.getElementById('btnLogout').classList.remove('hidden'); document.querySelectorAll('.admin-only').forEach(el => el.classList.remove('hidden')); closeLoginModal(); renderViews(); } };
+        window.logout = () => { isAdmin = false; document.getElementById('adminPanel').classList.add('hidden'); document.getElementById('btnLogout').classList.add('hidden'); document.querySelectorAll('.admin-only').forEach(el => el.classList.add('hidden')); };
         window.deleteAthlete = async (id) => { if(confirm("¿Eliminar?")) await deleteDoc(doc(db, 'artifacts', appId, 'public', 'data', 'athletes', id)); };
         start();
     </script>
