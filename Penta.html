@@ -64,7 +64,10 @@
                     <p class="text-[10px] text-blue-400 font-bold tracking-[0.2em] uppercase">Sistema de Resultados</p>
                 </div>
             </div>
-            <button id="adminToggleBtn" onclick="openLoginModal()" class="bg-slate-800 hover:bg-slate-700 px-6 py-2 rounded-xl text-xs font-black uppercase border border-slate-700">Admin</button>
+            <div class="flex gap-2">
+                <button onclick="switchView('publicEvents')" class="bg-purple-900/40 text-purple-400 border border-purple-800/50 px-6 py-2 rounded-xl text-xs font-black uppercase hover:bg-purple-800/60">Eventos</button>
+                <button id="adminToggleBtn" onclick="openLoginModal()" class="bg-slate-800 hover:bg-slate-700 px-6 py-2 rounded-xl text-xs font-black uppercase border border-slate-700">Admin</button>
+            </div>
         </header>
 
         <div class="flex flex-col gap-4 mb-6">
@@ -73,7 +76,6 @@
                 <button onclick="switchView('status')" id="btnViewStatus" class="bg-slate-800 text-slate-400 text-[9px] font-black uppercase px-4 py-2 rounded-lg hover:bg-slate-700">Clasificacion</button>
                 <button onclick="switchView('tournament')" id="btnViewTournament" class="bg-slate-800 text-slate-400 text-[9px] font-black uppercase px-4 py-2 rounded-lg hover:bg-slate-700">Llaves 1vs1</button>
                 <button onclick="switchView('handicap')" id="btnViewHandicap" class="bg-slate-800 text-slate-400 text-[9px] font-black uppercase px-4 py-2 rounded-lg hover:bg-slate-700">Hándicap</button>
-                <button onclick="switchView('publicEvents')" id="btnViewPublicEvents" class="bg-purple-900/40 text-purple-400 border border-purple-800/50 text-[9px] font-black uppercase px-4 py-2 rounded-lg hover:bg-purple-800/60">Eventos</button>
             </div>
             
             <div class="flex gap-2 p-1 bg-slate-900/50 rounded-xl w-fit border border-slate-800">
@@ -119,21 +121,38 @@
             </div>
 
             <section id="adminPanel" class="hidden space-y-8 mt-12 border-t-2 border-dashed border-slate-800 pt-12">
+                <div class="card p-6 rounded-3xl shadow-2xl border border-purple-900/30">
+                    <h2 class="text-lg font-black text-purple-400 italic uppercase mb-6 flex items-center gap-2"><span class="w-2 h-6 bg-purple-600"></span> Registro de Evento</h2>
+                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                        <input type="text" id="eventName" class="input-dark p-3 rounded-xl text-sm" placeholder="Nombre del Evento">
+                        <input type="date" id="eventDate" class="input-dark p-3 rounded-xl text-sm">
+                        <input type="text" id="eventDesc" class="input-dark p-3 rounded-xl text-sm" placeholder="Descripción">
+                    </div>
+                    <button onclick="saveEvent()" class="mt-4 bg-purple-600 text-white px-8 py-3 rounded-xl font-black uppercase text-xs w-full sm:w-auto">Guardar Evento</button>
+                </div>
+
                 <div class="card p-6 rounded-3xl shadow-2xl border border-blue-900/30">
                     <h2 id="adminFormTitle" class="text-lg font-black text-blue-400 italic uppercase mb-6 flex items-center gap-2"><span class="w-2 h-6 bg-blue-600"></span> Registro Atleta</h2>
-                    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                        <select id="playerEvent" class="input-dark p-3 rounded-xl text-sm bg-slate-950 col-span-full">
+                            <option value="">Seleccionar Evento...</option>
+                        </select>
+                        <input type="text" id="playerCountry" class="input-dark p-3 rounded-xl text-sm" placeholder="País">
+                        <input type="text" id="playerState" class="input-dark p-3 rounded-xl text-sm" placeholder="Estado">
                         <input type="text" id="playerName" class="input-dark p-3 rounded-xl text-sm" placeholder="Nombre">
-                        <select id="playerSex" class="input-dark p-3 rounded-xl text-sm bg-slate-950"><option value="M">Masculino</option><option value="F">Femenino</option></select>
+                        <select id="playerSex" class="input-dark p-3 rounded-xl text-sm bg-slate-950">
+                            <option value="M">Masculino</option>
+                            <option value="F">Femenino</option>
+                        </select>
                         <select id="playerCategory" class="input-dark p-3 rounded-xl text-sm bg-slate-950">
                             <option value="U09">U09</option><option value="U11">U11</option><option value="U13">U13</option><option value="U15">U15</option>
                             <option value="U17">U17</option><option value="U19">U19</option><option value="Junior">Junior</option><option value="Senior">Senior</option>
                         </select>
-                        <input type="number" id="playerEsgrimaV" class="input-dark p-3 rounded-xl text-sm" placeholder="Vics">
+                        <input type="number" id="playerEsgrimaV" class="input-dark p-3 rounded-xl text-sm" placeholder="Victorias">
                         <input type="number" id="playerEsgrimaTotal" class="input-dark p-3 rounded-xl text-sm" placeholder="Total Bouts">
                         <input type="text" id="playerObstaculos" class="input-dark p-3 rounded-xl text-sm" placeholder="Obs (seg)">
                         <input type="text" id="playerNatacion" class="input-dark p-3 rounded-xl text-sm" placeholder="Nat (m:s)">
                         <input type="text" id="playerLaser" class="input-dark p-3 rounded-xl text-sm" placeholder="Laser (m:s)">
-                        <input type="text" id="playerState" class="input-dark p-3 rounded-xl text-sm lg:col-span-2" placeholder="Estado/Club">
                     </div>
                     <div class="mt-6 flex gap-3">
                         <button onclick="savePlayer()" class="btn-primary text-white px-10 py-4 rounded-2xl font-black uppercase text-xs flex-1">Guardar Atleta</button>
@@ -198,8 +217,26 @@
             onSnapshot(collection(db, 'artifacts', appId, 'public', 'data', 'events'), (snap) => {
                 events = snap.docs.map(d => ({ id: d.id, ...d.data() }));
                 renderEvents();
+                updateEventSelect();
             });
         }
+
+        function updateEventSelect() {
+            const select = document.getElementById('playerEvent');
+            select.innerHTML = '<option value="">Seleccionar Evento...</option>' + 
+                events.map(e => `<option value="${e.name}">${e.name}</option>`).join('');
+        }
+
+        window.saveEvent = async () => {
+            const name = document.getElementById('eventName').value;
+            const date = document.getElementById('eventDate').value;
+            const desc = document.getElementById('eventDesc').value;
+            if(!name) return alert("Nombre obligatorio");
+            await setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'events', crypto.randomUUID()), { name, date, location: desc });
+            document.getElementById('eventName').value = "";
+            document.getElementById('eventDate').value = "";
+            document.getElementById('eventDesc').value = "";
+        };
 
         function parseTime(val) {
             if (!val) return 0;
@@ -214,7 +251,6 @@
         function getFullStats(p) {
             const bouts = parseInt(p.esgrimaTotal) || 0;
             const victories = parseInt(p.esgrimaV) || 0;
-            const defeats = Math.max(0, bouts - victories);
             const esgrimaPts = bouts > 0 ? Math.max(0, 250 + (victories - Math.ceil(bouts * 0.7)) * 5) : 0;
             const tObs = parseTime(p.obstaculos);
             let obsPts = tObs >= 15.00 ? Math.max(0, 400 - Math.floor((tObs - 15.00) / 0.33)) : (tObs > 0 ? 401 : 0);
@@ -223,11 +259,14 @@
             const tLas = parseTime(p.laser);
             let lasPts = tLas > 0 ? Math.max(0, 700 - Math.floor(tLas - 600.00)) : 0;
             const handicapPts = esgrimaPts + obsPts + natPts;
-            return { ...p, victories, defeats, esgrimaPts, obsPts, natPts, lasPts, handicapPts, totalFinal: Math.round(handicapPts + lasPts) };
+            return { ...p, victories, defeats: Math.max(0, bouts - victories), esgrimaPts, obsPts, natPts, lasPts, handicapPts, totalFinal: Math.round(handicapPts + lasPts) };
         }
 
         window.savePlayer = async () => {
             const data = {
+                event: document.getElementById('playerEvent').value,
+                country: document.getElementById('playerCountry').value,
+                state: document.getElementById('playerState').value,
                 name: document.getElementById('playerName').value,
                 sex: document.getElementById('playerSex').value,
                 category: document.getElementById('playerCategory').value,
@@ -235,8 +274,7 @@
                 esgrimaTotal: document.getElementById('playerEsgrimaTotal').value,
                 obstaculos: document.getElementById('playerObstaculos').value,
                 natacion: document.getElementById('playerNatacion').value,
-                laser: document.getElementById('playerLaser').value,
-                state: document.getElementById('playerState').value
+                laser: document.getElementById('playerLaser').value
             };
             await setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'athletes', editingId || crypto.randomUUID()), data);
             cancelEdit();
@@ -246,6 +284,9 @@
             const p = players.find(x => x.id === id);
             if(!p) return;
             editingId = id;
+            document.getElementById('playerEvent').value = p.event || '';
+            document.getElementById('playerCountry').value = p.country || '';
+            document.getElementById('playerState').value = p.state || '';
             document.getElementById('playerName').value = p.name || '';
             document.getElementById('playerSex').value = p.sex || 'M';
             document.getElementById('playerCategory').value = p.category || 'Senior';
@@ -254,7 +295,6 @@
             document.getElementById('playerObstaculos').value = p.obstaculos || '';
             document.getElementById('playerNatacion').value = p.natacion || '';
             document.getElementById('playerLaser').value = p.laser || '';
-            document.getElementById('playerState').value = p.state || '';
             document.getElementById('adminFormTitle').innerText = "Editando Atleta";
             document.getElementById('btnCancelEdit').classList.remove('hidden');
             window.scrollTo({ top: document.getElementById('adminPanel').offsetTop, behavior: 'smooth' });
@@ -264,7 +304,7 @@
             editingId = null;
             document.getElementById('adminFormTitle').innerText = "Registro Atleta";
             document.getElementById('btnCancelEdit').classList.add('hidden');
-            ['playerName','playerEsgrimaV','playerEsgrimaTotal','playerObstaculos','playerNatacion','playerLaser','playerState'].forEach(id => document.getElementById(id).value = "");
+            ['playerEvent','playerCountry','playerState','playerName','playerEsgrimaV','playerEsgrimaTotal','playerObstaculos','playerNatacion','playerLaser'].forEach(id => document.getElementById(id).value = "");
         };
 
         function renderViews() {
@@ -272,7 +312,6 @@
             if (currentSexFilter !== 'TODOS') data = data.filter(p => p.sex === currentSexFilter);
             data.sort((a, b) => b.totalFinal - a.totalFinal);
 
-            // 1. Ranking Table (CON ESTADO)
             document.getElementById('scoreboardBody').innerHTML = data.map((p, i) => `
                 <tr>
                     <td class="p-5">
@@ -291,7 +330,6 @@
                     </td>
                 </tr>`).join('');
 
-            // 2. Status View (CON ESTADO)
             document.getElementById('statusGrid').innerHTML = data.map(p => `
                 <div class="card p-5 rounded-2xl relative overflow-hidden">
                     <div class="flex justify-between items-start mb-4">
@@ -316,7 +354,6 @@
                     </div>
                 </div>`).join('');
 
-            // 3. Tournament 1vs1
             const bracketHTML = [];
             for (let i = 0; i < data.length; i += 2) {
                 const p1 = data[i]; const p2 = data[i + 1];
@@ -343,7 +380,6 @@
             }
             document.getElementById('tournamentBrackets').innerHTML = bracketHTML.join('') || '<p class="text-center text-slate-500 col-span-full">No hay suficientes atletas para llaves.</p>';
 
-            // 4. Handicap (CON ESTADO)
             const hData = [...data].sort((a,b) => b.handicapPts - a.handicapPts);
             const best = hData[0]?.handicapPts || 0;
             document.getElementById('handicapBody').innerHTML = hData.map((p, i) => `
@@ -365,7 +401,8 @@
                 if(btn) btn.className = "bg-slate-800 text-slate-400 text-[9px] font-black uppercase px-4 py-2 rounded-lg";
             });
             document.getElementById(view + 'View').classList.remove('hidden');
-            document.getElementById('btnView' + view.charAt(0).toUpperCase() + view.slice(1)).className = "bg-blue-600 text-white text-[9px] font-black uppercase px-4 py-2 rounded-lg";
+            const targetBtn = document.getElementById('btnView' + view.charAt(0).toUpperCase() + view.slice(1));
+            if(targetBtn) targetBtn.className = "bg-blue-600 text-white text-[9px] font-black uppercase px-4 py-2 rounded-lg";
         };
 
         window.openLoginModal = () => { isAdmin ? logout() : document.getElementById('loginModal').classList.remove('hidden'); };
