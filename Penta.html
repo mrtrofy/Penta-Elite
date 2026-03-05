@@ -12,6 +12,7 @@
         .card { background: #0f172a; border: 1px solid #1e293b; }
         .input-dark { background: #020617; border: 1px solid #334155; color: #f1f5f9; outline: none; }
         .input-dark:focus { border-color: #3b82f6; box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.2); }
+        .input-disabled { background: #1e293b; opacity: 0.5; cursor: not-allowed; }
         .neon-blue { color: #38bdf8; text-shadow: 0 0 10px rgba(56, 189, 248, 0.4); }
         .btn-primary { background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%); transition: all 0.2s; }
         #loadingOverlay { background: #020617; display: flex; align-items: center; justify-content: center; z-index: 100; position: fixed; inset: 0; }
@@ -105,7 +106,7 @@
                             <option value="Semifinal">2. Semifinal</option>
                             <option value="Final">3. Final</option>
                         </select>
-                        <select id="playerDisc" class="input-dark p-3 rounded-xl text-xs bg-slate-950">
+                        <select id="playerDisc" onchange="updateAdminInputs(this.value)" class="input-dark p-3 rounded-xl text-xs bg-slate-950">
                             <option value="Pentatlon moderno">Pentatlon moderno</option>
                             <option value="Obstaculos Laser Run">Obstaculos Laser Run</option>
                             <option value="OCR 100">OCR 100</option>
@@ -159,6 +160,28 @@
             });
         }
 
+        window.updateAdminInputs = (discipline) => {
+            const inputs = {
+                esgV: document.getElementById('playerEsgrimaV'),
+                esgD: document.getElementById('playerEsgrimaD'),
+                esgT: document.getElementById('playerEsgrimaTotal'),
+                obs: document.getElementById('playerObstaculos'),
+                nat: document.getElementById('playerNatacion'),
+                las: document.getElementById('playerLaser')
+            };
+            
+            // Reset clases
+            Object.values(inputs).forEach(i => i.classList.remove('input-disabled'));
+
+            if (discipline.includes("OCR")) {
+                inputs.esgV.classList.add('input-disabled'); inputs.esgD.classList.add('input-disabled'); inputs.esgT.classList.add('input-disabled');
+                inputs.nat.classList.add('input-disabled'); inputs.las.classList.add('input-disabled');
+            } else if (discipline === "Obstaculos Laser Run") {
+                inputs.esgV.classList.add('input-disabled'); inputs.esgD.classList.add('input-disabled'); inputs.esgT.classList.add('input-disabled');
+                inputs.nat.classList.add('input-disabled');
+            }
+        };
+
         window.toggleAccordion = (id) => {
             const content = document.getElementById('acc-' + id);
             content.classList.toggle('accordion-open');
@@ -186,7 +209,7 @@
         };
 
         function parseTime(val) {
-            if (!val) return 0;
+            if (!val || val === "") return 0;
             let clean = val.toString().trim().replace(',', '.');
             if (clean.includes(':')) { const parts = clean.split(':'); return (parseFloat(parts[0]) || 0) * 60 + (parseFloat(parts[1]) || 0); }
             return parseFloat(clean) || 0;
@@ -199,10 +222,9 @@
                 const tObs = parseTime(p.obstaculos);
                 const tNat = parseTime(p.natacion);
                 const tLas = parseTime(p.laser);
-                // Si la disciplina es OCR, usualmente solo importa el tiempo de obstáculos, pero para este orden general sumamos lo registrado.
                 const totalSeconds = tObs + tNat + tLas;
-                return { ...p, totalSeconds, tObs, tNat, tLas };
-            }).sort((a, b) => b.totalSeconds - a.totalSeconds); // Orden de MAYOR a MENOR tiempo
+                return { ...p, totalSeconds };
+            }).sort((a, b) => b.totalSeconds - a.totalSeconds); // ORDEN MAYOR A MENOR TIEMPO
 
             document.getElementById('scoreboardBody').innerHTML = data.map(p => `<tr><td class="p-4 font-black uppercase">${p.name}<br><span class="text-[8px] text-slate-500">${p.state || '-'} | ${p.club || '-'}</span><br><span class="cat-tag">${p.category}</span></td><td class="p-4 pts-value text-blue-300">-</td><td class="p-4 pts-value">${p.obstaculos || '0'}</td><td class="p-4 pts-value">${p.natacion || '0'}</td><td class="p-4 pts-value">${p.laser || '0'}</td><td class="p-4 font-black text-blue-400">${p.totalSeconds}s</td></tr>`).join('');
             document.getElementById('statusGrid').innerHTML = data.map(p => `<div class="card p-4 rounded-xl text-center"><p class="text-[10px] font-black uppercase mb-2">${p.name}</p><div class="grid grid-cols-2 gap-2"><div class="bg-green-900/20 p-2 rounded text-green-400 font-bold">${p.esgrimaV || 0}V</div><div class="bg-red-900/20 p-2 rounded text-red-400 font-bold">${p.esgrimaD || 0}D</div></div></div>`).join('');
