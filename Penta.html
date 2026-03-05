@@ -65,7 +65,7 @@
                     <div class="overflow-x-auto card rounded-2xl">
                         <table class="w-full text-left text-xs">
                             <thead class="bg-slate-800 uppercase font-black text-slate-400">
-                                <tr><th class="p-4">Atleta</th><th class="p-4">Esg</th><th class="p-4">Obs</th><th class="p-4">Nat</th><th class="p-4">Laser</th><th class="p-4">Total</th></tr>
+                                <tr><th class="p-4">Atleta / Info</th><th class="p-4">Esg</th><th class="p-4">Obs</th><th class="p-4">Nat</th><th class="p-4">Laser</th><th class="p-4">Total Tiempo</th></tr>
                             </thead>
                             <tbody id="scoreboardBody" class="divide-y divide-slate-800"></tbody>
                         </table>
@@ -93,6 +93,8 @@
                     <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
                         <select id="playerEvent" class="input-dark p-3 rounded-xl text-xs bg-slate-950 col-span-full"></select>
                         <input type="text" id="playerName" class="input-dark p-3 rounded-xl text-xs" placeholder="Nombre Completo">
+                        <input type="text" id="playerState" class="input-dark p-3 rounded-xl text-xs" placeholder="Estado">
+                        <input type="text" id="playerClub" class="input-dark p-3 rounded-xl text-xs" placeholder="Club">
                         <select id="playerSex" class="input-dark p-3 rounded-xl text-xs bg-slate-950"><option value="M">Masculino</option><option value="F">Femenino</option><option value="TODOS">Relevos</option></select>
                         <select id="playerCategory" class="input-dark p-3 rounded-xl text-xs bg-slate-950">
                             <option value="U09">U09</option><option value="U11">U11</option><option value="U13">U13</option><option value="U15">U15</option>
@@ -191,19 +193,17 @@
         }
 
         function renderResults(eventName, sex, phase, category, discipline) {
-            const pointsTable = [250, 244, 238, 236, 230, 228, 226, 224, 218, 216, 214, 212, 210, 208, 206, 204, 198, 196];
             let filtered = players.filter(p => p.event === eventName && p.sex === sex && p.phase === phase && p.category === category && p.discipline === discipline);
             
-            // Ordenar por tiempo total (de mayor a menor)
             let data = filtered.map((p) => {
                 const tObs = parseTime(p.obstaculos);
                 const tNat = parseTime(p.natacion);
                 const tLas = parseTime(p.laser);
                 const totalSeconds = tObs + tNat + tLas;
-                return { ...p, totalSeconds, tObs, tNat, tLas };
+                return { ...p, totalSeconds };
             }).sort((a, b) => b.totalSeconds - a.totalSeconds);
 
-            document.getElementById('scoreboardBody').innerHTML = data.map(p => `<tr><td class="p-4 font-black uppercase">${p.name}<br><span class="cat-tag">${p.category}</span></td><td class="p-4 pts-value text-blue-300">-</td><td class="p-4 pts-value">${p.obstaculos || '0'}</td><td class="p-4 pts-value">${p.natacion || '0'}</td><td class="p-4 pts-value">${p.laser || '0'}</td><td class="p-4 font-black text-blue-400">${p.totalSeconds}s</td></tr>`).join('');
+            document.getElementById('scoreboardBody').innerHTML = data.map(p => `<tr><td class="p-4 font-black uppercase">${p.name}<br><span class="text-[8px] text-slate-500">${p.state || '-'} | ${p.club || '-'}</span><br><span class="cat-tag">${p.category}</span></td><td class="p-4 pts-value text-blue-300">-</td><td class="p-4 pts-value">${p.obstaculos || '0'}</td><td class="p-4 pts-value">${p.natacion || '0'}</td><td class="p-4 pts-value">${p.laser || '0'}</td><td class="p-4 font-black text-blue-400">${p.totalSeconds}s</td></tr>`).join('');
             document.getElementById('statusGrid').innerHTML = data.map(p => `<div class="card p-4 rounded-xl text-center"><p class="text-[10px] font-black uppercase mb-2">${p.name}</p><div class="grid grid-cols-2 gap-2"><div class="bg-green-900/20 p-2 rounded text-green-400 font-bold">${p.esgrimaV || 0}V</div><div class="bg-red-900/20 p-2 rounded text-red-400 font-bold">${p.esgrimaD || 0}D</div></div></div>`).join('');
             
             const pairs = [];
@@ -243,6 +243,7 @@
         window.savePlayer = async () => {
             const data = {
                 event: document.getElementById('playerEvent').value, name: document.getElementById('playerName').value,
+                state: document.getElementById('playerState').value, club: document.getElementById('playerClub').value,
                 sex: document.getElementById('playerSex').value, category: document.getElementById('playerCategory').value,
                 phase: document.getElementById('playerPhase').value, discipline: document.getElementById('playerDisc').value,
                 esgrimaV: document.getElementById('playerEsgrimaV').value,
