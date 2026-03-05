@@ -199,9 +199,10 @@
                 const tObs = parseTime(p.obstaculos);
                 const tNat = parseTime(p.natacion);
                 const tLas = parseTime(p.laser);
+                // Si la disciplina es OCR, usualmente solo importa el tiempo de obstáculos, pero para este orden general sumamos lo registrado.
                 const totalSeconds = tObs + tNat + tLas;
-                return { ...p, totalSeconds };
-            }).sort((a, b) => b.totalSeconds - a.totalSeconds);
+                return { ...p, totalSeconds, tObs, tNat, tLas };
+            }).sort((a, b) => b.totalSeconds - a.totalSeconds); // Orden de MAYOR a MENOR tiempo
 
             document.getElementById('scoreboardBody').innerHTML = data.map(p => `<tr><td class="p-4 font-black uppercase">${p.name}<br><span class="text-[8px] text-slate-500">${p.state || '-'} | ${p.club || '-'}</span><br><span class="cat-tag">${p.category}</span></td><td class="p-4 pts-value text-blue-300">-</td><td class="p-4 pts-value">${p.obstaculos || '0'}</td><td class="p-4 pts-value">${p.natacion || '0'}</td><td class="p-4 pts-value">${p.laser || '0'}</td><td class="p-4 font-black text-blue-400">${p.totalSeconds}s</td></tr>`).join('');
             document.getElementById('statusGrid').innerHTML = data.map(p => `<div class="card p-4 rounded-xl text-center"><p class="text-[10px] font-black uppercase mb-2">${p.name}</p><div class="grid grid-cols-2 gap-2"><div class="bg-green-900/20 p-2 rounded text-green-400 font-bold">${p.esgrimaV || 0}V</div><div class="bg-red-900/20 p-2 rounded text-red-400 font-bold">${p.esgrimaD || 0}D</div></div></div>`).join('');
