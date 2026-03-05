@@ -84,19 +84,14 @@
             </div>
 
             <section id="adminPanel" class="hidden space-y-8 mt-12 border-t-2 border-dashed border-slate-800 pt-12">
-                <div class="card p-6 rounded-3xl border-2 border-blue-500/30 shadow-2xl shadow-blue-500/10">
-                    <h2 class="text-blue-400 font-black uppercase mb-6 text-lg flex items-center gap-2">
-                        <span class="w-2 h-6 bg-blue-500 rounded-full"></span> Registrar Atleta
-                    </h2>
+                
+                <div class="card p-6 rounded-3xl">
+                    <h2 class="text-blue-400 font-black uppercase mb-4 text-sm">Registrar Atleta</h2>
                     <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                        <select id="playerEvent" class="input-dark p-3 rounded-xl text-xs bg-slate-950 col-span-full border-blue-900/50"></select>
-                        
-                        <div class="col-span-full grid grid-cols-1 sm:grid-cols-3 gap-4 p-4 bg-slate-900/50 rounded-2xl border border-slate-800">
-                            <input type="text" id="playerName" class="input-dark p-3 rounded-xl text-xs" placeholder="Nombre Completo">
-                            <select id="playerState" class="input-dark p-3 rounded-xl text-xs bg-slate-950"><option value="">Estado...</option></select>
-                            <select id="playerClub" class="input-dark p-3 rounded-xl text-xs bg-slate-950"><option value="">Club...</option></select>
-                        </div>
-
+                        <select id="playerEvent" class="input-dark p-3 rounded-xl text-xs bg-slate-950 col-span-full"></select>
+                        <input type="text" id="playerName" class="input-dark p-3 rounded-xl text-xs" placeholder="Nombre Completo">
+                        <select id="playerState" class="input-dark p-3 rounded-xl text-xs bg-slate-950"><option value="">Estado...</option></select>
+                        <select id="playerClub" class="input-dark p-3 rounded-xl text-xs bg-slate-950"><option value="">Club...</option></select>
                         <select id="playerSex" class="input-dark p-3 rounded-xl text-xs bg-slate-950"><option value="M">Masculino</option><option value="F">Femenino</option><option value="TODOS">Relevos</option></select>
                         <select id="playerCategory" class="input-dark p-3 rounded-xl text-xs bg-slate-950">
                             <option value="U09">U09</option><option value="U11">U11</option><option value="U13">U13</option><option value="U15">U15</option>
@@ -105,12 +100,24 @@
                         <select id="playerPhase" class="input-dark p-3 rounded-xl text-xs bg-slate-950">
                             <option value="Clasificación">1. Clasificación</option><option value="Semifinal">2. Semifinal</option><option value="Final">3. Final</option>
                         </select>
+                    </div>
+                    <button onclick="savePlayer()" class="btn-primary mt-4 text-white px-10 py-3 rounded-xl font-black uppercase text-xs w-full">Guardar Atleta Base</button>
+                </div>
 
-                        <div class="col-span-full border-t border-slate-800 my-2"></div>
+                <div class="card p-6 rounded-3xl border-2 border-blue-500/30">
+                    <h2 class="text-white font-black uppercase mb-6 text-sm flex items-center gap-2">
+                        <span class="w-2 h-4 bg-blue-500 rounded"></span> Registrar Disciplina y Tiempos
+                    </h2>
+                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                        <select id="discEvent" class="input-dark p-3 rounded-xl text-xs bg-slate-950 col-span-full border-blue-900/50"></select>
+                        
+                        <input type="text" id="discName" class="input-dark p-3 rounded-xl text-xs" placeholder="Nombre Atleta">
+                        <select id="discState" class="input-dark p-3 rounded-xl text-xs bg-slate-950"><option value="">Estado...</option></select>
+                        <select id="discClub" class="input-dark p-3 rounded-xl text-xs bg-slate-950"><option value="">Club...</option></select>
 
                         <div class="col-span-full">
-                            <label class="text-[10px] font-black text-blue-400 uppercase mb-2 block">Seleccionar Disciplina para Registrar Tiempos</label>
-                            <select id="playerDisc" onchange="updateAdminInputs(this.value)" class="input-dark p-4 rounded-xl text-sm bg-blue-950/30 w-full border-blue-500/50 font-bold">
+                            <label class="text-[10px] font-black text-blue-400 uppercase mb-2 block">Disciplina</label>
+                            <select id="playerDisc" onchange="updateAdminInputs(this.value)" class="input-dark p-3 rounded-xl text-sm bg-blue-950/30 w-full font-bold">
                                 <option value="Pentatlon Moderno">Pentatlon Moderno</option>
                                 <option value="Obstaculos Laser Run">Obstaculos Laser Run</option>
                                 <option value="OCR 100">OCR 100</option>
@@ -126,7 +133,7 @@
                         <input type="text" id="playerNatacion" class="input-dark p-3 rounded-xl text-xs" placeholder="Natación (m:s)">
                         <input type="text" id="playerLaser" class="input-dark p-3 rounded-xl text-xs" placeholder="Laser Run (m:s)">
                     </div>
-                    <button onclick="savePlayer()" class="btn-primary mt-6 text-white px-10 py-4 rounded-2xl font-black uppercase text-xs w-full shadow-lg shadow-blue-500/20">Guardar Atleta y Tiempos</button>
+                    <button onclick="saveDiscData()" class="btn-primary mt-6 text-white px-10 py-4 rounded-2xl font-black uppercase text-xs w-full shadow-lg">Registrar Disciplina</button>
                 </div>
 
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -179,11 +186,15 @@
             });
             onSnapshot(collection(db, 'artifacts', appId, 'public', 'data', 'states'), (snap) => {
                 const data = snap.docs.map(d => d.data().name);
-                document.getElementById('playerState').innerHTML = `<option value="">Estado...</option>` + data.map(n => `<option value="${n}">${n}</option>`).join('');
+                const options = `<option value="">Estado...</option>` + data.map(n => `<option value="${n}">${n}</option>`).join('');
+                document.getElementById('playerState').innerHTML = options;
+                document.getElementById('discState').innerHTML = options;
             });
             onSnapshot(collection(db, 'artifacts', appId, 'public', 'data', 'clubs'), (snap) => {
                 const data = snap.docs.map(d => d.data().name);
-                document.getElementById('playerClub').innerHTML = `<option value="">Club...</option>` + data.map(n => `<option value="${n}">${n}</option>`).join('');
+                const options = `<option value="">Club...</option>` + data.map(n => `<option value="${n}">${n}</option>`).join('');
+                document.getElementById('playerClub').innerHTML = options;
+                document.getElementById('discClub').innerHTML = options;
             });
         }
 
@@ -208,6 +219,38 @@
             if (clean.includes(':')) { const parts = clean.split(':'); return (parseFloat(parts[0]) || 0) * 60 + (parseFloat(parts[1]) || 0); }
             return parseFloat(clean) || 0;
         }
+
+        window.saveDiscData = async () => {
+            const data = {
+                event: document.getElementById('discEvent').value,
+                name: document.getElementById('discName').value,
+                state: document.getElementById('discState').value,
+                club: document.getElementById('discClub').value,
+                discipline: document.getElementById('playerDisc').value,
+                esgrimaV: document.getElementById('playerEsgrimaV').value,
+                esgrimaD: document.getElementById('playerEsgrimaD').value,
+                esgrimaTotal: document.getElementById('playerEsgrimaTotal').value,
+                obstaculos: document.getElementById('playerObstaculos').value,
+                natacion: document.getElementById('playerNatacion').value,
+                laser: document.getElementById('playerLaser').value,
+                // Valores por defecto para mantener compatibilidad
+                sex: 'M', category: 'U09', phase: 'Final'
+            };
+            if(!data.name || !data.event) return alert("Nombre y Evento obligatorios");
+            await setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'athletes', crypto.randomUUID()), data);
+            alert("Registro de Disciplina Guardado");
+        };
+
+        window.savePlayer = async () => {
+            const data = {
+                event: document.getElementById('playerEvent').value, name: document.getElementById('playerName').value,
+                state: document.getElementById('playerState').value, club: document.getElementById('playerClub').value,
+                sex: document.getElementById('playerSex').value, category: document.getElementById('playerCategory').value,
+                phase: document.getElementById('playerPhase').value, discipline: 'Pentatlon Moderno'
+            };
+            await setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'athletes', crypto.randomUUID()), data);
+            alert("Atleta Base Guardado");
+        };
 
         window.applyFilters = (eventName, eventId) => {
             const sex = document.getElementById('sex-'+eventId).value;
@@ -246,21 +289,6 @@
             showSubView('ranking');
         }
 
-        window.savePlayer = async () => {
-            const data = {
-                event: document.getElementById('playerEvent').value, name: document.getElementById('playerName').value,
-                state: document.getElementById('playerState').value, club: document.getElementById('playerClub').value,
-                sex: document.getElementById('playerSex').value, category: document.getElementById('playerCategory').value,
-                phase: document.getElementById('playerPhase').value, discipline: document.getElementById('playerDisc').value,
-                esgrimaV: document.getElementById('playerEsgrimaV').value, esgrimaD: document.getElementById('playerEsgrimaD').value,
-                esgrimaTotal: document.getElementById('playerEsgrimaTotal').value, obstaculos: document.getElementById('playerObstaculos').value,
-                natacion: document.getElementById('playerNatacion').value, laser: document.getElementById('playerLaser').value
-            };
-            if(!data.name || !data.event) return alert("Nombre y Evento obligatorios");
-            await setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'athletes', crypto.randomUUID()), data);
-            alert("Atleta Registrado");
-        };
-
         window.saveEvent = async () => {
             const name = document.getElementById('eventName').value; if(!name) return;
             await setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'events', crypto.randomUUID()), { name, date: document.getElementById('eventDate').value });
@@ -273,7 +301,11 @@
             document.getElementById(inputId).value = "";
         };
 
-        function updateEventSelect() { document.getElementById('playerEvent').innerHTML = events.map(e => `<option value="${e.name}">${e.name}</option>`).join(''); }
+        function updateEventSelect() { 
+            const opt = events.map(e => `<option value="${e.name}">${e.name}</option>`).join('');
+            document.getElementById('playerEvent').innerHTML = opt;
+            document.getElementById('discEvent').innerHTML = opt;
+        }
         
         function renderEventsList() {
             document.getElementById('publicEventsList').innerHTML = events.map(e => `
