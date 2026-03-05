@@ -90,6 +90,15 @@
                 </div>
 
                 <div class="card p-6 rounded-3xl">
+                    <h2 class="text-green-400 font-black uppercase mb-4 text-sm">Gestionar Disciplinas</h2>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
+                        <input type="text" id="newDiscName" class="input-dark p-3 rounded-xl text-xs" placeholder="Nombre de la Disciplina (Ej: Biathle)">
+                        <button onclick="saveDiscipline()" class="bg-green-600 text-white px-6 py-2 rounded-xl font-black text-[10px] uppercase">Añadir Disciplina</button>
+                    </div>
+                    <div id="adminDiscList" class="mt-4 space-y-2"></div>
+                </div>
+
+                <div class="card p-6 rounded-3xl">
                     <h2 class="text-blue-400 font-black uppercase mb-4 text-sm">Registrar Atleta</h2>
                     <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
                         <select id="playerEvent" class="input-dark p-3 rounded-xl text-xs bg-slate-950 col-span-full"></select>
@@ -107,12 +116,7 @@
                             <option value="Final">3. Final</option>
                         </select>
                         <select id="playerDisc" onchange="updateAdminInputs(this.value)" class="input-dark p-3 rounded-xl text-xs bg-slate-950">
-                            <option value="Pentatlon moderno">Pentatlon moderno</option>
-                            <option value="Obstaculos Laser Run">Obstaculos Laser Run</option>
-                            <option value="OCR 100">OCR 100</option>
-                            <option value="OCR 400">OCR 400</option>
-                            <option value="OCR 3 Km +">OCR 3 Km +</option>
-                        </select>
+                            </select>
                         <input type="number" id="playerEsgrimaV" class="input-dark p-3 rounded-xl text-xs" placeholder="Victorias">
                         <input type="number" id="playerEsgrimaD" class="input-dark p-3 rounded-xl text-xs" placeholder="Derrotas">
                         <input type="number" id="playerEsgrimaTotal" class="input-dark p-3 rounded-xl text-xs" placeholder="Total Bouts">
@@ -133,7 +137,7 @@
 
         const firebaseConfig = { apiKey: "AIzaSyAtWCkDlZuv11AueTW6WEPNwAn97Vf-3yQ", authDomain: "pentatlon-scores.firebaseapp.com", projectId: "pentatlon-scores", storageBucket: "pentatlon-scores.firebasestorage.app", messagingSenderId: "650229123946", appId: "1:650229123946:web:a3769c31f8ce1a23edb313" };
         const appId = 'penta-tourney-v2';
-        let firebaseApp, auth, db, players = [], events = [], isAdmin = false;
+        let firebaseApp, auth, db, players = [], events = [], disciplines = [], isAdmin = false;
 
         async function start() {
             firebaseApp = initializeApp(firebaseConfig); auth = getAuth(firebaseApp); db = getFirestore(firebaseApp);
@@ -158,6 +162,36 @@
                 events = snap.docs.map(d => ({ id: d.id, ...d.data() })).sort((a,b) => new Date(a.date) - new Date(b.date)); 
                 updateEventSelect(); renderEventsList(); renderAdminEvents();
             });
+            onSnapshot(collection(db, 'artifacts', appId, 'public', 'data', 'disciplines'), (snap) => {
+                disciplines = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+                // Si no hay disciplinas en BD, usamos las default
+                if (disciplines.length === 0) {
+                    const defaults = ["Pentatlon moderno", "Obstaculos Laser Run", "OCR 100", "OCR 400", "OCR 3 Km +"];
+                    defaults.forEach(d => setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'disciplines', crypto.randomUUID()), { name: d }));
+                }
+                updateDiscSelects(); renderAdminDisciplines();
+            });
+        }
+
+        window.saveDiscipline = async () => {
+            const name = document.getElementById('newDiscName').value;
+            if(!name) return;
+            await setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'disciplines', crypto.randomUUID()), { name });
+            document.getElementById('newDiscName').value = "";
+            alert("Disciplina Añadida");
+        };
+
+        window.deleteDiscipline = async (id) => { if(confirm("¿Eliminar Disciplina?")) await deleteDoc(doc(db, 'artifacts', appId, 'public', 'data', 'disciplines', id)); };
+
+        function updateDiscSelects() {
+            const options = disciplines.map(d => `<option value="${d.name}">${d.name}</option>`).join('');
+            document.getElementById('playerDisc').innerHTML = options;
+            // Actualizar selectores en la lista de eventos públicos dinámicamente si es necesario
+            renderEventsList(); 
+        }
+
+        function renderAdminDisciplines() {
+            document.getElementById('adminDiscList').innerHTML = disciplines.map(d => `<div class="flex justify-between items-center bg-slate-900 p-2 rounded-lg border border-slate-800"><span class="text-[10px] font-bold uppercase text-green-400">${d.name}</span><button onclick="deleteDiscipline('${d.id}')" class="text-red-500 font-black">ELIMINAR</button></div>`).join('');
         }
 
         window.updateAdminInputs = (discipline) => {
@@ -169,10 +203,7 @@
                 nat: document.getElementById('playerNatacion'),
                 las: document.getElementById('playerLaser')
             };
-            
-            // Reset clases
             Object.values(inputs).forEach(i => i.classList.remove('input-disabled'));
-
             if (discipline.includes("OCR")) {
                 inputs.esgV.classList.add('input-disabled'); inputs.esgD.classList.add('input-disabled'); inputs.esgT.classList.add('input-disabled');
                 inputs.nat.classList.add('input-disabled'); inputs.las.classList.add('input-disabled');
@@ -217,14 +248,12 @@
 
         function renderResults(eventName, sex, phase, category, discipline) {
             let filtered = players.filter(p => p.event === eventName && p.sex === sex && p.phase === phase && p.category === category && p.discipline === discipline);
-            
             let data = filtered.map((p) => {
                 const tObs = parseTime(p.obstaculos);
                 const tNat = parseTime(p.natacion);
                 const tLas = parseTime(p.laser);
-                const totalSeconds = tObs + tNat + tLas;
-                return { ...p, totalSeconds };
-            }).sort((a, b) => b.totalSeconds - a.totalSeconds); // ORDEN MAYOR A MENOR TIEMPO
+                return { ...p, totalSeconds: tObs + tNat + tLas };
+            }).sort((a, b) => b.totalSeconds - a.totalSeconds);
 
             document.getElementById('scoreboardBody').innerHTML = data.map(p => `<tr><td class="p-4 font-black uppercase">${p.name}<br><span class="text-[8px] text-slate-500">${p.state || '-'} | ${p.club || '-'}</span><br><span class="cat-tag">${p.category}</span></td><td class="p-4 pts-value text-blue-300">-</td><td class="p-4 pts-value">${p.obstaculos || '0'}</td><td class="p-4 pts-value">${p.natacion || '0'}</td><td class="p-4 pts-value">${p.laser || '0'}</td><td class="p-4 font-black text-blue-400">${p.totalSeconds}s</td></tr>`).join('');
             document.getElementById('statusGrid').innerHTML = data.map(p => `<div class="card p-4 rounded-xl text-center"><p class="text-[10px] font-black uppercase mb-2">${p.name}</p><div class="grid grid-cols-2 gap-2"><div class="bg-green-900/20 p-2 rounded text-green-400 font-bold">${p.esgrimaV || 0}V</div><div class="bg-red-900/20 p-2 rounded text-red-400 font-bold">${p.esgrimaD || 0}D</div></div></div>`).join('');
@@ -279,6 +308,7 @@
         };
 
         function renderEventsList() { 
+            const discOptions = disciplines.map(d => `<option value="${d.name}">${d.name}</option>`).join('');
             document.getElementById('publicEventsList').innerHTML = events.map(e => `
                 <div class="card rounded-2xl overflow-hidden shadow-2xl">
                     <div onclick="toggleAccordion('${e.id}')" class="p-6 flex justify-between items-center cursor-pointer hover:bg-slate-800/40">
@@ -291,11 +321,7 @@
                                 <div><label class="text-[9px] uppercase font-black text-slate-500 ml-1">Género</label><select id="sex-${e.id}" class="input-dark w-full p-3 rounded-xl mt-1 text-xs"><option value="M">HOMBRE</option><option value="F">MUJER</option><option value="TODOS">RELEVOS</option></select></div>
                                 <div><label class="text-[9px] uppercase font-black text-slate-500 ml-1">Disciplina</label>
                                 <select id="disc-${e.id}" class="input-dark w-full p-3 rounded-xl mt-1 text-xs">
-                                    <option value="Pentatlon moderno">Pentatlon moderno</option>
-                                    <option value="Obstaculos Laser Run">Obstaculos Laser Run</option>
-                                    <option value="OCR 100">OCR 100</option>
-                                    <option value="OCR 400">OCR 400</option>
-                                    <option value="OCR 3 Km +">OCR 3 Km +</option>
+                                    ${discOptions}
                                 </select></div>
                                 <div><label class="text-[9px] uppercase font-black text-slate-500 ml-1">Categoría</label>
                                 <select id="cat-${e.id}" class="input-dark w-full p-3 rounded-xl mt-1 text-xs">
