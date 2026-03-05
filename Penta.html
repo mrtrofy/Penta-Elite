@@ -159,9 +159,10 @@
             const sex = document.getElementById('sex-'+eventId).value;
             const phase = document.getElementById('phase-'+eventId).value;
             const category = document.getElementById('cat-'+eventId).value;
+            const disc = document.getElementById('disc-'+eventId).value;
             document.getElementById('publicEventsList').classList.add('hidden');
             document.getElementById('resultsContainer').classList.remove('hidden');
-            renderResults(eventName, sex, phase, category);
+            renderResults(eventName, sex, phase, category, disc);
         };
 
         window.showSubView = (view) => {
@@ -182,7 +183,7 @@
             return parseFloat(clean) || 0;
         }
 
-        function renderResults(eventName, sex, phase, category) {
+        function renderResults(eventName, sex, phase, category, disc) {
             const pointsTable = [250, 244, 238, 236, 230, 228, 226, 224, 218, 216, 214, 212, 210, 208, 206, 204, 198, 196];
             let esgrimaSorted = players
                 .filter(p => p.event === eventName && p.sex === sex && p.phase === phase && p.category === category)
@@ -256,12 +257,20 @@
                     </div>
                     <div id="acc-${e.id}" class="accordion-content bg-slate-900/20 px-6">
                         <div class="py-6 border-t border-slate-800/50 space-y-4">
-                            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                            <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
                                 <div><label class="text-[9px] uppercase font-black text-slate-500 ml-1">Género</label><select id="sex-${e.id}" class="input-dark w-full p-3 rounded-xl mt-1 text-xs"><option value="M">HOMBRE</option><option value="F">MUJER</option><option value="TODOS">RELEVOS</option></select></div>
                                 <div><label class="text-[9px] uppercase font-black text-slate-500 ml-1">Categoría</label>
                                 <select id="cat-${e.id}" class="input-dark w-full p-3 rounded-xl mt-1 text-xs">
                                     <option value="U09">U09</option><option value="U11">U11</option><option value="U13">U13</option><option value="U15">U15</option>
                                     <option value="U17">U17</option><option value="U19">U19</option><option value="Junior">Junior</option><option value="Senior">Senior</option>
+                                </select></div>
+                                <div><label class="text-[9px] uppercase font-black text-slate-500 ml-1">Disciplina</label>
+                                <select id="disc-${e.id}" class="input-dark w-full p-3 rounded-xl mt-1 text-xs">
+                                    <option value="Pentatlon moderno">Pentatlon moderno</option>
+                                    <option value="Obstaculos Laser Run">Obstaculos Laser Run</option>
+                                    <option value="OCR 100">OCR 100</option>
+                                    <option value="OCR 400">OCR 400</option>
+                                    <option value="OCR 3 Km +">OCR 3 Km +</option>
                                 </select></div>
                                 <div><label class="text-[9px] uppercase font-black text-slate-500 ml-1">Fase</label>
                                 <select id="phase-${e.id}" class="input-dark w-full p-3 rounded-xl mt-1 text-xs">
