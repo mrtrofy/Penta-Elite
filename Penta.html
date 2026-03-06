@@ -426,6 +426,14 @@
                     <div id="acc-${e.id}" class="accordion-content bg-slate-900/20 px-6">
                         <div class="py-6 border-t border-slate-800/50 space-y-4">
                             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                                <div><label class="text-[9px] uppercase font-black text-orange-500 ml-1">Prueba</label>
+                                <select id="disc-${e.id}" class="input-dark w-full p-3 rounded-xl mt-1 text-xs border-orange-500/50">
+                                    <option value="Pentatlon Moderno">Pentatlon Moderno</option>
+                                    <option value="Obstaculos Laser Run">Obstaculos Laser Run</option>
+                                    <option value="OCR 100">OCR 100</option>
+                                    <option value="OCR 400">OCR 400</option>
+                                    <option value="OCR 3 Km+">OCR 3 Km+</option>
+                                </select></div>
                                 <div><label class="text-[9px] uppercase font-black text-slate-500 ml-1">Género</label><select id="sex-${e.id}" class="input-dark w-full p-3 rounded-xl mt-1 text-xs"><option value="M">HOMBRE</option><option value="F">MUJER</option><option value="TODOS">RELEVOS</option></select></div>
                                 <div><label class="text-[9px] uppercase font-black text-slate-500 ml-1">Categoría</label>
                                 <select id="cat-${e.id}" class="input-dark w-full p-3 rounded-xl mt-1 text-xs">
@@ -437,14 +445,6 @@
                                     <option value="Clasificación">1. CLASIFICACIÓN</option>
                                     <option value="Semifinal">2. SEMIFINAL</option>
                                     <option value="Final">3. FINAL</option>
-                                </select></div>
-                                <div><label class="text-[9px] uppercase font-black text-orange-500 ml-1">Prueba</label>
-                                <select id="disc-${e.id}" class="input-dark w-full p-3 rounded-xl mt-1 text-xs border-orange-500/50">
-                                    <option value="Pentatlon Moderno">Pentatlon Moderno</option>
-                                    <option value="Obstaculos Laser Run">Obstaculos Laser Run</option>
-                                    <option value="OCR 100">OCR 100</option>
-                                    <option value="OCR 400">OCR 400</option>
-                                    <option value="OCR 3 Km+">OCR 3 Km+</option>
                                 </select></div>
                             </div>
                             <button onclick="applyFilters('${e.name}', '${e.id}')" class="btn-primary w-full py-4 rounded-2xl text-xs font-black uppercase">Ver Resultados</button>
@@ -473,7 +473,7 @@
     </script>
 
     <div id="loginModal" class="fixed inset-0 bg-slate-950/98 hidden flex items-center justify-center p-6 z-50">
-        <div class="bg-slate-900 p-8 rounded-[2rem] w-full max-sm border border-slate-800 text-center">
+        <div class="bg-slate-900 p-8 rounded-[2rem] w-full max-w-sm border border-slate-800 text-center">
             <h2 class="text-xl font-black mb-6 text-white uppercase">Acceso Admin</h2>
             <input type="password" id="adminPass" class="input-dark w-full p-4 rounded-2xl mb-6 text-center text-2xl" placeholder="****">
             <button onclick="checkPassword()" class="btn-primary w-full py-4 rounded-2xl font-black text-white text-xs uppercase">Entrar</button>
