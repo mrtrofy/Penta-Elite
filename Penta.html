@@ -12,7 +12,6 @@
         .card { background: #0f172a; border: 1px solid #1e293b; }
         .input-dark { background: #020617; border: 1px solid #334155; color: #f1f5f9; outline: none; }
         .input-dark:focus { border-color: #3b82f6; box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.2); }
-        .neon-blue { color: #38bdf8; text-shadow: 0 0 10px rgba(56, 189, 248, 0.4); }
         .btn-primary { background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%); transition: all 0.2s; }
         .btn-orange { background: linear-gradient(135deg, #f97316 0%, #ea580c 100%); transition: all 0.2s; }
         #loadingOverlay { background: #020617; display: flex; align-items: center; justify-content: center; z-index: 100; position: fixed; inset: 0; }
@@ -29,7 +28,7 @@
         <div id="adminBadge" class="hidden bg-blue-600/20 border border-blue-500/50 text-blue-500 px-3 py-1 rounded-full text-[10px] font-black uppercase">Modo Admin</div>
     </div>
 
-    <div id="loadingOverlay"><div class="text-center"><div class="inline-block animate-spin rounded-full h-10 w-10 border-t-2 border-b-2 border-blue-500 mb-4"></div><p class="neon-blue font-bold uppercase text-sm">Cargando...</p></div></div>
+    <div id="loadingOverlay"><div class="text-center"><div class="inline-block animate-spin rounded-full h-10 w-10 border-t-2 border-b-2 border-blue-500 mb-4"></div><p class="text-blue-400 font-bold uppercase text-sm">Cargando...</p></div></div>
 
     <div id="app" class="max-w-7xl mx-auto opacity-0 transition-opacity duration-700">
         <header class="flex flex-col md:flex-row justify-between items-center mb-6 border-b border-slate-800 pb-6 gap-4">
@@ -48,11 +47,11 @@
         </header>
 
         <div id="disciplinesView" class="hidden mb-6">
-            <h2 class="text-orange-500 font-black uppercase mb-4 text-sm">Registros de Disciplinas</h2>
+            <h2 class="text-orange-500 font-black uppercase mb-4 text-sm">Registros de Disciplinas y Tiempos</h2>
             <div class="card rounded-2xl overflow-x-auto">
                 <table class="w-full text-left text-xs">
                     <thead class="bg-slate-800 uppercase font-black text-slate-400">
-                        <tr><th class="p-4">Atleta</th><th class="p-4">Estado/Club</th><th class="p-4">Disciplina</th><th class="p-4">Tiempo</th></tr>
+                        <tr><th class="p-4">Atleta</th><th class="p-4">Evento</th><th class="p-4">Estado/Club</th><th class="p-4">Disciplina</th><th class="p-4">Tiempo</th></tr>
                     </thead>
                     <tbody id="disciplinesResultsBody" class="divide-y divide-slate-800"></tbody>
                 </table>
@@ -67,7 +66,6 @@
             <div id="resultsContainer" class="hidden space-y-6">
                 <div id="navButtonsResults" class="flex flex-wrap gap-2 py-4 border-b border-slate-800">
                     <button onclick="showSubView('ranking')" id="btnRank" class="bg-blue-600 text-white text-[9px] font-black uppercase px-4 py-2 rounded-lg">Tabla General</button>
-                    <button onclick="showSubView('laser')" id="btnLaser" class="bg-slate-800 text-slate-400 text-[9px] font-black uppercase px-4 py-2 rounded-lg">Solo Laser Run</button>
                 </div>
                 <div id="rankingSubView" class="subview">
                     <div class="card rounded-2xl overflow-x-auto"><table class="w-full text-left text-xs"><tbody id="scoreboardBody" class="divide-y divide-slate-800"></tbody></table></div>
@@ -75,6 +73,7 @@
             </div>
 
             <section id="adminPanel" class="hidden space-y-8 mt-12 border-t-2 border-dashed border-slate-800 pt-12">
+                
                 <div class="card p-6 rounded-3xl">
                     <h2 class="text-blue-400 font-black uppercase mb-4 text-sm">Registrar Atleta</h2>
                     <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
@@ -82,14 +81,22 @@
                         <input type="text" id="playerName" class="input-dark p-3 rounded-xl text-xs" placeholder="Nombre Completo">
                         <select id="playerState" class="input-dark p-3 rounded-xl text-xs bg-slate-950"><option value="">Estado...</option></select>
                         <select id="playerSex" class="input-dark p-3 rounded-xl text-xs bg-slate-950"><option value="M">Masculino</option><option value="F">Femenino</option></select>
+                        <select id="playerCategory" class="input-dark p-3 rounded-xl text-xs bg-slate-950">
+                            <option value="U09">U09</option><option value="U11">U11</option><option value="U13">U13</option><option value="U15">U15</option><option value="U17">U17</option><option value="U19">U19</option><option value="Junior">Junior</option><option value="Senior">Senior</option>
+                        </select>
+                        <select id="playerPhase" class="input-dark p-3 rounded-xl text-xs bg-slate-950"><option value="Clasificación">1. Clasificación</option><option value="Semifinal">2. Semifinal</option><option value="Final">3. Final</option></select>
+                        
+                        <input type="number" id="playerEsgV" class="input-dark p-3 rounded-xl text-xs" placeholder="Esg Victorias">
+                        <input type="number" id="playerEsgD" class="input-dark p-3 rounded-xl text-xs" placeholder="Esg Derrotas">
+                        <input type="number" id="playerEsgT" class="input-dark p-3 rounded-xl text-xs" placeholder="Esg Total Bouts">
                         <input type="text" id="playerObs" class="input-dark p-3 rounded-xl text-xs" placeholder="Obstáculos (seg)">
                         <input type="text" id="playerNat" class="input-dark p-3 rounded-xl text-xs" placeholder="Natación (m:s)">
                         <input type="text" id="playerLas" class="input-dark p-3 rounded-xl text-xs" placeholder="Laser Run (m:s)">
                     </div>
-                    <button onclick="savePlayer()" class="btn-primary mt-4 text-white px-10 py-3 rounded-xl font-black uppercase text-xs w-full">Guardar Atleta y Tiempos</button>
+                    <button onclick="savePlayer()" class="btn-primary mt-4 text-white px-10 py-3 rounded-xl font-black uppercase text-xs w-full">Guardar Atleta Completo</button>
                 </div>
 
-                <div class="card p-6 rounded-3xl border-2 border-blue-500/30">
+                <div class="card p-6 rounded-3xl border-2 border-orange-500/30">
                     <h2 class="text-white font-black uppercase mb-6 text-sm">Registrar Disciplina y Tiempos</h2>
                     <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
                         <select id="discEvent" class="input-dark p-3 rounded-xl text-xs bg-slate-950 col-span-full"></select>
@@ -103,9 +110,22 @@
                             <option value="OCR 400">OCR 400</option>
                             <option value="OCR 3 Km +">OCR 3 Km +</option>
                         </select>
-                        <input type="text" id="discTime" class="input-dark p-3 rounded-xl text-xs col-span-full" placeholder="Tiempo de la Disciplina (ej. 15:30)">
+                        <input type="text" id="discTime" class="input-dark p-3 rounded-xl text-xs col-span-full" placeholder="Tiempo/Marca (ej. 1:45.20)">
                     </div>
-                    <button onclick="saveDiscData()" class="btn-primary mt-6 text-white px-10 py-4 rounded-2xl font-black uppercase text-xs w-full">Registrar Disciplina</button>
+                    <button onclick="saveDiscData()" class="btn-primary mt-6 text-white px-10 py-4 rounded-2xl font-black uppercase text-xs w-full">Registrar Tiempo de Disciplina</button>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div class="card p-4 rounded-2xl">
+                         <h3 class="text-green-400 font-black uppercase mb-3 text-[10px]">Nuevo Estado</h3>
+                         <input type="text" id="stateName" class="input-dark w-full p-2 rounded-lg text-[10px] mb-2" placeholder="Estado">
+                         <button onclick="saveOption('states', 'stateName')" class="bg-green-600 w-full py-2 rounded-lg font-black text-[9px] uppercase">Agregar</button>
+                    </div>
+                    <div class="card p-4 rounded-2xl">
+                         <h3 class="text-orange-400 font-black uppercase mb-3 text-[10px]">Nuevo Club</h3>
+                         <input type="text" id="clubName" class="input-dark w-full p-2 rounded-lg text-[10px] mb-2" placeholder="Club">
+                         <button onclick="saveOption('clubs', 'clubName')" class="bg-orange-600 w-full py-2 rounded-lg font-black text-[9px] uppercase">Agregar</button>
+                    </div>
                 </div>
             </section>
         </main>
@@ -126,13 +146,11 @@
         }
 
         function setupListeners() {
-            // Escuchar Atletas
             onSnapshot(collection(db, 'artifacts', appId, 'public', 'data', 'athletes'), (snap) => {
                 players = snap.docs.map(d => ({ id: d.id, ...d.data() }));
                 document.getElementById('loadingOverlay').style.display = 'none';
                 document.getElementById('app').classList.replace('opacity-0', 'opacity-100');
             });
-            // Escuchar Disciplinas Específicas
             onSnapshot(collection(db, 'artifacts', appId, 'public', 'data', 'disciplines_logs'), (snap) => {
                 disciplines = snap.docs.map(d => d.data());
                 renderDisciplinesTable();
@@ -141,17 +159,28 @@
                 events = snap.docs.map(d => ({ id: d.id, ...d.data() }));
                 updateEventSelects(); renderEventsList();
             });
+            onSnapshot(collection(db, 'artifacts', appId, 'public', 'data', 'states'), (snap) => {
+                const opt = `<option value="">Estado...</option>` + snap.docs.map(d => `<option value="${d.data().name}">${d.data().name}</option>`).join('');
+                document.getElementById('playerState').innerHTML = opt;
+                document.getElementById('discState').innerHTML = opt;
+            });
+            onSnapshot(collection(db, 'artifacts', appId, 'public', 'data', 'clubs'), (snap) => {
+                const opt = `<option value="">Club...</option>` + snap.docs.map(d => `<option value="${d.data().name}">${d.data().name}</option>`).join('');
+                document.getElementById('discClub').innerHTML = opt;
+            });
         }
 
         window.savePlayer = async () => {
             const data = {
                 event: document.getElementById('playerEvent').value, name: document.getElementById('playerName').value,
                 state: document.getElementById('playerState').value, sex: document.getElementById('playerSex').value,
-                obstaculos: document.getElementById('playerObs').value, natacion: document.getElementById('playerNat').value,
-                laser: document.getElementById('playerLas').value, type: 'atleta_base'
+                category: document.getElementById('playerCategory').value, phase: document.getElementById('playerPhase').value,
+                esgV: document.getElementById('playerEsgV').value, esgD: document.getElementById('playerEsgD').value,
+                esgT: document.getElementById('playerEsgT').value, obstaculos: document.getElementById('playerObs').value,
+                natacion: document.getElementById('playerNat').value, laser: document.getElementById('playerLas').value
             };
             await setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'athletes', crypto.randomUUID()), data);
-            alert("Atleta Guardado");
+            alert("Atleta Registrado");
         };
 
         window.saveDiscData = async () => {
@@ -161,7 +190,7 @@
                 discipline: document.getElementById('playerDisc').value, time: document.getElementById('discTime').value
             };
             await setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'disciplines_logs', crypto.randomUUID()), data);
-            alert("Registro de Disciplina Exitoso");
+            alert("Tiempo Registrado");
         };
 
         window.showDisciplinesView = () => {
@@ -173,26 +202,12 @@
         function renderDisciplinesTable() {
             document.getElementById('disciplinesResultsBody').innerHTML = disciplines.map(d => `
                 <tr>
-                    <td class="p-4 font-black uppercase text-white">${d.name}</td>
+                    <td class="p-4 font-black text-white">${d.name}</td>
+                    <td class="p-4 text-[10px] text-slate-500">${d.event}</td>
                     <td class="p-4 text-slate-400">${d.state} / ${d.club}</td>
                     <td class="p-4 text-orange-400 font-bold">${d.discipline}</td>
                     <td class="p-4 font-black text-white">${d.time || '--'}</td>
                 </tr>
-            `).join('');
-        }
-
-        window.applyFilters = (eventName, eventId) => {
-            const sex = document.getElementById('sex-'+eventId).value;
-            document.getElementById('publicEventsView').classList.add('hidden');
-            document.getElementById('disciplinesView').classList.add('hidden');
-            document.getElementById('resultsContainer').classList.remove('hidden');
-            renderRanking(eventName, sex);
-        };
-
-        function renderRanking(eventName, sex) {
-            let filtered = players.filter(p => p.event === eventName && p.sex === sex);
-            document.getElementById('scoreboardBody').innerHTML = filtered.map(p => `
-                <tr><td class="p-4 font-black">${p.name}</td><td class="p-4">${p.laser}</td></tr>
             `).join('');
         }
 
@@ -205,12 +220,29 @@
         function renderEventsList() {
             document.getElementById('publicEventsList').innerHTML = events.map(e => `
                 <div class="card rounded-2xl p-6 mb-4">
-                    <div class="flex justify-between items-center mb-4">
-                        <p class="font-black text-white uppercase">${e.name}</p>
+                    <p class="font-black text-white uppercase mb-4">${e.name}</p>
+                    <div class="grid grid-cols-2 gap-4 mb-4">
                         <select id="sex-${e.id}" class="input-dark p-2 rounded-lg text-xs"><option value="M">HOMBRE</option><option value="F">MUJER</option></select>
+                        <select id="cat-${e.id}" class="input-dark p-2 rounded-lg text-xs"><option value="U09">U09</option><option value="U11">U11</option><option value="U13">U13</option><option value="U15">U15</option><option value="U17">U17</option><option value="U19">U19</option><option value="Junior">Junior</option><option value="Senior">Senior</option></select>
                     </div>
                     <button onclick="applyFilters('${e.name}', '${e.id}')" class="btn-primary w-full py-3 rounded-xl text-xs font-black uppercase">Ver Resultados</button>
                 </div>
+            `).join('');
+        }
+
+        window.applyFilters = (eventName, eventId) => {
+            const sex = document.getElementById('sex-'+eventId).value;
+            const cat = document.getElementById('cat-'+eventId).value;
+            document.getElementById('publicEventsView').classList.add('hidden');
+            document.getElementById('disciplinesView').classList.add('hidden');
+            document.getElementById('resultsContainer').classList.remove('hidden');
+            renderRanking(eventName, sex, cat);
+        };
+
+        function renderRanking(eventName, sex, cat) {
+            let filtered = players.filter(p => p.event === eventName && p.sex === sex && p.category === cat);
+            document.getElementById('scoreboardBody').innerHTML = filtered.map(p => `
+                <tr><td class="p-4 font-black">${p.name}</td><td class="p-4">Laser: ${p.laser}</td><td class="p-4">Total: ${p.obstaculos}s</td></tr>
             `).join('');
         }
 
