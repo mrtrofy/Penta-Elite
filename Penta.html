@@ -83,8 +83,8 @@
                                     <th class="p-4">Club</th>
                                     <th class="p-4">Estado</th>
                                     <th class="p-4">Penalidad (Pts)</th>
-                                    <th class="p-4">Tiempo Base</th>
-                                    <th class="p-4">Tiempo Total</th>
+                                    <th class="p-4">Tiempo Inicial</th>
+                                    <th class="p-4">Tiempo Final</th>
                                 </tr>
                             </thead>
                             <tbody id="disciplinasBody" class="divide-y divide-slate-800"></tbody>
@@ -111,7 +111,8 @@
                             <option value="OCR 400">OCR 400</option>
                             <option value="OCR 3 Km+">OCR 3 Km+</option>
                         </select>
-                        <input type="text" id="discTiempo" class="input-dark p-3 rounded-xl text-xs" placeholder="Tiempo Base (m:s.ms)">
+                        <input type="text" id="discTiempo" class="input-dark p-3 rounded-xl text-xs" placeholder="Tiempo Inicial (m:s.ms)">
+                        <input type="text" id="discTiempoFinal" class="input-dark p-3 rounded-xl text-xs" placeholder="Tiempo Final (m:s.ms)">
                         <div>
                             <label class="text-[9px] uppercase font-black text-slate-500 ml-1">Penalidad (Puntos)</label>
                             <select id="discPenalidad" class="input-dark w-full p-3 rounded-xl text-xs bg-slate-950">
@@ -244,6 +245,7 @@
                 estado: document.getElementById('discEstado').value,
                 disciplina: document.getElementById('adminDisciplina').value,
                 tiempo: document.getElementById('discTiempo').value,
+                tiempoFinal: document.getElementById('discTiempoFinal').value,
                 penalidad: document.getElementById('discPenalidad').value
             };
             if(!data.nombre) return alert("Ingrese nombre");
@@ -251,14 +253,11 @@
             alert("Prueba guardada");
         };
 
-        function calculateTotalTime(baseTimeStr, penaltyPoints) {
-            let totalSeconds = parseTime(baseTimeStr);
+        function calculatePenaltyAddition(penaltyPoints) {
             let penaltySeconds = (parseInt(penaltyPoints) || 0) * 50;
-            let finalSeconds = totalSeconds + penaltySeconds;
-            
-            let m = Math.floor(finalSeconds / 60);
-            let s = (finalSeconds % 60).toFixed(2);
-            return `${m}:${s < 10 ? '0' : ''}${s}`;
+            let m = Math.floor(penaltySeconds / 60);
+            let s = (penaltySeconds % 60).toFixed(2);
+            return `+${m}:${s < 10 ? '0' : ''}${s}`;
         }
 
         function renderDisciplinas() {
@@ -268,9 +267,12 @@
                     <td class="p-4 text-orange-400 font-bold">${d.disciplina}</td>
                     <td class="p-4">${d.club}</td>
                     <td class="p-4 uppercase text-[10px]">${d.estado}</td>
-                    <td class="p-4 text-center font-bold text-red-400">${d.penalidad || 0}</td>
+                    <td class="p-4 text-center font-bold text-red-400">
+                        ${d.penalidad || 0}<br>
+                        <span class="text-[8px] text-red-500/70">${calculatePenaltyAddition(d.penalidad)}</span>
+                    </td>
                     <td class="p-4 font-mono text-slate-400">${d.tiempo}</td>
-                    <td class="p-4 font-mono text-white font-bold bg-orange-950/20">${calculateTotalTime(d.tiempo, d.penalidad)}</td>
+                    <td class="p-4 font-mono text-white font-bold bg-orange-950/20">${d.tiempoFinal || '--'}</td>
                 </tr>
             `).join('');
             document.getElementById('adminDiscList').innerHTML = discData.map(d => `<div class="flex justify-between items-center bg-slate-900 p-2 rounded-lg border border-slate-800"><span class="text-[10px] font-bold uppercase">${d.nombre} - ${d.disciplina}</span><button onclick="deleteDisc('${d.id}')" class="text-red-500 font-black">ELIMINAR</button></div>`).join('');
