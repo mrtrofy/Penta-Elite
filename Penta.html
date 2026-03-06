@@ -91,7 +91,6 @@
                         <select id="playerEvent" class="input-dark p-3 rounded-xl text-xs bg-slate-950 col-span-full"></select>
                         <input type="text" id="playerName" class="input-dark p-3 rounded-xl text-xs" placeholder="Nombre Completo">
                         <select id="playerState" class="input-dark p-3 rounded-xl text-xs bg-slate-950"><option value="">Estado...</option></select>
-                        <select id="playerClub" class="input-dark p-3 rounded-xl text-xs bg-slate-950"><option value="">Club...</option></select>
                         <select id="playerSex" class="input-dark p-3 rounded-xl text-xs bg-slate-950"><option value="M">Masculino</option><option value="F">Femenino</option><option value="TODOS">Relevos</option></select>
                         <select id="playerCategory" class="input-dark p-3 rounded-xl text-xs bg-slate-950">
                             <option value="U09">U09</option><option value="U11">U11</option><option value="U13">U13</option><option value="U15">U15</option>
@@ -99,6 +98,13 @@
                         </select>
                         <select id="playerPhase" class="input-dark p-3 rounded-xl text-xs bg-slate-950">
                             <option value="Clasificación">1. Clasificación</option><option value="Semifinal">2. Semifinal</option><option value="Final">3. Final</option>
+                        </select>
+                        <select id="playerDiscBase" class="input-dark p-3 rounded-xl text-xs bg-slate-950">
+                            <option value="Pentatlon Moderno">Pentatlon Moderno</option>
+                            <option value="Obstaculos Laser Run">Obstaculos Laser Run</option>
+                            <option value="OCR 100">OCR 100</option>
+                            <option value="OCR 400">OCR 400</option>
+                            <option value="OCR 3 Km +">OCR 3 Km +</option>
                         </select>
                     </div>
                     <button onclick="savePlayer()" class="btn-primary mt-4 text-white px-10 py-3 rounded-xl font-black uppercase text-xs w-full">Guardar Atleta Base</button>
@@ -116,7 +122,7 @@
                         <select id="discClub" class="input-dark p-3 rounded-xl text-xs bg-slate-950"><option value="">Club...</option></select>
 
                         <div class="col-span-full">
-                            <label class="text-[10px] font-black text-blue-400 uppercase mb-2 block">Disciplina</label>
+                            <label class="text-[10px] font-black text-blue-400 uppercase mb-2 block">Seleccionar Disciplina</label>
                             <select id="playerDisc" onchange="updateAdminInputs(this.value)" class="input-dark p-3 rounded-xl text-sm bg-blue-950/30 w-full font-bold">
                                 <option value="Pentatlon Moderno">Pentatlon Moderno</option>
                                 <option value="Obstaculos Laser Run">Obstaculos Laser Run</option>
@@ -133,7 +139,7 @@
                         <input type="text" id="playerNatacion" class="input-dark p-3 rounded-xl text-xs" placeholder="Natación (m:s)">
                         <input type="text" id="playerLaser" class="input-dark p-3 rounded-xl text-xs" placeholder="Laser Run (m:s)">
                     </div>
-                    <button onclick="saveDiscData()" class="btn-primary mt-6 text-white px-10 py-4 rounded-2xl font-black uppercase text-xs w-full shadow-lg">Registrar Disciplina</button>
+                    <button onclick="saveDiscData()" class="btn-primary mt-6 text-white px-10 py-4 rounded-2xl font-black uppercase text-xs w-full shadow-lg">Registrar Tiempos</button>
                 </div>
 
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -193,7 +199,6 @@
             onSnapshot(collection(db, 'artifacts', appId, 'public', 'data', 'clubs'), (snap) => {
                 const data = snap.docs.map(d => d.data().name);
                 const options = `<option value="">Club...</option>` + data.map(n => `<option value="${n}">${n}</option>`).join('');
-                document.getElementById('playerClub').innerHTML = options;
                 document.getElementById('discClub').innerHTML = options;
             });
         }
@@ -213,13 +218,6 @@
             }
         };
 
-        function parseTime(val) {
-            if (!val) return 0;
-            let clean = val.toString().trim().replace(',', '.');
-            if (clean.includes(':')) { const parts = clean.split(':'); return (parseFloat(parts[0]) || 0) * 60 + (parseFloat(parts[1]) || 0); }
-            return parseFloat(clean) || 0;
-        }
-
         window.saveDiscData = async () => {
             const data = {
                 event: document.getElementById('discEvent').value,
@@ -233,25 +231,25 @@
                 obstaculos: document.getElementById('playerObstaculos').value,
                 natacion: document.getElementById('playerNatacion').value,
                 laser: document.getElementById('playerLaser').value,
-                // Valores por defecto para mantener compatibilidad
                 sex: 'M', category: 'U09', phase: 'Final'
             };
             if(!data.name || !data.event) return alert("Nombre y Evento obligatorios");
             await setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'athletes', crypto.randomUUID()), data);
-            alert("Registro de Disciplina Guardado");
+            alert("Tiempos Guardados");
         };
 
         window.savePlayer = async () => {
             const data = {
                 event: document.getElementById('playerEvent').value, name: document.getElementById('playerName').value,
-                state: document.getElementById('playerState').value, club: document.getElementById('playerClub').value,
+                state: document.getElementById('playerState').value,
                 sex: document.getElementById('playerSex').value, category: document.getElementById('playerCategory').value,
-                phase: document.getElementById('playerPhase').value, discipline: 'Pentatlon Moderno'
+                phase: document.getElementById('playerPhase').value, discipline: document.getElementById('playerDiscBase').value
             };
             await setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'athletes', crypto.randomUUID()), data);
             alert("Atleta Base Guardado");
         };
 
+        // Lógica de visualización (Sin cambios según instrucción)
         window.applyFilters = (eventName, eventId) => {
             const sex = document.getElementById('sex-'+eventId).value;
             const phase = document.getElementById('phase-'+eventId).value;
@@ -270,6 +268,13 @@
             document.getElementById('btn'+btns[view]).className = "bg-blue-600 text-white text-[9px] font-black uppercase px-4 py-2 rounded-lg";
         };
 
+        function parseTime(val) {
+            if (!val) return 0;
+            let clean = val.toString().trim().replace(',', '.');
+            if (clean.includes(':')) { const parts = clean.split(':'); return (parseFloat(parts[0]) || 0) * 60 + (parseFloat(parts[1]) || 0); }
+            return parseFloat(clean) || 0;
+        }
+
         function renderResults(eventName, sex, phase, category, discipline) {
             let filtered = players.filter(p => p.event === eventName && p.sex === sex && p.phase === phase && p.category === category && p.discipline === discipline);
             let data = filtered.map(p => {
@@ -277,7 +282,7 @@
                 return { ...p, total };
             }).sort((a,b) => b.total - a.total);
 
-            document.getElementById('scoreboardBody').innerHTML = data.map(p => `<tr><td class="p-4 font-black uppercase">${p.name}<br><span class="text-[8px] text-slate-500">${p.club}</span></td><td class="p-4 pts-value">-</td><td class="p-4 pts-value">${p.obstaculos || '0'}</td><td class="p-4 pts-value">${p.natacion || '0'}</td><td class="p-4 pts-value">${p.laser || '0'}</td><td class="p-4 font-black text-blue-400">${p.total}s</td></tr>`).join('');
+            document.getElementById('scoreboardBody').innerHTML = data.map(p => `<tr><td class="p-4 font-black uppercase">${p.name}<br><span class="text-[8px] text-slate-500">${p.club || ''}</span></td><td class="p-4 pts-value">-</td><td class="p-4 pts-value">${p.obstaculos || '0'}</td><td class="p-4 pts-value">${p.natacion || '0'}</td><td class="p-4 pts-value">${p.laser || '0'}</td><td class="p-4 font-black text-blue-400">${p.total}s</td></tr>`).join('');
             
             const laserSorted = [...data].sort((a,b) => parseTime(b.laser) - parseTime(a.laser));
             document.getElementById('laserOnlyBody').innerHTML = laserSorted.map(p => `<tr><td class="p-4 font-black uppercase">${p.name}</td><td class="p-4 font-black text-blue-400 text-right">${p.laser || '0'}</td></tr>`).join('');
