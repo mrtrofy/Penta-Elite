@@ -78,6 +78,25 @@
             </div>
 
             <section id="adminPanel" class="hidden space-y-8 mt-12 border-t-2 border-dashed border-slate-800 pt-12">
+                <div class="card p-6 rounded-3xl border-orange-500/30">
+                    <h2 class="text-orange-400 font-black uppercase mb-4 text-sm">Configuración de Disciplinas</h2>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <div>
+                            <label class="text-[9px] uppercase font-black text-slate-500 ml-1">Seleccionar Disciplina</label>
+                            <select id="adminDisciplina" class="input-dark w-full p-3 rounded-xl mt-1 text-xs bg-slate-950">
+                                <option value="Pentatlon Moderno">Pentatlon Moderno</option>
+                                <option value="Obstaculos Laser Run">Obstaculos Laser Run</option>
+                                <option value="OCR 100">OCR 100</option>
+                                <option value="OCR 400">OCR 400</option>
+                                <option value="OCR 3 Km+">OCR 3 Km+</option>
+                            </select>
+                        </div>
+                        <div class="flex items-end">
+                            <button class="bg-orange-600 text-white px-6 py-3 rounded-xl font-black text-[10px] uppercase w-full">Establecer Disciplina</button>
+                        </div>
+                    </div>
+                </div>
+
                 <div class="card p-6 rounded-3xl">
                     <h2 class="text-purple-400 font-black uppercase mb-4 text-sm">Crear Evento</h2>
                     <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-4">
@@ -297,7 +316,7 @@
     </script>
 
     <div id="loginModal" class="fixed inset-0 bg-slate-950/98 hidden flex items-center justify-center p-6 z-50">
-        <div class="bg-slate-900 p-8 rounded-[2rem] w-full max-w-sm border border-slate-800 text-center">
+        <div class="bg-slate-900 p-8 rounded-[2rem] w-full max-sm border border-slate-800 text-center">
             <h2 class="text-xl font-black mb-6 text-white uppercase">Acceso Admin</h2>
             <input type="password" id="adminPass" class="input-dark w-full p-4 rounded-2xl mb-6 text-center text-2xl" placeholder="****">
             <button onclick="checkPassword()" class="btn-primary w-full py-4 rounded-2xl font-black text-white text-xs uppercase">Entrar</button>
