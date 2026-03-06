@@ -145,7 +145,8 @@
                 document.getElementById('app').classList.replace('opacity-0', 'opacity-100');
             });
             onSnapshot(collection(db, 'artifacts', appId, 'public', 'data', 'events'), (snap) => {
-                events = snap.docs.map(d => ({ id: d.id, ...d.data() })).sort((a,b) => new Date(b.date) - new Date(a.date)); 
+                // MODIFICACIÓN: Ordenamos de más viejo (a) a más nuevo (b)
+                events = snap.docs.map(d => ({ id: d.id, ...d.data() })).sort((a,b) => new Date(a.date) - new Date(b.date)); 
                 updateEventSelect(); renderEventsList(); renderAdminEvents();
             });
         }
@@ -212,7 +213,6 @@
                 </div>
             `).join('');
 
-            // CAMBIO: Ordenamos hData específicamente por hPts de mayor a menor para el Hándicap
             const hData = [...data].sort((a,b) => b.hPts - a.hPts); 
             const best = hData[0]?.hPts || 0;
             document.getElementById('handicapBody').innerHTML = hData.map((p, i) => `<tr><td class="p-4 font-black uppercase">${p.name}</td><td class="p-4 pts-value">${p.hPts}</td><td class="p-4 text-green-500 font-mono">${i === 0 ? '0' : `+${best - p.hPts}s`}</td></tr>`).join('');
