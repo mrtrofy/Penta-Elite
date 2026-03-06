@@ -99,15 +99,15 @@
                         <select id="playerPhase" class="input-dark p-3 rounded-xl text-xs bg-slate-950">
                             <option value="Clasificación">1. Clasificación</option><option value="Semifinal">2. Semifinal</option><option value="Final">3. Final</option>
                         </select>
-                        <select id="playerDiscBase" class="input-dark p-3 rounded-xl text-xs bg-slate-950">
-                            <option value="Pentatlon Moderno">Pentatlon Moderno</option>
-                            <option value="Obstaculos Laser Run">Obstaculos Laser Run</option>
-                            <option value="OCR 100">OCR 100</option>
-                            <option value="OCR 400">OCR 400</option>
-                            <option value="OCR 3 Km +">OCR 3 Km +</option>
-                        </select>
+
+                        <input type="number" id="playerEsgrimaV" class="input-dark p-3 rounded-xl text-xs" placeholder="Esg Victorias">
+                        <input type="number" id="playerEsgrimaD" class="input-dark p-3 rounded-xl text-xs" placeholder="Esg Derrotas">
+                        <input type="number" id="playerEsgrimaTotal" class="input-dark p-3 rounded-xl text-xs" placeholder="Esg Total Bouts">
+                        <input type="text" id="playerObstaculos" class="input-dark p-3 rounded-xl text-xs" placeholder="Obstáculos (seg)">
+                        <input type="text" id="playerNatacion" class="input-dark p-3 rounded-xl text-xs" placeholder="Natación (m:s)">
+                        <input type="text" id="playerLaser" class="input-dark p-3 rounded-xl text-xs" placeholder="Laser Run (m:s)">
                     </div>
-                    <button onclick="savePlayer()" class="btn-primary mt-4 text-white px-10 py-3 rounded-xl font-black uppercase text-xs w-full">Guardar Atleta Base</button>
+                    <button onclick="savePlayer()" class="btn-primary mt-4 text-white px-10 py-3 rounded-xl font-black uppercase text-xs w-full">Guardar Atleta y Resultados</button>
                 </div>
 
                 <div class="card p-6 rounded-3xl border-2 border-blue-500/30">
@@ -123,7 +123,7 @@
 
                         <div class="col-span-full">
                             <label class="text-[10px] font-black text-blue-400 uppercase mb-2 block">Seleccionar Disciplina</label>
-                            <select id="playerDisc" onchange="updateAdminInputs(this.value)" class="input-dark p-3 rounded-xl text-sm bg-blue-950/30 w-full font-bold">
+                            <select id="playerDisc" class="input-dark p-3 rounded-xl text-sm bg-blue-950/30 w-full font-bold">
                                 <option value="Pentatlon Moderno">Pentatlon Moderno</option>
                                 <option value="Obstaculos Laser Run">Obstaculos Laser Run</option>
                                 <option value="OCR 100">OCR 100</option>
@@ -131,15 +131,8 @@
                                 <option value="OCR 3 Km +">OCR 3 Km +</option>
                             </select>
                         </div>
-
-                        <input type="number" id="playerEsgrimaV" class="input-dark p-3 rounded-xl text-xs" placeholder="Esg Victorias">
-                        <input type="number" id="playerEsgrimaD" class="input-dark p-3 rounded-xl text-xs" placeholder="Esg Derrotas">
-                        <input type="number" id="playerEsgrimaTotal" class="input-dark p-3 rounded-xl text-xs" placeholder="Esg Total Bouts">
-                        <input type="text" id="playerObstaculos" class="input-dark p-3 rounded-xl text-xs" placeholder="Obstáculos (seg)">
-                        <input type="text" id="playerNatacion" class="input-dark p-3 rounded-xl text-xs" placeholder="Natación (m:s)">
-                        <input type="text" id="playerLaser" class="input-dark p-3 rounded-xl text-xs" placeholder="Laser Run (m:s)">
                     </div>
-                    <button onclick="saveDiscData()" class="btn-primary mt-6 text-white px-10 py-4 rounded-2xl font-black uppercase text-xs w-full shadow-lg">Registrar Tiempos</button>
+                    <button onclick="saveDiscData()" class="btn-primary mt-6 text-white px-10 py-4 rounded-2xl font-black uppercase text-xs w-full shadow-lg">Registrar Disciplina</button>
                 </div>
 
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -203,21 +196,6 @@
             });
         }
 
-        window.updateAdminInputs = (disc) => {
-            const fields = ['playerEsgrimaV', 'playerEsgrimaD', 'playerEsgrimaTotal', 'playerObstaculos', 'playerNatacion', 'playerLaser'];
-            fields.forEach(f => { const el = document.getElementById(f); el.disabled = false; el.classList.remove('input-disabled'); });
-            
-            if (disc.startsWith("OCR")) {
-                ['playerEsgrimaV', 'playerEsgrimaD', 'playerEsgrimaTotal', 'playerNatacion', 'playerLaser'].forEach(f => {
-                    const el = document.getElementById(f); el.disabled = true; el.classList.add('input-disabled'); el.value = "";
-                });
-            } else if (disc === "Obstaculos Laser Run") {
-                ['playerEsgrimaV', 'playerEsgrimaD', 'playerEsgrimaTotal', 'playerNatacion'].forEach(f => {
-                    const el = document.getElementById(f); el.disabled = true; el.classList.add('input-disabled'); el.value = "";
-                });
-            }
-        };
-
         window.saveDiscData = async () => {
             const data = {
                 event: document.getElementById('discEvent').value,
@@ -225,17 +203,11 @@
                 state: document.getElementById('discState').value,
                 club: document.getElementById('discClub').value,
                 discipline: document.getElementById('playerDisc').value,
-                esgrimaV: document.getElementById('playerEsgrimaV').value,
-                esgrimaD: document.getElementById('playerEsgrimaD').value,
-                esgrimaTotal: document.getElementById('playerEsgrimaTotal').value,
-                obstaculos: document.getElementById('playerObstaculos').value,
-                natacion: document.getElementById('playerNatacion').value,
-                laser: document.getElementById('playerLaser').value,
                 sex: 'M', category: 'U09', phase: 'Final'
             };
             if(!data.name || !data.event) return alert("Nombre y Evento obligatorios");
             await setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'athletes', crypto.randomUUID()), data);
-            alert("Tiempos Guardados");
+            alert("Disciplina Registrada");
         };
 
         window.savePlayer = async () => {
@@ -243,13 +215,19 @@
                 event: document.getElementById('playerEvent').value, name: document.getElementById('playerName').value,
                 state: document.getElementById('playerState').value,
                 sex: document.getElementById('playerSex').value, category: document.getElementById('playerCategory').value,
-                phase: document.getElementById('playerPhase').value, discipline: document.getElementById('playerDiscBase').value
+                phase: document.getElementById('playerPhase').value,
+                esgrimaV: document.getElementById('playerEsgrimaV').value,
+                esgrimaD: document.getElementById('playerEsgrimaD').value,
+                esgrimaTotal: document.getElementById('playerEsgrimaTotal').value,
+                obstaculos: document.getElementById('playerObstaculos').value,
+                natacion: document.getElementById('playerNatacion').value,
+                laser: document.getElementById('playerLaser').value,
+                discipline: 'Pentatlon Moderno'
             };
             await setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'athletes', crypto.randomUUID()), data);
-            alert("Atleta Base Guardado");
+            alert("Atleta y Resultados Guardados");
         };
 
-        // Lógica de visualización (Sin cambios según instrucción)
         window.applyFilters = (eventName, eventId) => {
             const sex = document.getElementById('sex-'+eventId).value;
             const phase = document.getElementById('phase-'+eventId).value;
