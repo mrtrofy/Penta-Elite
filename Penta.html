@@ -234,11 +234,13 @@
 
             if(discipline === "Pentatlon Moderno") {
                 document.getElementById('navButtonsResults').classList.remove('hidden');
+                // ESTA LÍNEA OCULTA EL BOTÓN ESPECÍFICAMENTE PARA PENTATLÓN
                 document.getElementById('btnDisc').classList.add('hidden');
                 renderResults(eventName, sex, phase, category, discipline);
                 showSubView('ranking');
             } else {
                 document.getElementById('navButtonsResults').classList.add('hidden');
+                // Asegura que se vea en las otras pruebas
                 document.getElementById('btnDisc').classList.remove('hidden');
                 renderDisciplinas(discipline);
                 showSubView('disciplinas');
