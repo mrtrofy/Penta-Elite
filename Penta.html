@@ -63,7 +63,6 @@
                     <button onclick="showSubView('status')" id="btnStat" class="bg-slate-800 text-slate-400 text-[9px] font-black uppercase px-4 py-2 rounded-lg">Clasificación-Esgrima</button>
                     <button onclick="showSubView('tournament')" id="btnTourney" class="bg-slate-800 text-slate-400 text-[9px] font-black uppercase px-4 py-2 rounded-lg">Eliminacion-Directa</button>
                     <button onclick="showSubView('handicap')" id="btnHandi" class="bg-slate-800 text-slate-400 text-[9px] font-black uppercase px-4 py-2 rounded-lg">Hándicap</button>
-                    <button onclick="showSubView('disciplinas')" id="btnDisc" class="bg-slate-800 text-slate-400 text-[9px] font-black uppercase px-4 py-2 rounded-lg">Registros Pruebas</button>
                 </div>
 
                 <div id="rankingSubView" class="subview">
@@ -222,73 +221,40 @@
         };
 
         window.applyFilters = (eventName, eventId) => {
-    const sex = document.getElementById('sex-'+eventId).value;
-    const phase = document.getElementById('phase-'+eventId).value;
-    const category = document.getElementById('cat-'+eventId).value;
-    const discipline = document.getElementById('disc-'+eventId).value;
-    
-    document.getElementById('publicEventsList').classList.add('hidden');
-    document.getElementById('resultsContainer').classList.remove('hidden');
-    document.getElementById('viewTitle').innerText = `${discipline} - ${category}`;
+            const sex = document.getElementById('sex-'+eventId).value;
+            const phase = document.getElementById('phase-'+eventId).value;
+            const category = document.getElementById('cat-'+eventId).value;
+            const discipline = document.getElementById('disc-'+eventId).value;
+            document.getElementById('publicEventsList').classList.add('hidden');
+            document.getElementById('resultsContainer').classList.remove('hidden');
+            
+            document.getElementById('viewTitle').innerText = `${discipline} - ${category}`;
 
-    if(discipline === "Pentatlon Moderno") {
-        document.getElementById('btnDisc').classList.add('hidden');
-        document.getElementById('navButtonsResults').classList.remove('hidden');
-        document.getElementById('btnDisc').classList.add('hidden'); // ELIMINACIÓN FORZADA AQUÍ
-        renderResults(eventName, sex, phase, category, discipline);
-        showSubView('ranking');
-    } else {
-        document.getElementById('navButtonsResults').classList.add('hidden');
-        document.getElementById('btnDisc').classList.remove('hidden'); // Solo aparece en OCR
-        renderDisciplinas(discipline);
-        showSubView('disciplinas');
-    }
-};
-
-window.showSubView = (view) => {
-    // Detectar si estamos en Pentatlón por el título
-    const currentTitle = document.getElementById('viewTitle').innerText;
-    const isPentatlon = currentTitle.includes("Pentatlon Moderno");
-
-    document.querySelectorAll('.subview').forEach(v => v.classList.add('hidden'));
-    document.getElementById(view + 'SubView').classList.remove('hidden');
-    
-    // Resetear estilos de botones
-    ['Rank', 'Stat', 'Handi', 'Tourney', 'Disc'].forEach(id => {
-        const btn = document.getElementById('btn'+id);
-        if(btn) btn.className = "bg-slate-800 text-slate-400 text-[9px] font-black uppercase px-4 py-2 rounded-lg";
-    });
-
-    // REFUERZO: Si es Pentatlón, el botón NO DEBE EXISTIR visualmente
-    if(isPentatlon) {
-        document.getElementById('btnDisc').classList.add('hidden');
-    }
-
-    const btnMap = {ranking: 'Rank', status: 'Stat', handicap: 'Handi', tournament: 'Tourney', disciplinas: 'Disc'};
-    const activeBtn = document.getElementById('btn'+btnMap[view]);
-    if(activeBtn) activeBtn.className = (view === 'disciplinas' ? "bg-orange-600" : "bg-blue-600") + " text-white text-[9px] font-black uppercase px-4 py-2 rounded-lg";
-};
+            // SIEMPRE MUESTRA EL MENÚ GENERAL Y LA TABLA GENERAL
+            document.getElementById('navButtonsResults').classList.remove('hidden');
+            
+            if(discipline === "Pentatlon Moderno") {
+                renderResults(eventName, sex, phase, category, discipline);
+                showSubView('ranking');
+            } else {
+                // Para OCR, aunque el botón no esté, mostramos la tabla de disciplinas directamente
+                renderDisciplinas(discipline);
+                showSubView('disciplinas');
+            }
+        };
 
         window.showSubView = (view) => {
-            const title = document.getElementById('viewTitle').innerText;
-            const isPentatlon = title.includes("Pentatlon Moderno");
-
             document.querySelectorAll('.subview').forEach(v => v.classList.add('hidden'));
             document.getElementById(view + 'SubView').classList.remove('hidden');
             
-            ['Rank', 'Stat', 'Handi', 'Tourney', 'Disc'].forEach(id => {
+            ['Rank', 'Stat', 'Handi', 'Tourney'].forEach(id => {
                 const btn = document.getElementById('btn'+id);
                 if(btn) btn.className = "bg-slate-800 text-slate-400 text-[9px] font-black uppercase px-4 py-2 rounded-lg";
             });
 
-            // Forzar ocultar si es Pentatlón en cualquier cambio de pestaña
-            if(isPentatlon) {
-                document.getElementById('btnDisc').classList.add('hidden');
-            }
-
-            const btnMap = {ranking: 'Rank', status: 'Stat', handicap: 'Handi', tournament: 'Tourney', disciplinas: 'Disc'};
+            const btnMap = {ranking: 'Rank', status: 'Stat', handicap: 'Handi', tournament: 'Tourney'};
             const activeBtn = document.getElementById('btn'+btnMap[view]);
-            if(activeBtn) activeBtn.className = (view === 'disciplinas' ? "bg-orange-600" : "bg-blue-600") + " text-white text-[9px] font-black uppercase px-4 py-2 rounded-lg";
+            if(activeBtn) activeBtn.className = "bg-blue-600 text-white text-[9px] font-black uppercase px-4 py-2 rounded-lg";
         };
 
         window.saveDisciplina = async () => {
@@ -533,21 +499,12 @@ window.showSubView = (view) => {
     </script>
 
     <div id="loginModal" class="fixed inset-0 bg-slate-950/98 hidden flex items-center justify-center p-6 z-50">
-        <div class="bg-slate-900 p-8 rounded-[2rem] w-full max-sm border border-slate-800 text-center">
+        <div class="bg-slate-900 p-8 rounded-[2rem] w-full max-w-sm border border-slate-800 text-center">
             <h2 class="text-xl font-black mb-6 text-white uppercase">Acceso Admin</h2>
             <input type="password" id="adminPass" class="input-dark w-full p-4 rounded-2xl mb-6 text-center text-2xl" placeholder="****">
             <button onclick="checkPassword()" class="btn-primary w-full py-4 rounded-2xl font-black text-white text-xs uppercase">Entrar</button>
             <button onclick="closeLoginModal()" class="mt-4 text-slate-600 text-[10px] font-bold uppercase">Cerrar</button>
         </div>
     </div>
-
-    <script>
-        document.addEventListener('contextmenu', e => e.preventDefault());
-        document.addEventListener('keydown', e => {
-            if (e.key === "F12" || (e.ctrlKey && e.shiftKey && (e.key === "I" || e.key === "J")) || (e.ctrlKey && e.key === "u")) {
-                e.preventDefault();
-            }
-        });
-    </script>
 </body>
 </html>
