@@ -230,14 +230,14 @@
             
             document.getElementById('viewTitle').innerText = `${discipline} - ${category}`;
 
-            // SIEMPRE MUESTRA EL MENÚ GENERAL Y LA TABLA GENERAL
-            document.getElementById('navButtonsResults').classList.remove('hidden');
-            
             if(discipline === "Pentatlon Moderno") {
+                // SI ES PENTATLON, MOSTRAR BOTONES Y TABLA GENERAL
+                document.getElementById('navButtonsResults').classList.remove('hidden');
                 renderResults(eventName, sex, phase, category, discipline);
                 showSubView('ranking');
             } else {
-                // Para OCR, aunque el botón no esté, mostramos la tabla de disciplinas directamente
+                // SI ES OCR O LASER RUN, OCULTAR BOTONES Y MOSTRAR SOLO TABLA DE DISCIPLINAS
+                document.getElementById('navButtonsResults').classList.add('hidden');
                 renderDisciplinas(discipline);
                 showSubView('disciplinas');
             }
