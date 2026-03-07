@@ -54,6 +54,10 @@
 
         <main>
             <div id="resultsContainer" class="hidden space-y-6">
+                <div class="text-center mb-4">
+                    <h2 id="viewTitle" class="text-xl font-black uppercase text-blue-400 italic"></h2>
+                </div>
+
                 <div id="navButtonsResults" class="flex flex-wrap gap-2 py-4 border-b border-slate-800">
                     <button onclick="showSubView('ranking')" id="btnRank" class="bg-blue-600 text-white text-[9px] font-black uppercase px-4 py-2 rounded-lg">Tabla General</button>
                     <button onclick="showSubView('status')" id="btnStat" class="bg-slate-800 text-slate-400 text-[9px] font-black uppercase px-4 py-2 rounded-lg">Clasificación-Esgrima</button>
@@ -76,17 +80,8 @@
                 <div id="disciplinasSubView" class="subview hidden">
                     <div class="overflow-x-auto card rounded-2xl">
                         <table class="w-full text-left text-xs">
-                            <thead class="bg-orange-900/50 uppercase font-black text-orange-200">
-                                <tr>
-                                    <th class="p-4">Nombre</th>
-                                    <th class="p-4">Prueba</th>
-                                    <th class="p-4">Club</th>
-                                    <th class="p-4">Estado</th>
-                                    <th class="p-4">Penalidad (Pts)</th>
-                                    <th class="p-4">Tiempo Inicial</th>
-                                    <th class="p-4">Tiempo Final</th>
-                                </tr>
-                            </thead>
+                            <thead id="disciplinasHeader" class="bg-orange-900/50 uppercase font-black text-orange-200">
+                                </thead>
                             <tbody id="disciplinasBody" class="divide-y divide-slate-800"></tbody>
                         </table>
                     </div>
@@ -233,7 +228,19 @@
             const discipline = document.getElementById('disc-'+eventId).value;
             document.getElementById('publicEventsList').classList.add('hidden');
             document.getElementById('resultsContainer').classList.remove('hidden');
-            renderResults(eventName, sex, phase, category, discipline);
+            
+            // Titulo dinámico
+            document.getElementById('viewTitle').innerText = `${discipline} - ${category}`;
+
+            if(discipline === "Pentatlon Moderno") {
+                document.getElementById('navButtonsResults').classList.remove('hidden');
+                renderResults(eventName, sex, phase, category, discipline);
+                showSubView('ranking');
+            } else {
+                document.getElementById('navButtonsResults').classList.add('hidden');
+                renderDisciplinas(discipline);
+                showSubView('disciplinas');
+            }
         };
 
         window.showSubView = (view) => {
@@ -270,21 +277,40 @@
             return `${m}:${s < 10 ? '0' : ''}${s}`;
         }
 
-        function renderDisciplinas() {
-            document.getElementById('disciplinasBody').innerHTML = discData.map(d => `
+        function renderDisciplinas(filterName = null) {
+            const filtered = filterName ? discData.filter(d => d.disciplina === filterName) : discData;
+            const isOCR = filterName && filterName.startsWith("OCR");
+
+            // Header dinámico: Intercambio y Condicionales
+            document.getElementById('disciplinasHeader').innerHTML = `
+                <tr>
+                    <th class="p-4">Nombre</th>
+                    <th class="p-4">Prueba</th>
+                    <th class="p-4">Club</th>
+                    <th class="p-4">Estado</th>
+                    ${!isOCR ? '<th class="p-4">Tiempo Inicial</th>' : ''}
+                    ${!isOCR ? '<th class="p-4">Penalidad (Pts)</th>' : ''}
+                    <th class="p-4">Tiempo Final</th>
+                </tr>
+            `;
+
+            document.getElementById('disciplinasBody').innerHTML = filtered.map(d => `
                 <tr>
                     <td class="p-4 font-black uppercase">${d.nombre}</td>
                     <td class="p-4 text-orange-400 font-bold">${d.disciplina}</td>
                     <td class="p-4">${d.club}</td>
                     <td class="p-4 uppercase text-[10px]">${d.estado}</td>
-                    <td class="p-4 text-center font-bold text-red-400">
-                        ${d.penalidad || 0} Pts<br>
-                        <span class="text-[8px] text-red-500/70">+${calculatePenaltyAddition(d.penalidad)}</span>
-                    </td>
-                    <td class="p-4 font-mono text-slate-400">${d.tiempo}</td>
+                    ${!isOCR ? `<td class="p-4 font-mono text-slate-400">${d.tiempo}</td>` : ''}
+                    ${!isOCR ? `
+                        <td class="p-4 text-center font-bold text-red-400">
+                            ${d.penalidad || 0} Pts<br>
+                            <span class="text-[8px] text-red-500/70">+${calculatePenaltyAddition(d.penalidad)}</span>
+                        </td>
+                    ` : ''}
                     <td class="p-4 font-mono text-white font-bold bg-orange-950/20">${d.tiempoFinal || '--'}</td>
                 </tr>
             `).join('');
+            
             document.getElementById('adminDiscList').innerHTML = discData.map(d => `<div class="flex justify-between items-center bg-slate-900 p-2 rounded-lg border border-slate-800"><span class="text-[10px] font-bold uppercase">${d.nombre} - ${d.disciplina}</span><button onclick="deleteDisc('${d.id}')" class="text-red-500 font-black">ELIMINAR</button></div>`).join('');
         }
 
@@ -329,7 +355,6 @@
             const hData = [...data].sort((a,b) => b.hPts - a.hPts); 
             const best = hData[0]?.hPts || 0;
             document.getElementById('handicapBody').innerHTML = hData.map((p, i) => `<tr><td class="p-4 font-black uppercase">${p.name}</td><td class="p-4 pts-value">${p.hPts}</td><td class="p-4 text-green-500 font-mono">${i === 0 ? '0' : `+${best - p.hPts}s`}</td></tr>`).join('');
-            showSubView('ranking');
         }
 
         window.toggleAdminMode = () => { if (isAdmin) { logoutAdmin(); } else { openLoginModal(); } };
