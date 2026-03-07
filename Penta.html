@@ -222,27 +222,51 @@
         };
 
         window.applyFilters = (eventName, eventId) => {
-            const sex = document.getElementById('sex-'+eventId).value;
-            const phase = document.getElementById('phase-'+eventId).value;
-            const category = document.getElementById('cat-'+eventId).value;
-            const discipline = document.getElementById('disc-'+eventId).value;
-            document.getElementById('publicEventsList').classList.add('hidden');
-            document.getElementById('resultsContainer').classList.remove('hidden');
-            
-            document.getElementById('viewTitle').innerText = `${discipline} - ${category}`;
+    const sex = document.getElementById('sex-'+eventId).value;
+    const phase = document.getElementById('phase-'+eventId).value;
+    const category = document.getElementById('cat-'+eventId).value;
+    const discipline = document.getElementById('disc-'+eventId).value;
+    
+    document.getElementById('publicEventsList').classList.add('hidden');
+    document.getElementById('resultsContainer').classList.remove('hidden');
+    document.getElementById('viewTitle').innerText = `${discipline} - ${category}`;
 
-            if(discipline === "Pentatlon Moderno") {
-                document.getElementById('navButtonsResults').classList.remove('hidden');
-                document.getElementById('btnDisc').classList.add('hidden'); // Ocultar aquí
-                renderResults(eventName, sex, phase, category, discipline);
-                showSubView('ranking');
-            } else {
-                document.getElementById('navButtonsResults').classList.add('hidden');
-                document.getElementById('btnDisc').classList.remove('hidden'); // Mostrar aquí
-                renderDisciplinas(discipline);
-                showSubView('disciplinas');
-            }
-        };
+    if(discipline === "Pentatlon Moderno") {
+        document.getElementById('navButtonsResults').classList.remove('hidden');
+        document.getElementById('btnDisc').classList.add('hidden'); // ELIMINACIÓN FORZADA AQUÍ
+        renderResults(eventName, sex, phase, category, discipline);
+        showSubView('ranking');
+    } else {
+        document.getElementById('navButtonsResults').classList.add('hidden');
+        document.getElementById('btnDisc').classList.remove('hidden'); // Solo aparece en OCR
+        renderDisciplinas(discipline);
+        showSubView('disciplinas');
+    }
+};
+
+window.showSubView = (view) => {
+    // Detectar si estamos en Pentatlón por el título
+    const currentTitle = document.getElementById('viewTitle').innerText;
+    const isPentatlon = currentTitle.includes("Pentatlon Moderno");
+
+    document.querySelectorAll('.subview').forEach(v => v.classList.add('hidden'));
+    document.getElementById(view + 'SubView').classList.remove('hidden');
+    
+    // Resetear estilos de botones
+    ['Rank', 'Stat', 'Handi', 'Tourney', 'Disc'].forEach(id => {
+        const btn = document.getElementById('btn'+id);
+        if(btn) btn.className = "bg-slate-800 text-slate-400 text-[9px] font-black uppercase px-4 py-2 rounded-lg";
+    });
+
+    // REFUERZO: Si es Pentatlón, el botón NO DEBE EXISTIR visualmente
+    if(isPentatlon) {
+        document.getElementById('btnDisc').classList.add('hidden');
+    }
+
+    const btnMap = {ranking: 'Rank', status: 'Stat', handicap: 'Handi', tournament: 'Tourney', disciplinas: 'Disc'};
+    const activeBtn = document.getElementById('btn'+btnMap[view]);
+    if(activeBtn) activeBtn.className = (view === 'disciplinas' ? "bg-orange-600" : "bg-blue-600") + " text-white text-[9px] font-black uppercase px-4 py-2 rounded-lg";
+};
 
         window.showSubView = (view) => {
             const title = document.getElementById('viewTitle').innerText;
