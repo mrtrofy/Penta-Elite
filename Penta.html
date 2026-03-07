@@ -63,6 +63,7 @@
                     <button onclick="showSubView('status')" id="btnStat" class="bg-slate-800 text-slate-400 text-[9px] font-black uppercase px-4 py-2 rounded-lg">Clasificación-Esgrima</button>
                     <button onclick="showSubView('tournament')" id="btnTourney" class="bg-slate-800 text-slate-400 text-[9px] font-black uppercase px-4 py-2 rounded-lg">Eliminacion-Directa</button>
                     <button onclick="showSubView('handicap')" id="btnHandi" class="bg-slate-800 text-slate-400 text-[9px] font-black uppercase px-4 py-2 rounded-lg">Hándicap</button>
+                    <button onclick="showSubView('disciplinas')" id="btnDisc" class="hidden bg-slate-800 text-slate-400 text-[9px] font-black uppercase px-4 py-2 rounded-lg">Registros Pruebas</button>
                 </div>
 
                 <div id="rankingSubView" class="subview">
@@ -79,8 +80,7 @@
                 <div id="disciplinasSubView" class="subview hidden">
                     <div class="overflow-x-auto card rounded-2xl">
                         <table class="w-full text-left text-xs">
-                            <thead id="disciplinasHeader" class="bg-orange-900/50 uppercase font-black text-orange-200">
-                                </thead>
+                            <thead id="disciplinasHeader" class="bg-orange-900/50 uppercase font-black text-orange-200"></thead>
                             <tbody id="disciplinasBody" class="divide-y divide-slate-800"></tbody>
                         </table>
                     </div>
@@ -172,7 +172,7 @@
                         <div id="adminAtletasList" class="space-y-2 max-h-96 overflow-y-auto pr-2"></div>
                     </div>
                 </div>
-            </section>
+                </section>
         </main>
     </div>
 
@@ -187,16 +187,10 @@
 
         async function start() {
             firebaseApp = initializeApp(firebaseConfig); auth = getAuth(firebaseApp); db = getFirestore(firebaseApp);
-            onAuthStateChanged(auth, (user) => { 
-                if (user) { setupListeners(); } 
-                else { window.location.href = 'index.html'; }
-            });
+            onAuthStateChanged(auth, (user) => { if (user) { setupListeners(); } else { window.location.href = 'index.html'; } });
         }
 
-        window.logoutSession = async () => {
-            try { await signOut(auth); } 
-            catch (error) { window.location.href = 'index.html'; }
-        };
+        window.logoutSession = async () => { try { await signOut(auth); } catch (error) { window.location.href = 'index.html'; } };
 
         function setupListeners() {
             onSnapshot(collection(db, 'artifacts', appId, 'public', 'data', 'athletes'), (snap) => {
@@ -215,29 +209,28 @@
             });
         }
 
-        window.toggleAccordion = (id) => {
-            const content = document.getElementById('acc-' + id);
-            content.classList.toggle('accordion-open');
-        };
+        window.toggleAccordion = (id) => { document.getElementById('acc-' + id).classList.toggle('accordion-open'); };
 
         window.applyFilters = (eventName, eventId) => {
             const sex = document.getElementById('sex-'+eventId).value;
             const phase = document.getElementById('phase-'+eventId).value;
             const category = document.getElementById('cat-'+eventId).value;
             const discipline = document.getElementById('disc-'+eventId).value;
+            
             document.getElementById('publicEventsList').classList.add('hidden');
             document.getElementById('resultsContainer').classList.remove('hidden');
-            
             document.getElementById('viewTitle').innerText = `${discipline} - ${category}`;
 
-            // SIEMPRE MUESTRA EL MENÚ GENERAL Y LA TABLA GENERAL
-            document.getElementById('navButtonsResults').classList.remove('hidden');
-            
+            const btnDisc = document.getElementById('btnDisc');
+
             if(discipline === "Pentatlon Moderno") {
+                document.getElementById('navButtonsResults').classList.remove('hidden');
+                btnDisc.classList.add('hidden');
                 renderResults(eventName, sex, phase, category, discipline);
                 showSubView('ranking');
             } else {
-                // Para OCR, aunque el botón no esté, mostramos la tabla de disciplinas directamente
+                document.getElementById('navButtonsResults').classList.remove('hidden');
+                btnDisc.classList.remove('hidden');
                 renderDisciplinas(discipline);
                 showSubView('disciplinas');
             }
@@ -247,24 +240,21 @@
             document.querySelectorAll('.subview').forEach(v => v.classList.add('hidden'));
             document.getElementById(view + 'SubView').classList.remove('hidden');
             
-            ['Rank', 'Stat', 'Handi', 'Tourney'].forEach(id => {
+            ['Rank', 'Stat', 'Handi', 'Tourney', 'Disc'].forEach(id => {
                 const btn = document.getElementById('btn'+id);
                 if(btn) btn.className = "bg-slate-800 text-slate-400 text-[9px] font-black uppercase px-4 py-2 rounded-lg";
             });
 
-            const btnMap = {ranking: 'Rank', status: 'Stat', handicap: 'Handi', tournament: 'Tourney'};
+            const btnMap = {ranking: 'Rank', status: 'Stat', handicap: 'Handi', tournament: 'Tourney', disciplinas: 'Disc'};
             const activeBtn = document.getElementById('btn'+btnMap[view]);
-            if(activeBtn) activeBtn.className = "bg-blue-600 text-white text-[9px] font-black uppercase px-4 py-2 rounded-lg";
+            if(activeBtn) activeBtn.className = (view === 'disciplinas' ? "bg-orange-600" : "bg-blue-600") + " text-white text-[9px] font-black uppercase px-4 py-2 rounded-lg";
         };
 
         window.saveDisciplina = async () => {
             const data = {
-                nombre: document.getElementById('discNombre').value,
-                club: document.getElementById('discClub').value,
-                estado: document.getElementById('discEstado').value,
-                disciplina: document.getElementById('adminDisciplina').value,
-                tiempo: document.getElementById('discTiempo').value,
-                tiempoFinal: document.getElementById('discTiempoFinal').value,
+                nombre: document.getElementById('discNombre').value, club: document.getElementById('discClub').value,
+                estado: document.getElementById('discEstado').value, disciplina: document.getElementById('adminDisciplina').value,
+                tiempo: document.getElementById('discTiempo').value, tiempoFinal: document.getElementById('discTiempoFinal').value,
                 penalidad: document.getElementById('discPenalidad').value
             };
             if(!data.nombre) return alert("Ingrese nombre");
@@ -272,50 +262,15 @@
             alert("Prueba guardada");
         };
 
-        function calculatePenaltyAddition(penaltyPoints) {
-            let penaltySeconds = (parseInt(penaltyPoints) || 0) * 50;
-            let m = Math.floor(penaltySeconds / 60);
-            let s = penaltySeconds % 60;
-            return `${m}:${s < 10 ? '0' : ''}${s}`;
-        }
-
         function renderDisciplinas(filterName = null) {
             const filtered = filterName ? discData.filter(d => d.disciplina === filterName) : discData;
             const isOCR = filterName && filterName.startsWith("OCR");
-
-            document.getElementById('disciplinasHeader').innerHTML = `
-                <tr>
-                    <th class="p-4">Nombre</th>
-                    <th class="p-4">Prueba</th>
-                    <th class="p-4">Club</th>
-                    <th class="p-4">Estado</th>
-                    ${!isOCR ? '<th class="p-4">Tiempo Inicial</th>' : ''}
-                    ${!isOCR ? '<th class="p-4">Penalidad (Pts)</th>' : ''}
-                    <th class="p-4">Tiempo Final</th>
-                </tr>
-            `;
-
-            document.getElementById('disciplinasBody').innerHTML = filtered.map(d => `
-                <tr>
-                    <td class="p-4 font-black uppercase">${d.nombre}</td>
-                    <td class="p-4 text-orange-400 font-bold">${d.disciplina}</td>
-                    <td class="p-4">${d.club}</td>
-                    <td class="p-4 uppercase text-[10px]">${d.estado}</td>
-                    ${!isOCR ? `<td class="p-4 font-mono text-slate-400">${d.tiempo}</td>` : ''}
-                    ${!isOCR ? `
-                        <td class="p-4 text-center font-bold text-red-400">
-                            ${d.penalidad || 0} Pts<br>
-                            <span class="text-[8px] text-red-500/70">+${calculatePenaltyAddition(d.penalidad)}</span>
-                        </td>
-                    ` : ''}
-                    <td class="p-4 font-mono text-white font-bold bg-orange-950/20">${d.tiempoFinal || '--'}</td>
-                </tr>
-            `).join('');
-            
-            document.getElementById('adminDiscList').innerHTML = discData.map(d => `<div class="flex justify-between items-center bg-slate-900 p-2 rounded-lg border border-slate-800"><span class="text-[10px] font-bold uppercase">${d.nombre} - ${d.disciplina}</span><button onclick="deleteDisc('${d.id}')" class="text-red-500 font-black">ELIMINAR</button></div>`).join('');
+            document.getElementById('disciplinasHeader').innerHTML = `<tr><th class="p-4">Nombre</th><th class="p-4">Prueba</th><th class="p-4">Club</th><th class="p-4">Estado</th>${!isOCR ? '<th class="p-4">Inicial</th><th class="p-4">Pen</th>' : ''}<th class="p-4">Final</th></tr>`;
+            document.getElementById('disciplinasBody').innerHTML = filtered.map(d => `<tr><td class="p-4 font-black uppercase">${d.nombre}</td><td class="p-4 text-orange-400 font-bold text-[10px]">${d.disciplina}</td><td class="p-4">${d.club}</td><td class="p-4 uppercase text-[9px]">${d.estado}</td>${!isOCR ? `<td class="p-4 text-slate-400">${d.tiempo}</td><td class="p-4 text-red-400">${d.penalidad}</td>` : ''}<td class="p-4 font-bold text-white bg-orange-950/20">${d.tiempoFinal}</td></tr>`).join('');
+            document.getElementById('adminDiscList').innerHTML = discData.map(d => `<div class="flex justify-between items-center bg-slate-900 p-2 rounded-lg mb-1"><span class="text-[10px] uppercase">${d.nombre}</span><button onclick="deleteDisc('${d.id}')" class="text-red-500 font-black">X</button></div>`).join('');
         }
 
-        window.deleteDisc = async (id) => { if(confirm("¿Eliminar registro?")) await deleteDoc(doc(db, 'artifacts', appId, 'public', 'data', 'disciplinas', id)); };
+        window.deleteDisc = async (id) => { if(confirm("¿Eliminar?")) await deleteDoc(doc(db, 'artifacts', appId, 'public', 'data', 'disciplinas', id)); };
 
         function parseTime(val) {
             if (!val) return 0;
@@ -327,7 +282,6 @@
         function renderResults(eventName, sex, phase, category, discipline) {
             const pointsTable = [250, 244, 238, 236, 230, 228, 226, 224, 218, 216, 214, 212, 210, 208, 206, 204, 198, 196];
             let filtered = players.filter(p => p.event === eventName && p.sex === sex && p.phase === phase && p.category === category);
-            
             let data = filtered.sort((a, b) => (parseInt(b.esgrimaV) || 0) - (parseInt(a.esgrimaV) || 0)).map((p, index) => {
                 const esgrimaPts = pointsTable[index] !== undefined ? pointsTable[index] : (196 - ((index - 17) * 2));
                 const tObs = parseTime(p.obstaculos); let obsPts = tObs > 0 ? Math.max(0, 400 - Math.floor((tObs - 15) / 0.33)) : 0;
@@ -336,34 +290,12 @@
                 const hPts = esgrimaPts + obsPts + natPts;
                 return { ...p, esgrimaPts, obsPts, natPts, lasPts, hPts, total: Math.round(hPts + lasPts) };
             }).sort((a,b) => b.total - a.total);
-
             document.getElementById('scoreboardBody').innerHTML = data.map(p => `<tr><td class="p-4 font-black uppercase">${p.name}<br><span class="cat-tag">${p.category}</span></td><td class="p-4 pts-value text-blue-300">${p.esgrimaPts}</td><td class="p-4 pts-value">${p.obsPts}</td><td class="p-4 pts-value">${p.natPts}</td><td class="p-4 pts-value">${p.lasPts}</td><td class="p-4 font-black text-blue-400">${p.total}</td></tr>`).join('');
             document.getElementById('statusGrid').innerHTML = data.map(p => `<div class="card p-4 rounded-xl text-center"><p class="text-[10px] font-black uppercase mb-2">${p.name}</p><div class="grid grid-cols-2 gap-2"><div class="bg-green-900/20 p-2 rounded text-green-400 font-bold">${p.esgrimaV}V</div><div class="bg-red-900/20 p-2 rounded text-red-400 font-bold">${p.esgrimaD}D</div></div></div>`).join('');
-            
-            const pairs = [];
-            let tempPlayers = [...data];
-            while (tempPlayers.length > 1) { pairs.push({ p1: tempPlayers.shift(), p2: tempPlayers.pop() }); }
-            if (tempPlayers.length === 1) pairs.push({ p1: tempPlayers[0], p2: { name: "BYE", total: 0 } });
-            
-            document.getElementById('tournamentBrackets').innerHTML = pairs.map(pair => `
-                <div class="card p-4 rounded-2xl border-l-4 border-l-blue-600">
-                    <div class="flex justify-between items-center text-[10px] font-black uppercase"><span>${pair.p1.name}</span><span class="text-blue-400">${pair.p1.total}</span></div>
-                    <div class="vs-circle">VS</div>
-                    <div class="flex justify-between items-center text-[10px] font-black uppercase"><span>${pair.p2.name}</span><span class="text-blue-400">${pair.p2.total}</span></div>
-                </div>
-            `).join('');
-
-            const hData = [...data].sort((a,b) => b.hPts - a.hPts); 
-            const best = hData[0]?.hPts || 0;
+            const pairs = []; let temp = [...data]; while(temp.length > 1) pairs.push({p1: temp.shift(), p2: temp.pop()}); if(temp.length === 1) pairs.push({p1: temp[0], p2: {name: "BYE", total: 0}});
+            document.getElementById('tournamentBrackets').innerHTML = pairs.map(pair => `<div class="card p-4 rounded-2xl border-l-4 border-l-blue-600 mb-2"><div class="flex justify-between text-[10px] font-black uppercase"><span>${pair.p1.name}</span><span>${pair.p1.total}</span></div><div class="vs-circle">VS</div><div class="flex justify-between text-[10px] font-black uppercase"><span>${pair.p2.name}</span><span>${pair.p2.total}</span></div></div>`).join('');
+            const hData = [...data].sort((a,b) => b.hPts - a.hPts); const best = hData[0]?.hPts || 0;
             document.getElementById('handicapBody').innerHTML = hData.map((p, i) => `<tr><td class="p-4 font-black uppercase">${p.name}</td><td class="p-4 pts-value">${p.hPts}</td><td class="p-4 text-green-500 font-mono">${i === 0 ? '0' : `+${best - p.hPts}s`}</td></tr>`).join('');
-        }
-
-        window.toggleAdminMode = () => { if (isAdmin) { logoutAdmin(); } else { openLoginModal(); } };
-        function logoutAdmin() {
-            isAdmin = false;
-            document.getElementById('adminPanel').classList.add('hidden');
-            document.getElementById('adminBadge').classList.add('hidden');
-            document.getElementById('adminToggleBtn').innerText = "Admin";
         }
 
         window.saveEvent = async () => {
@@ -484,17 +416,12 @@
         function updateEventSelect() { document.getElementById('playerEvent').innerHTML = events.map(e => `<option value="${e.name}">${e.name}</option>`).join(''); }
         function renderAdminEvents() { document.getElementById('adminEventsList').innerHTML = events.map(e => `<div class="flex justify-between items-center bg-slate-900 p-2 rounded-lg border border-slate-800"><span class="text-[10px] font-bold uppercase">${e.name}</span><button onclick="deleteEvent('${e.id}')" class="text-red-500 font-black">ELIMINAR</button></div>`).join(''); }
 
+        window.toggleAdminMode = () => { if (isAdmin) { logoutAdmin(); } else { openLoginModal(); } };
+        function logoutAdmin() { isAdmin = false; document.getElementById('adminPanel').classList.add('hidden'); document.getElementById('adminBadge').classList.add('hidden'); document.getElementById('adminToggleBtn').innerText = "Admin"; }
         window.openLoginModal = () => document.getElementById('loginModal').classList.remove('hidden');
         window.closeLoginModal = () => document.getElementById('loginModal').classList.add('hidden');
-        window.checkPassword = () => { 
-            if (document.getElementById('adminPass').value === "Newman.999") { 
-                isAdmin = true; 
-                document.getElementById('adminPanel').classList.remove('hidden'); 
-                document.getElementById('adminBadge').classList.remove('hidden');
-                document.getElementById('adminToggleBtn').innerText = "Usuario Normal";
-                closeLoginModal(); 
-            } else { alert("Error"); }
-        };
+        window.checkPassword = () => { if (document.getElementById('adminPass').value === "Newman.999") { isAdmin = true; document.getElementById('adminPanel').classList.remove('hidden'); document.getElementById('adminBadge').classList.remove('hidden'); document.getElementById('adminToggleBtn').innerText = "Normal"; closeLoginModal(); } else { alert("Error"); } };
+
         start();
     </script>
 
