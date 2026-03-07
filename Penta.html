@@ -234,11 +234,12 @@
 
             if(discipline === "Pentatlon Moderno") {
                 document.getElementById('navButtonsResults').classList.remove('hidden');
-                document.getElementById('btnDisc').classList.add('hidden'); // Línea añadida: Ocultar botón Registros Pruebas
+                document.getElementById('btnDisc').classList.add('hidden');
                 renderResults(eventName, sex, phase, category, discipline);
                 showSubView('ranking');
             } else {
                 document.getElementById('navButtonsResults').classList.add('hidden');
+                document.getElementById('btnDisc').classList.remove('hidden');
                 renderDisciplinas(discipline);
                 showSubView('disciplinas');
             }
