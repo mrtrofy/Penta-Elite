@@ -232,6 +232,7 @@
     document.getElementById('viewTitle').innerText = `${discipline} - ${category}`;
 
     if(discipline === "Pentatlon Moderno") {
+        document.getElementById('btnDisc').classList.add('hidden');
         document.getElementById('navButtonsResults').classList.remove('hidden');
         document.getElementById('btnDisc').classList.add('hidden'); // ELIMINACIÓN FORZADA AQUÍ
         renderResults(eventName, sex, phase, category, discipline);
