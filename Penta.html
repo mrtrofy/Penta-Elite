@@ -229,31 +229,38 @@
             document.getElementById('publicEventsList').classList.add('hidden');
             document.getElementById('resultsContainer').classList.remove('hidden');
             
-            // Titulo dinámico
             document.getElementById('viewTitle').innerText = `${discipline} - ${category}`;
 
             if(discipline === "Pentatlon Moderno") {
                 document.getElementById('navButtonsResults').classList.remove('hidden');
-                // ESTA LÍNEA OCULTA EL BOTÓN ESPECÍFICAMENTE PARA PENTATLÓN
-                document.getElementById('btnDisc').classList.add('hidden');
+                document.getElementById('btnDisc').classList.add('hidden'); // Ocultar aquí
                 renderResults(eventName, sex, phase, category, discipline);
                 showSubView('ranking');
             } else {
                 document.getElementById('navButtonsResults').classList.add('hidden');
-                // Asegura que se vea en las otras pruebas
-                document.getElementById('btnDisc').classList.remove('hidden');
+                document.getElementById('btnDisc').classList.remove('hidden'); // Mostrar aquí
                 renderDisciplinas(discipline);
                 showSubView('disciplinas');
             }
         };
 
         window.showSubView = (view) => {
+            const title = document.getElementById('viewTitle').innerText;
+            const isPentatlon = title.includes("Pentatlon Moderno");
+
             document.querySelectorAll('.subview').forEach(v => v.classList.add('hidden'));
             document.getElementById(view + 'SubView').classList.remove('hidden');
+            
             ['Rank', 'Stat', 'Handi', 'Tourney', 'Disc'].forEach(id => {
                 const btn = document.getElementById('btn'+id);
                 if(btn) btn.className = "bg-slate-800 text-slate-400 text-[9px] font-black uppercase px-4 py-2 rounded-lg";
             });
+
+            // Forzar ocultar si es Pentatlón en cualquier cambio de pestaña
+            if(isPentatlon) {
+                document.getElementById('btnDisc').classList.add('hidden');
+            }
+
             const btnMap = {ranking: 'Rank', status: 'Stat', handicap: 'Handi', tournament: 'Tourney', disciplinas: 'Disc'};
             const activeBtn = document.getElementById('btn'+btnMap[view]);
             if(activeBtn) activeBtn.className = (view === 'disciplinas' ? "bg-orange-600" : "bg-blue-600") + " text-white text-[9px] font-black uppercase px-4 py-2 rounded-lg";
@@ -285,7 +292,6 @@
             const filtered = filterName ? discData.filter(d => d.disciplina === filterName) : discData;
             const isOCR = filterName && filterName.startsWith("OCR");
 
-            // Header dinámico: Intercambio y Condicionales
             document.getElementById('disciplinasHeader').innerHTML = `
                 <tr>
                     <th class="p-4">Nombre</th>
@@ -502,7 +508,7 @@
     </script>
 
     <div id="loginModal" class="fixed inset-0 bg-slate-950/98 hidden flex items-center justify-center p-6 z-50">
-        <div class="bg-slate-900 p-8 rounded-[2rem] w-full max-w-sm border border-slate-800 text-center">
+        <div class="bg-slate-900 p-8 rounded-[2rem] w-full max-sm border border-slate-800 text-center">
             <h2 class="text-xl font-black mb-6 text-white uppercase">Acceso Admin</h2>
             <input type="password" id="adminPass" class="input-dark w-full p-4 rounded-2xl mb-6 text-center text-2xl" placeholder="****">
             <button onclick="checkPassword()" class="btn-primary w-full py-4 rounded-2xl font-black text-white text-xs uppercase">Entrar</button>
