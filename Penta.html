@@ -94,32 +94,6 @@
             <section id="adminPanel" class="hidden space-y-8 mt-12 border-t-2 border-dashed border-slate-800 pt-12">
                 <div class="card p-6 rounded-3xl border-orange-500/30">
                     <h2 class="text-orange-400 font-black uppercase mb-4 text-sm">Configuración de Pruebas</h2>
-                    <h2 class="text-orange-400 font-black uppercase mb-4 text-sm">Configuración de Pruebas</h2>
-<input type="hidden" id="editDiscId" value=""> ```
-
-### 2. Función `renderDisciplinas` actualizada
-Reemplaza tu función actual por esta, que incluye el botón azul de "Editar" en la lista del admin:
-
-```javascript
-function renderDisciplinas(filterName = null) {
-    const filtered = filterName ? discData.filter(d => d.disciplina === filterName) : discData;
-    const isOCR = filterName && filterName.startsWith("OCR");
-
-    // ... (Mantén aquí el código de document.getElementById('disciplinasHeader').innerHTML que ya tienes)
-
-    // ... (Mantén aquí el código de document.getElementById('disciplinasBody').innerHTML que ya tienes)
-    
-    // ESTA ES LA PARTE QUE CAMBIA (Lista de administración con botón Editar)
-    document.getElementById('adminDiscList').innerHTML = discData.map(d => `
-        <div class="flex justify-between items-center bg-slate-900 p-2 rounded-lg border border-slate-800">
-            <span class="text-[10px] font-bold uppercase">${d.nombre} - ${d.disciplina}</span>
-            <div class="flex gap-3">
-                <button onclick="editDisc('${d.id}')" class="text-blue-400 font-black text-[9px] uppercase">Editar</button>
-                <button onclick="deleteDisc('${d.id}')" class="text-red-500 font-black text-[9px] uppercase">Eliminar</button>
-            </div>
-        </div>
-    `).join('');
-}
                     <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mb-4">
                         <input type="text" id="discNombre" class="input-dark p-3 rounded-xl text-xs" placeholder="Nombre Completo">
                         <input type="text" id="discClub" class="input-dark p-3 rounded-xl text-xs" placeholder="Club">
@@ -521,62 +495,6 @@ function renderDisciplinas(filterName = null) {
             } else { alert("Error"); }
         };
         start();
-
-        window.editDisc = (id) => {
-    const d = discData.find(x => x.id === id);
-    if(!d) return;
-    
-    // Cargar datos en el formulario
-    document.getElementById('editDiscId').value = d.id;
-    document.getElementById('discNombre').value = d.nombre;
-    document.getElementById('discClub').value = d.club;
-    document.getElementById('discEstado').value = d.estado;
-    document.getElementById('adminDisciplina').value = d.disciplina;
-    document.getElementById('discTiempo').value = d.tiempo;
-    document.getElementById('discTiempoFinal').value = d.tiempoFinal;
-    document.getElementById('discPenalidad').value = d.penalidad || "0";
-    
-    // Cambiar texto del botón principal
-    const saveBtn = document.querySelector("button[onclick='saveDisciplina()']");
-    saveBtn.innerText = "Actualizar Registro";
-    saveBtn.className = "bg-blue-600 text-white px-6 py-3 rounded-xl font-black text-[10px] uppercase w-full";
-    
-    window.scrollTo({ top: document.getElementById('adminPanel').offsetTop, behavior: 'smooth' });
-};
-
-// Modifica también tu función saveDisciplina para que use el ID si existe:
-const originalSaveDisciplina = window.saveDisciplina;
-window.saveDisciplina = async () => {
-    const editId = document.getElementById('editDiscId').value;
-    const data = {
-        nombre: document.getElementById('discNombre').value,
-        club: document.getElementById('discClub').value,
-        estado: document.getElementById('discEstado').value,
-        disciplina: document.getElementById('adminDisciplina').value,
-        tiempo: document.getElementById('discTiempo').value,
-        tiempoFinal: document.getElementById('discTiempoFinal').value,
-        penalidad: document.getElementById('discPenalidad').value
-    };
-    
-    if(!data.nombre) return alert("Ingrese nombre");
-    
-    const finalId = editId || crypto.randomUUID();
-    await setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'disciplinas', finalId), data);
-    
-    // Limpiar formulario
-    document.getElementById('editDiscId').value = "";
-    document.getElementById('discNombre').value = "";
-    document.getElementById('discClub').value = "";
-    document.getElementById('discEstado').value = "";
-    document.getElementById('discTiempo').value = "";
-    document.getElementById('discTiempoFinal').value = "";
-    
-    const saveBtn = document.querySelector("button[onclick='saveDisciplina()']");
-    saveBtn.innerText = "Guardar Registro Prueba";
-    saveBtn.className = "bg-orange-600 text-white px-6 py-3 rounded-xl font-black text-[10px] uppercase w-full";
-    
-    alert(editId ? "Registro actualizado" : "Registro guardado");
-};
     </script>
 
     <div id="loginModal" class="fixed inset-0 bg-slate-950/98 hidden flex items-center justify-center p-6 z-50">
