@@ -280,39 +280,58 @@
         }
 
         function renderDisciplinas(filterName = null) {
-            const filtered = filterName ? discData.filter(d => d.disciplina === filterName) : discData;
-            const isOCR = filterName && filterName.startsWith("OCR");
+    const filtered = filterName ? discData.filter(d => d.disciplina === filterName) : discData;
+    const isOCR = filterName && filterName.startsWith("OCR");
 
-            document.getElementById('disciplinasHeader').innerHTML = `
-                <tr>
-                    <th class="p-4">Nombre</th>
-                    <th class="p-4">Club</th>
-                    <th class="p-4">Estado</th>
-                    ${!isOCR ? '<th class="p-4">Tiempo Inicial</th>' : ''}
-                    ${!isOCR ? '<th class="p-4">Penalidad (Pts)</th>' : ''}
-                    <th class="p-4">Tiempo Final</th>
-                </tr>
-            `;
+    // 1. Encabezados (Sin la columna "Prueba" como pediste antes)
+    document.getElementById('disciplinasHeader').innerHTML = `
+        <tr>
+            <th class="p-4">Nombre</th>
+            <th class="p-4">Club</th>
+            <th class="p-4">Estado</th>
+            ${!isOCR ? '<th class="p-4">Tiempo Inicial</th>' : ''}
+            ${!isOCR ? '<th class="p-4 text-center">Penalidad (Pts)</th>' : ''}
+            <th class="p-4">Tiempo Final</th>
+        </tr>
+    `;
 
-            document.getElementById('disciplinasBody').innerHTML = filtered.map(d => `
-                <tr>
-                    <td class="p-4 font-black uppercase">${d.nombre}</td>
-                    <td class="p-4 text-orange-400 font-bold">${d.disciplina}</td>
-                    <td class="p-4">${d.club}</td>
-                    <td class="p-4 uppercase text-[10px]">${d.estado}</td>
-                    ${!isOCR ? `<td class="p-4 font-mono text-slate-400">${d.tiempo}</td>` : ''}
-                    ${!isOCR ? `
-                        <td class="p-4 text-center font-bold text-red-400">
-                            ${d.penalidad || 0} Pts<br>
-                            <span class="text-[8px] text-red-500/70">+${calculatePenaltyAddition(d.penalidad)}</span>
-                        </td>
-                    ` : ''}
-                    <td class="p-4 font-mono text-white font-bold bg-orange-950/20">${d.tiempoFinal || '--'}</td>
-                </tr>
-            `).join('');
+    // 2. Cuerpo de la tabla con el orden de columnas REPARADO
+    document.getElementById('disciplinasBody').innerHTML = filtered.map(d => `
+        <tr>
+            <td class="p-4 font-black uppercase">${d.nombre}</td>
+            <td class="p-4">${d.club}</td>
+            <td class="p-4 uppercase text-[10px]">${d.estado}</td>
             
-            document.getElementById('adminDiscList').innerHTML = discData.map(d => `<div class="flex justify-between items-center bg-slate-900 p-2 rounded-lg border border-slate-800"><span class="text-[10px] font-bold uppercase">${d.nombre} - ${d.disciplina}</span><button onclick="deleteDisc('${d.id}')" class="text-red-500 font-black">ELIMINAR</button></div>`).join('');
-        }
+            ${/* Columna Tiempo Inicial */ !isOCR ? `
+                <td class="p-4 font-mono text-slate-400">${d.tiempo || '--'}</td>
+            ` : ''}
+
+            ${/* COLUMNA PENALIDAD (Corregida aquí) */ !isOCR ? `
+                <td class="p-4 text-center font-bold text-red-400">
+                    ${d.penalidad || 0} Pts<br>
+                    <span class="text-[8px] text-red-500/70">+${calculatePenaltyAddition(d.penalidad)}</span>
+                </td>
+            ` : ''}
+
+            ${/* COLUMNA TIEMPO FINAL (Corregida aquí) */ `
+                <td class="p-4 font-mono text-white font-bold bg-orange-950/20">
+                    ${d.tiempoFinal || '--'}
+                </td>
+            `}
+        </tr>
+    `).join('');
+    
+    // 3. Lista de administración (Mantiene los botones de Editar y Eliminar)
+    document.getElementById('adminDiscList').innerHTML = discData.map(d => `
+        <div class="flex justify-between items-center bg-slate-900 p-2 rounded-lg border border-slate-800">
+            <span class="text-[10px] font-bold uppercase">${d.nombre} - ${d.disciplina}</span>
+            <div class="flex gap-3">
+                <button onclick="editDisc('${d.id}')" class="text-blue-400 font-black text-[9px] uppercase">Editar</button>
+                <button onclick="deleteDisc('${d.id}')" class="text-red-500 font-black text-[9px] uppercase">Eliminar</button>
+            </div>
+        </div>
+    `).join('');
+}
 
         window.deleteDisc = async (id) => { if(confirm("¿Eliminar registro?")) await deleteDoc(doc(db, 'artifacts', appId, 'public', 'data', 'disciplinas', id)); };
 
