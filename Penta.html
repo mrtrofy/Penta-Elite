@@ -63,7 +63,6 @@
                     <button onclick="showSubView('status')" id="btnStat" class="bg-slate-800 text-slate-400 text-[9px] font-black uppercase px-4 py-2 rounded-lg">Clasificación-Esgrima</button>
                     <button onclick="showSubView('tournament')" id="btnTourney" class="bg-slate-800 text-slate-400 text-[9px] font-black uppercase px-4 py-2 rounded-lg">Eliminacion-Directa</button>
                     <button onclick="showSubView('handicap')" id="btnHandi" class="bg-slate-800 text-slate-400 text-[9px] font-black uppercase px-4 py-2 rounded-lg">Hándicap</button>
-                    <button onclick="showSubView('disciplinas')" id="btnDisc" class="hidden bg-slate-800 text-slate-400 text-[9px] font-black uppercase px-4 py-2 rounded-lg">Prueba</button>
                 </div>
 
                 <div id="rankingSubView" class="subview">
@@ -80,7 +79,8 @@
                 <div id="disciplinasSubView" class="subview hidden">
                     <div class="overflow-x-auto card rounded-2xl">
                         <table class="w-full text-left text-xs">
-                            <thead id="disciplinasHeader" class="bg-orange-900/50 uppercase font-black text-orange-200"></thead>
+                            <thead id="disciplinasHeader" class="bg-orange-900/50 uppercase font-black text-orange-200">
+                                </thead>
                             <tbody id="disciplinasBody" class="divide-y divide-slate-800"></tbody>
                         </table>
                     </div>
@@ -225,22 +225,19 @@
             const phase = document.getElementById('phase-'+eventId).value;
             const category = document.getElementById('cat-'+eventId).value;
             const discipline = document.getElementById('disc-'+eventId).value;
-            
             document.getElementById('publicEventsList').classList.add('hidden');
             document.getElementById('resultsContainer').classList.remove('hidden');
+            
             document.getElementById('viewTitle').innerText = `${discipline} - ${category}`;
 
-            const navButtons = ['btnRank', 'btnStat', 'btnTourney', 'btnHandi'];
-            const btnDisc = document.getElementById('btnDisc');
-
             if(discipline === "Pentatlon Moderno") {
-                navButtons.forEach(id => document.getElementById(id).classList.remove('hidden'));
-                btnDisc.classList.add('hidden');
+                // SI ES PENTATLON, MOSTRAR BOTONES Y TABLA GENERAL
+                document.getElementById('navButtonsResults').classList.remove('hidden');
                 renderResults(eventName, sex, phase, category, discipline);
                 showSubView('ranking');
             } else {
-                navButtons.forEach(id => document.getElementById(id).classList.add('hidden'));
-                btnDisc.classList.remove('hidden');
+                // SI ES OCR O LASER RUN, OCULTAR BOTONES Y MOSTRAR SOLO TABLA DE DISCIPLINAS
+                document.getElementById('navButtonsResults').classList.add('hidden');
                 renderDisciplinas(discipline);
                 showSubView('disciplinas');
             }
@@ -250,20 +247,14 @@
             document.querySelectorAll('.subview').forEach(v => v.classList.add('hidden'));
             document.getElementById(view + 'SubView').classList.remove('hidden');
             
-            ['Rank', 'Stat', 'Handi', 'Tourney', 'Disc'].forEach(id => {
+            ['Rank', 'Stat', 'Handi', 'Tourney'].forEach(id => {
                 const btn = document.getElementById('btn'+id);
                 if(btn) btn.className = "bg-slate-800 text-slate-400 text-[9px] font-black uppercase px-4 py-2 rounded-lg";
             });
 
-            const btnMap = {ranking: 'Rank', status: 'Stat', handicap: 'Handi', tournament: 'Tourney', disciplinas: 'Disc'};
+            const btnMap = {ranking: 'Rank', status: 'Stat', handicap: 'Handi', tournament: 'Tourney'};
             const activeBtn = document.getElementById('btn'+btnMap[view]);
-            if(activeBtn) {
-                if(view === 'disciplinas') {
-                    activeBtn.className = "bg-orange-600 text-white text-[9px] font-black uppercase px-4 py-2 rounded-lg";
-                } else {
-                    activeBtn.className = "bg-blue-600 text-white text-[9px] font-black uppercase px-4 py-2 rounded-lg";
-                }
-            }
+            if(activeBtn) activeBtn.className = "bg-blue-600 text-white text-[9px] font-black uppercase px-4 py-2 rounded-lg";
         };
 
         window.saveDisciplina = async () => {
@@ -496,16 +487,14 @@
         window.openLoginModal = () => document.getElementById('loginModal').classList.remove('hidden');
         window.closeLoginModal = () => document.getElementById('loginModal').classList.add('hidden');
         window.checkPassword = () => { 
-    if (document.getElementById('adminPass').value === "Newman.999") { 
-        isAdmin = true; 
-        document.getElementById('adminPanel').classList.remove('hidden'); 
-        document.getElementById('adminBadge').classList.remove('hidden');
-        document.getElementById('adminToggleBtn').innerText = "Usuario Normal";
-        closeLoginModal(); 
-    } else { 
-        alert("Error"); 
-    }
-};
+            if (document.getElementById('adminPass').value === "Newman.999") { 
+                isAdmin = true; 
+                document.getElementById('adminPanel').classList.remove('hidden'); 
+                document.getElementById('adminBadge').classList.remove('hidden');
+                document.getElementById('adminToggleBtn').innerText = "Usuario Normal";
+                closeLoginModal(); 
+            } else { alert("Error"); }
+        };
         start();
     </script>
 
@@ -517,14 +506,5 @@
             <button onclick="closeLoginModal()" class="mt-4 text-slate-600 text-[10px] font-bold uppercase">Cerrar</button>
         </div>
     </div>
-
-    <script>
-        document.addEventListener('contextmenu', e => e.preventDefault());
-        document.addEventListener('keydown', e => {
-            if (e.key === "F12" || (e.ctrlKey && e.shiftKey && (e.key === "I" || e.key === "J" || e.key === "C")) || (e.ctrlKey && e.key === "U")) {
-                e.preventDefault();
-            }
-        });
-    </script>
 </body>
 </html>
